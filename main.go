@@ -1,22 +1,27 @@
 package main
 
 import (
-  "os"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
+
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
 )
 
+func init() {
+
+}
 func main() {
 
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
-	/*
+
+	/* OAuth coming soon.
 	   if os.Getenv("GNUSOCIALKEY") == "" {
 	   		fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
 	   		fmt.Println("GNUSOCIALKEY before running go-quitter.")
@@ -27,6 +32,37 @@ func main() {
 	   		os.Exit(1)
 	   }
 	*/
+
+	if len(os.Args) < 2 {
+		log.Fatalln("Usage: go-quitter read")
+	}
+
+	if os.Args[1] == "read" {
+		readNew()
+	}
+	/*
+	   type Tweets struct {
+
+	   	Status []*Tweet `json:"status"`
+
+
+	   }
+	*/
+	//	v := []Tweets{}
+	//	s := Tweet{}
+
+	/*
+	   if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
+	   		fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
+	   		os.Exit(1)
+	   }
+	   if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
+	   		fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
+	   		os.Exit(1)
+	   }
+	*/
+}
+func readNew() {
 
 	type User struct {
 		Name string `json:"name"`
@@ -57,44 +93,21 @@ func main() {
 		//Geo                  interface{} `json:"geo"`
 	}
 
-	/*
-	   type Tweets struct {
-
-	   	Status []*Tweet `json:"status"`
-
-
-	   }
-	*/
-	//	v := []Tweets{}
-	//	s := Tweet{}
-
-	/*
-	   if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
-	   		fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
-	   		os.Exit(1)
-	   }
-	   if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
-	   		fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
-	   		os.Exit(1)
-	   }
-	*/
 	var gnusocialnode string
 	if os.Getenv("GNUSOCIALNODE") == "" {
 		gnusocialnode = "gs.sdf.org"
-	}else{
+	} else {
 		gnusocialnode = os.Getenv("GNUSOCIALNODE")
 	}
 
-		res, err := http.Get("https://"+ gnusocialnode +"/api/statuses/public_timeline.json")
-		if err != nil {
-			log.Fatalln(err)
-		}
-
+	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-
-	var tweets []Tweet
+	var tweets []*Tweet
 	err = json.Unmarshal(body, &tweets)
 
 	if err != nil {
@@ -103,7 +116,7 @@ func main() {
 
 	for i := range tweets {
 		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(2000 * time.Millisecond)
 	}
 
 }
