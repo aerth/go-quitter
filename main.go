@@ -1,7 +1,7 @@
 package main
 
 import (
-	//  "os"
+  "os"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -15,6 +15,7 @@ import (
 func main() {
 
 	log.Println("go-quitter v0.0.1")
+	log.Println("Copyright 2016 aerth@sdf.org")
 	/*
 	   if os.Getenv("GNUSOCIALKEY") == "" {
 	   		fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
@@ -77,12 +78,19 @@ func main() {
 	   		os.Exit(1)
 	   }
 	*/
-
-	res, err := http.Get("https://gs.sdf.org/api/statuses/public_timeline.json")
-
-	if err != nil {
-		log.Fatalln(err)
+	var gnusocialnode string
+	if os.Getenv("GNUSOCIALNODE") == "" {
+		gnusocialnode = "gs.sdf.org"
+	}else{
+		gnusocialnode = os.Getenv("GNUSOCIALNODE")
 	}
+
+		res, err := http.Get("https://"+ gnusocialnode +"/api/statuses/public_timeline.json")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 
@@ -95,7 +103,7 @@ func main() {
 
 	for i := range tweets {
 		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 
 }
