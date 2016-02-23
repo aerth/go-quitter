@@ -96,24 +96,24 @@ func readNew(fast bool) {
 
 }
 
-	/* OAuth coming soon.
+/* OAuth coming soon.
 
-		if os.Getenv("GNUSOCIALKEY") == "" {
-				fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
-				fmt.Println("GNUSOCIALKEY before running go-quitter.")
-				os.Exit(1)
-			}
-		if os.Getenv("GNUSOCIALSECRET") == "" {
-				fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
-				os.Exit(1)
+	if os.Getenv("GNUSOCIALKEY") == "" {
+			fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
+			fmt.Println("GNUSOCIALKEY before running go-quitter.")
+			os.Exit(1)
 		}
+	if os.Getenv("GNUSOCIALSECRET") == "" {
+			fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
+			os.Exit(1)
+	}
 
-		if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
-		 fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
-		 os.Exit(1)
-		}
-		if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
-		 fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
-		 os.Exit(1)
-	 }
-	*/
+	if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
+	 fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
+	 os.Exit(1)
+	}
+	if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
+	 fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
+	 os.Exit(1)
+ }
+*/
