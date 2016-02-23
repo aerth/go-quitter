@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"golang.org/x/crypto/ssh/terminal"
+	//"golang.org/x/crypto/ssh/terminal"
 	//"github.com/gillesdemey/go-oauth"
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
@@ -44,11 +44,6 @@ var fast bool = false
 
 func main() {
 
-oldState, err := terminal.MakeRaw(0)
-if err != nil {
-        panic(err)
-}
-defer terminal.Restore(0, oldState)
 
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
