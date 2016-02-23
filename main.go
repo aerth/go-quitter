@@ -12,13 +12,42 @@ import (
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
 )
+
+type User struct {
+	Name string `json:"name"`
+}
+type Tweet struct {
+	Id                   int64  `json:"id"`
+	IdStr                string `json:"id_str"`
+	InReplyToScreenName  string `json:"in_reply_to_screen_name"`
+	InReplyToStatusID    int64  `json:"in_reply_to_status_id"`
+	InReplyToStatusIdStr string `json:"in_reply_to_status_id_str"`
+	InReplyToUserID      int64  `json:"in_reply_to_user_id"`
+	InReplyToUserIdStr   string `json:"in_reply_to_user_id_str"`
+	Lang                 string `json:"lang"`
+	Place                string `json:"place"`
+	PossiblySensitive    bool   `json:"possibly_sensitive"`
+	RetweetCount         int    `json:"retweet_count"`
+	Retweeted            bool   `json:"retweeted"`
+	RetweetedStatus      *Tweet `json:"retweeted_status"`
+	Source               string `json:"source"`
+
+	Text                string   `json:"text"`
+	Truncated           bool     `json:"truncated"`
+	User                User     `json:"user"`
+	WithheldCopyright   bool     `json:"withheld_copyright"`
+	WithheldInCountries []string `json:"withheld_in_countries"`
+	WithheldScope       string   `json:"withheld_scope"`
+}
+
+
 var fast bool
 
 func init() {
 fast = false
 }
 func main() {
-
+//var tweet Tweet
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
 
@@ -61,33 +90,7 @@ func main() {
 }
 func readNew(fast bool) {
 
-	type User struct {
-		Name string `json:"name"`
-	}
-	type Tweet struct {
-		Id                   int64  `json:"id"`
-		IdStr                string `json:"id_str"`
-		InReplyToScreenName  string `json:"in_reply_to_screen_name"`
-		InReplyToStatusID    int64  `json:"in_reply_to_status_id"`
-		InReplyToStatusIdStr string `json:"in_reply_to_status_id_str"`
-		InReplyToUserID      int64  `json:"in_reply_to_user_id"`
-		InReplyToUserIdStr   string `json:"in_reply_to_user_id_str"`
-		Lang                 string `json:"lang"`
-		Place                string `json:"place"`
-		PossiblySensitive    bool   `json:"possibly_sensitive"`
-		RetweetCount         int    `json:"retweet_count"`
-		Retweeted            bool   `json:"retweeted"`
-		RetweetedStatus      *Tweet `json:"retweeted_status"`
-		Source               string `json:"source"`
-
-		Text                string   `json:"text"`
-		Truncated           bool     `json:"truncated"`
-		User                User     `json:"user"`
-		WithheldCopyright   bool     `json:"withheld_copyright"`
-		WithheldInCountries []string `json:"withheld_in_countries"`
-		WithheldScope       string   `json:"withheld_scope"`
-	}
-
+	//var Tweet Tweet
 	var gnusocialnode string
 	if os.Getenv("GNUSOCIALNODE") == "" {
 		gnusocialnode = "gs.sdf.org"
@@ -102,7 +105,7 @@ func readNew(fast bool) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-	var tweets []*Tweet
+	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 
 
