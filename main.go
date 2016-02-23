@@ -46,32 +46,8 @@ func init() {
 	fast = false
 }
 func main() {
-	//var tweet Tweet
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
-
-	/* OAuth coming soon.
-
-		if os.Getenv("GNUSOCIALKEY") == "" {
-				fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
-				fmt.Println("GNUSOCIALKEY before running go-quitter.")
-				os.Exit(1)
-			}
-		if os.Getenv("GNUSOCIALSECRET") == "" {
-				fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
-				os.Exit(1)
-		}
-
-		if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
-		 fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
-		 os.Exit(1)
-		}
-		if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
-		 fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
-		 os.Exit(1)
-	 }
-	*/
-
 	if len(os.Args) < 2 {
 		log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de ./go-quitter read\n\tGNUSOCIALNODE=quitter.es ./go-quitter read\n\tGNUSOCIALNODE=shitposter.club ./go-quitter read\n\tGNUSOCIALNODE=sealion.club ./go-quitter read\n\t(defaults node is gs.sdf.org)\n")
 	}
@@ -89,6 +65,8 @@ func main() {
 	log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de ./go-quitter read\n\tGNUSOCIALNODE=quitter.es ./go-quitter read\n\tGNUSOCIALNODE=shitposter.club ./go-quitter read\n\tGNUSOCIALNODE=sealion.club ./go-quitter read\n\t(defaults node is gs.sdf.org)\n")
 
 }
+
+// readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readNew(fast bool) {
 
 	//var Tweet Tweet
@@ -117,3 +95,25 @@ func readNew(fast bool) {
 	}
 
 }
+
+	/* OAuth coming soon.
+
+		if os.Getenv("GNUSOCIALKEY") == "" {
+				fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
+				fmt.Println("GNUSOCIALKEY before running go-quitter.")
+				os.Exit(1)
+			}
+		if os.Getenv("GNUSOCIALSECRET") == "" {
+				fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
+				os.Exit(1)
+		}
+
+		if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
+		 fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
+		 os.Exit(1)
+		}
+		if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
+		 fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
+		 os.Exit(1)
+	 }
+	*/
