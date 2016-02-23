@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-
+	//"github.com/kurrik/oauth1a"
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
 )
@@ -40,10 +40,10 @@ type Tweet struct {
 	WithheldScope       string   `json:"withheld_scope"`
 }
 
-var fast bool
+var fast bool = false
 
 func init() {
-	fast = false
+
 }
 func main() {
 	log.Println("go-quitter v0.0.1")
@@ -52,11 +52,13 @@ func main() {
 		log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read fast\n\tGNUSOCIALNODE=quitter.es go-quitter read fast\n\tGNUSOCIALNODE=shitposter.club go-quitter read fast\n\tGNUSOCIALNODE=sealion.club go-quitter read fast\n\t(defaults node is gs.sdf.org)\n")
 	}
 
+	// go-quitter read
 	if os.Args[1] == "read" && len(os.Args) == 2 {
 		readNew(false)
 		os.Exit(0)
 	}
 
+	// go quitter read fast
 	if os.Args[1] == "read" && os.Args[2] == "fast" {
 		readNew(true)
 		os.Exit(0)
@@ -68,7 +70,6 @@ func main() {
 
 // readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readNew(fast bool) {
-
 	//var Tweet Tweet
 	var gnusocialnode string
 	if os.Getenv("GNUSOCIALNODE") == "" {
@@ -96,24 +97,25 @@ func readNew(fast bool) {
 
 }
 
-/* OAuth coming soon.
+func init() {
 
 	if os.Getenv("GNUSOCIALKEY") == "" {
-			fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
-			fmt.Println("GNUSOCIALKEY before running go-quitter.")
-			os.Exit(1)
-		}
+		fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
+		fmt.Println("GNUSOCIALKEY before running go-quitter.")
+		os.Exit(1)
+	}
 	if os.Getenv("GNUSOCIALSECRET") == "" {
-			fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
-			os.Exit(1)
+		fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
+		os.Exit(1)
 	}
 
 	if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
-	 fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
-	 os.Exit(1)
+		fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
+		os.Exit(1)
 	}
 	if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
-	 fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
-	 os.Exit(1)
- }
-*/
+		fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
+		os.Exit(1)
+	}
+
+}
