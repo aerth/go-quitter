@@ -74,8 +74,8 @@ func main() {
 	*/
 
 	if len(os.Args) < 2 {
-		log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n")
-	}
+		log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de ./go-quitter read\n\tGNUSOCIALNODE=quitter.es ./go-quitter read\n\tGNUSOCIALNODE=shitposter.club ./go-quitter read\n\tGNUSOCIALNODE=sealion.club ./go-quitter read\n\t(defaults node is gs.sdf.org)\n")
+		}
 
 	if os.Args[1] == "read" && len(os.Args) == 2 {
 		readNew(false)
