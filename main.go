@@ -94,7 +94,7 @@ func readNew(fast bool) {
 	} else {
 		gnusocialnode = os.Getenv("GNUSOCIALNODE")
 	}
-
+	log.Println("node: "+gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
 		log.Fatalln(err)
@@ -103,11 +103,8 @@ func readNew(fast bool) {
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	var tweets []*Tweet
-	err = json.Unmarshal(body, &tweets)
+	_ = json.Unmarshal(body, &tweets)
 
-	if err != nil {
-		fmt.Println("error:", err)
-	}
 
 	for i := range tweets {
 		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
