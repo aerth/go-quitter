@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
+	"time"
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
 )
@@ -31,33 +31,41 @@ func main() {
 		Name string `json:"name"`
 	}
 	type Tweet struct {
-		Id                   int64  `json:"id"`
-		IdStr                string `json:"id_str"`
-		InReplyToScreenName  string `json:"in_reply_to_screen_name"`
-		InReplyToStatusID    int64  `json:"in_reply_to_status_id"`
-		InReplyToStatusIdStr string `json:"in_reply_to_status_id_str"`
-		InReplyToUserID      int64  `json:"in_reply_to_user_id"`
-		InReplyToUserIdStr   string `json:"in_reply_to_user_id_str"`
-		Lang                 string `json:"lang"`
-		Place                string `json:"place"`
-		PossiblySensitive    bool   `json:"possibly_sensitive"`
-		RetweetCount         int    `json:"retweet_count"`
-		Retweeted            bool   `json:"retweeted"`
-		RetweetedStatus      *Tweet `json:"retweeted_status"`
-		Source               string `json:"source"`
-
-		Text                string   `json:"text"`
-		Truncated           bool     `json:"truncated"`
-		User                User     `json:"user"`
-		WithheldCopyright   bool     `json:"withheld_copyright"`
-		WithheldInCountries []string `json:"withheld_in_countries"`
-		WithheldScope       string   `json:"withheld_scope"`
-
+		Id int64 `json:"id"`
+		/*		IdStr                string `json:"id_str"`
+				InReplyToScreenName  string `json:"in_reply_to_screen_name"`
+				InReplyToStatusID    int64  `json:"in_reply_to_status_id"`
+				InReplyToStatusIdStr string `json:"in_reply_to_status_id_str"`
+				InReplyToUserID      int64  `json:"in_reply_to_user_id"`
+				InReplyToUserIdStr   string `json:"in_reply_to_user_id_str"`
+				Lang                 string `json:"lang"`
+				Place                string `json:"place"`
+				PossiblySensitive    bool   `json:"possibly_sensitive"`
+				RetweetCount         int    `json:"retweet_count"`
+				Retweeted            bool   `json:"retweeted"`
+				RetweetedStatus      *Tweet `json:"retweeted_status"`
+				Source               string `json:"source"`
+		*/
+		Text string `json:"text"`
+		//		Truncated           bool     `json:"truncated"`
+		User User `json:"user"`
+		/*		WithheldCopyright   bool     `json:"withheld_copyright"`
+				WithheldInCountries []string `json:"withheld_in_countries"`
+				WithheldScope       string   `json:"withheld_scope"`*/
 		//Geo is deprecated
 		//Geo                  interface{} `json:"geo"`
 	}
 
-	v := Tweet{}
+	/*
+	   type Tweets struct {
+
+	   	Status []*Tweet `json:"status"`
+
+
+	   }
+	*/
+	//	v := []Tweets{}
+	//	s := Tweet{}
 
 	/*
 	   if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
@@ -70,15 +78,24 @@ func main() {
 	   }
 	*/
 
-	res, err := http.Get("https://gs.sdf.org/api/statuses/show/1.json")
+	res, err := http.Get("https://gs.sdf.org/api/statuses/public_timeline.json")
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 
-	err = json.Unmarshal(body, &v)
+	var tweets []Tweet
+	err = json.Unmarshal(body, &tweets)
+
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("error:", err)
 	}
 
-	fmt.Printf("%s says %#v\n", v.User.Name, v.Text)
+	for i := range tweets {
+		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		time.Sleep(500 * time.Millisecond)
+	}
 
 }
