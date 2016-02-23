@@ -40,14 +40,13 @@ type Tweet struct {
 	WithheldScope       string   `json:"withheld_scope"`
 }
 
-
 var fast bool
 
 func init() {
-fast = false
+	fast = false
 }
 func main() {
-//var tweet Tweet
+	//var tweet Tweet
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
 
@@ -75,17 +74,19 @@ func main() {
 
 	if len(os.Args) < 2 {
 		log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de ./go-quitter read\n\tGNUSOCIALNODE=quitter.es ./go-quitter read\n\tGNUSOCIALNODE=shitposter.club ./go-quitter read\n\tGNUSOCIALNODE=sealion.club ./go-quitter read\n\t(defaults node is gs.sdf.org)\n")
-		}
+	}
 
 	if os.Args[1] == "read" && len(os.Args) == 2 {
 		readNew(false)
 		os.Exit(0)
 	}
-		if os.Args[1] == "read" && os.Args[2] == "fast" {
-			readNew(true)
-			os.Exit(0)
-		}
 
+	if os.Args[1] == "read" && os.Args[2] == "fast" {
+		readNew(true)
+		os.Exit(0)
+	}
+
+	log.Fatalln("Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de ./go-quitter read\n\tGNUSOCIALNODE=quitter.es ./go-quitter read\n\tGNUSOCIALNODE=shitposter.club ./go-quitter read\n\tGNUSOCIALNODE=sealion.club ./go-quitter read\n\t(defaults node is gs.sdf.org)\n")
 
 }
 func readNew(fast bool) {
@@ -97,7 +98,7 @@ func readNew(fast bool) {
 	} else {
 		gnusocialnode = os.Getenv("GNUSOCIALNODE")
 	}
-	log.Println("node: "+gnusocialnode)
+	log.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
 		log.Fatalln(err)
@@ -108,10 +109,11 @@ func readNew(fast bool) {
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 
-
 	for i := range tweets {
 		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		if fast != true { time.Sleep(2000 * time.Millisecond) }
+		if fast != true {
+			time.Sleep(2000 * time.Millisecond)
+		}
 	}
 
 }
