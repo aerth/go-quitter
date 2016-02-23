@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
-	//"github.com/kurrik/oauth1a"
+	"golang.org/x/crypto/ssh/terminal"
+	//"github.com/gillesdemey/go-oauth"
 	//"gopkg.in/resty.v0"
 	//    "github.com/aerth/anaconda"
 )
@@ -31,7 +32,6 @@ type Tweet struct {
 	Retweeted            bool   `json:"retweeted"`
 	RetweetedStatus      *Tweet `json:"retweeted_status"`
 	Source               string `json:"source"`
-
 	Text                string   `json:"text"`
 	Truncated           bool     `json:"truncated"`
 	User                User     `json:"user"`
@@ -42,10 +42,14 @@ type Tweet struct {
 
 var fast bool = false
 
-func init() {
-
-}
 func main() {
+
+oldState, err := terminal.MakeRaw(0)
+if err != nil {
+        panic(err)
+}
+defer terminal.Restore(0, oldState)
+
 	log.Println("go-quitter v0.0.1")
 	log.Println("Copyright 2016 aerth@sdf.org")
 	if len(os.Args) < 2 {
@@ -99,23 +103,5 @@ func readNew(fast bool) {
 
 func init() {
 
-	if os.Getenv("GNUSOCIALKEY") == "" {
-		fmt.Println("Set environmental variable GNUSOCIALKEY before running go-quitter.")
-		fmt.Println("GNUSOCIALKEY before running go-quitter.")
-		os.Exit(1)
-	}
-	if os.Getenv("GNUSOCIALSECRET") == "" {
-		fmt.Println("Set environmental variable GNUSOCIALSECRET before running go-quitter.")
-		os.Exit(1)
-	}
-
-	if os.Getenv("GNUSOCIALACCESSTOKEN") == "" {
-		fmt.Println("Set environmental variable GNUSOCIALACCESSTOKEN before running go-quitter.")
-		os.Exit(1)
-	}
-	if os.Getenv("GNUSOCIALTOKENSECRET") == "" {
-		fmt.Println("Set environmental variable GNUSOCIALTOKENSECRET before running go-quitter.")
-		os.Exit(1)
-	}
 
 }
