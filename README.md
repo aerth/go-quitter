@@ -3,12 +3,16 @@ gnusocial client in golang. work in progress. things will break.
 
 ## Usage
 
-```
 
-GNUSOCIALNODE=gnusocial.de ./go-quitter read
-GNUSOCIALNODE=quitter.es ./go-quitter read
-GNUSOCIALNODE=shitposter.club ./go-quitter read
-GNUSOCIALNODE=sealion.club ./go-quitter read
-
-```
 Default node is gs.sdf.org!
+
+```
+#!/bin/sh                                                                       
+unset GNUSOCIALNODE                                                             
+/go-quitter read >> tweet.log                                                   
+GNUSOCIALNODE=gnusocial.de go-quitter read >> treet.log                         
+GNUSOCIALNODE=quitter.es go-quitter read >> treet.log                           
+GNUSOCIALNODE=shitposter.club go-quitter read >> treet.log                      
+GNUSOCIALNODE=sealion.club go-quitter read >> treet.log   
+
+```
