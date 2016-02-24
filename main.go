@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/crypto/nacl/secretbox"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,12 +16,20 @@ import (
 	"time"
 )
 
+const keySize = 32
+const nonceSize = 24
+
 var goquitter = "go-quitter v0.0.4"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
 var fast bool = false
 var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
+var configuser = ""
+var configpass = ""
+var confignode = ""
+var configlock = ""
+var configstrings = ""
 
 type User struct {
 	Name       string `json:"name"`
@@ -59,6 +70,7 @@ func main() {
 	usage = "\t" + `go-quitter v0.0.4	Copyright 2016 aerth@sdf.org
 Usage:
 
+	go-quitter config		Creates config file
 	go-quitter read			Reads 20 new posts
 	go-quitter read fast		Reads 20 new posts (no delay)
 	go-quitter home			Your home timeline.
@@ -72,15 +84,30 @@ Usage:
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 
-Most commands require GNUSOCIALUSER and GNUSOCIALPASS variables set.
+Now with config file! Try it: go-quitter config
 
-Did you know?	You can "go-quitter read | more"
+Did you know?	You can "go-quitter read fast | more"
 
 `
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
 	}
+	if os.Args[1] == "config" {
+		fmt.Println("Creating config file.")
+		if DetectConfig() == false {
+			createConfig()
+		} else {
+			log.Fatalln("Config file already exists.")
+		}
 
+	}
+
+	if DetectConfig() == true {
+		username, gnusocialnode, password, _ = ReadConfig()
+	log.Println("Config file detected.")
+	}else{
+	log.Println("No config file detected.")
+	}
 	// Set speed
 	speed := false
 	lastvar := len(os.Args)
@@ -164,7 +191,7 @@ func readNew(fast bool) {
 // readMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readMentions(fast bool) {
 	if username == "" || password == "" {
-		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	fmt.Println("node: " + gnusocialnode)
 	apipath := "https://" + gnusocialnode + "/api/statuses/mentions.json"
@@ -202,7 +229,7 @@ func readMentions(fast bool) {
 // readHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with readHome(fast) for a quick dump.
 func readHome(fast bool) {
 	if username == "" || password == "" {
-		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
 	fmt.Println("node: " + gnusocialnode)
 	apipath := "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
@@ -310,7 +337,7 @@ func readUserposts(userlookup string, fast bool) {
 
 func postNew(content string) {
 	if username == "" || password == "" {
-		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if content == "" {
 		content = getTypin()
@@ -392,11 +419,83 @@ func getTypin() string {
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		//	fmt.Println(line)
 		return line
 	}
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
 	return ""
+}
+func createConfig() bool {
+	fmt.Println("What username? Example: aerth")
+	username = getTypin()
+	fmt.Println("What gnusocial node? Example: gs.sdf.org")
+	gnusocialnode = getTypin()
+	fmt.Println("What password? Example: password123")
+	password = getTypin()
+	fmt.Println("What password to use for config file? Example: 0101")
+	configlock = getTypin()
+	var userKey = configlock
+	var pad = []byte("«super jumpy fox jumps all over»")
+	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
+	key := []byte(userKey)
+	key = append(key, pad...)
+	naclKey := new([keySize]byte)
+	copy(naclKey[:], key[:keySize])
+	nonce := new([nonceSize]byte)
+	// Read bytes from random and put them in nonce until it is full.
+	_, err := io.ReadFull(rand.Reader, nonce[:])
+	if err != nil {
+		log.Fatalln("Could not read from random:", err)
+	}
+	out := make([]byte, nonceSize)
+	copy(out, nonce[:])
+	out = secretbox.Seal(out, message, nonce, naclKey)
+	err = ioutil.WriteFile(os.Getenv("HOME")+"/.go-quitter", out, 0644)
+	if err != nil {
+		log.Fatalln("Error while writing config file: ", err)
+	}
+	fmt.Printf("Config file saved. Total size is %d bytes. \n",
+		len(out))
+	os.Exit(0)
+	return true
+}
+
+func DetectConfig() bool {
+	_, err := ioutil.ReadFile(os.Getenv("HOME") + "/.go-quitter")
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func ReadConfig() (configuser string, confignode string, configpass string, err error) {
+	configlock = getTypin()
+	var userKey = configlock
+	var pad = []byte("«super jumpy fox jumps all over»")
+	key := []byte(userKey)
+	key = append(key, pad...)
+	naclKey := new([keySize]byte)
+	copy(naclKey[:], key[:keySize])
+	nonce := new([nonceSize]byte)
+	in, err := ioutil.ReadFile(os.Getenv("HOME") + "/.go-quitter")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	copy(nonce[:], in[:nonceSize])
+	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
+	if ok {
+		fmt.Println("Logged in. Welcome back to go-quitter!")
+	} else {
+		log.Fatalln("Could not decrypt the config file. Wrong password?")
+	}
+	configstrings := strings.Split(string(configbytes), "::::")
+
+	username = configstrings[0]
+	gnusocialnode = configstrings[1]
+	password = configstrings[2]
+
+	return username, gnusocialnode, password, nil
+
 }
