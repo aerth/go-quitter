@@ -120,6 +120,16 @@ Most commands require GNUSOCIALUSER and GNUSOCIALPASS variables set.
 		os.Exit(0)
 	}
 
+	// go-quitter search _____
+	if os.Args[1] == "search" {
+		searchstr := ""
+		if len(os.Args) > 1 {
+			searchstr = strings.Join(os.Args[2:], " ")
+		}
+		readSearch(searchstr, speed)
+		os.Exit(0)
+	}
+
 	// go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
 		userlookup := os.Args[2]
@@ -161,7 +171,9 @@ func readNew(fast bool) {
 }
 // readMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readMentions(fast bool) {
-
+	if username == "" || password == "" {
+		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
 	fmt.Println("node: " + gnusocialnode)
 	apipath := "https://" + gnusocialnode + "/api/statuses/mentions.json"
 	req, err := http.NewRequest("GET", apipath, nil)
@@ -246,6 +258,50 @@ func readHome(fast bool) {
 	}
 
 }
+
+
+
+func readSearch(searchstr string, fast bool) {
+
+	fmt.Println("searching " + searchstr + " @ " + gnusocialnode)
+	v := url.Values{}
+	v.Set("q", searchstr)
+	searchstr = url.Values.Encode(v)
+	apipath := "https://" + gnusocialnode + "/api/search.json?" + searchstr
+
+	req, err := http.NewRequest("GET", apipath, nil)
+	req.Header.Set("User-Agent", goquitter)
+	//req.SetBasicAuth(username, password)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var tweets []Tweet
+	_ = json.Unmarshal(body, &tweets)
+	//if err != nil { log.Fatalln(err) } // This fails
+	for i := range tweets {
+		if tweets[i].User.Screenname == tweets[i].User.Name {
+
+			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+		} else {
+
+			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		}
+		if fast != true {
+			time.Sleep(2000 * time.Millisecond)
+		}
+	}
+
+}
+
+
 func readUserposts(userlookup string, fast bool) {
 
 	fmt.Println("user " + userlookup + " @ " + gnusocialnode)
