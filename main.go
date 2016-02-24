@@ -63,36 +63,34 @@ type Badrequest struct {
 func main() {
 	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\tgo-quitter post ____ \t\tPosts to your node.\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\n"
 
-	//Explore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n\nTry `go-quitter read fast | more`"
-
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
 	}
 
-	// go-quitter read
-	if os.Args[1] == "read" && len(os.Args) == 2 {
-		readNew(false)
-		os.Exit(0)
-	}
+// Set speed
+speed := false
+lastvar := len(os.Args)
+lastvar = (lastvar - 1)
+if os.Args[lastvar] == "fast" {
+	speed = true
+}
 
-	// go quitter read fast
-	if os.Args[1] == "read" && os.Args[2] == "fast" {
-		readNew(true)
+	// go-quitter read
+	if os.Args[1] == "read" {
+		readNew(speed)
 		os.Exit(0)
 	}
 
 	// go-quitter home
-	if os.Args[1] == "home" && len(os.Args) == 2 {
-		readHome(false)
-		os.Exit(0)
-	}
-	// go-quitter home fast
-	if os.Args[1] == "home" && os.Args[2] == "fast" {
-		readHome(true)
+	if os.Args[1] == "home" {
+		readHome(speed)
 		os.Exit(0)
 	}
 
-	// go-quitter post "Testing form console line using go-quitter"
+	// go-quitter post Testing from console line using go-quitter
+	// Notice how there is no quotation marks.
+	// Also, its a pain in the ass to \#escape symbols\!
+	// Also will be adding go-quitter shoot ~/essay.txt
 	if os.Args[1] == "post" && os.Args[2] != "" {
 		content := strings.Join(os.Args[2:], " ")
 		postNew(content)
@@ -102,7 +100,7 @@ func main() {
 	// go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
 		userlookup := os.Args[2]
-		readUserposts(userlookup, false)
+		readUserposts(userlookup, speed)
 		os.Exit(0)
 	}
 
