@@ -188,7 +188,7 @@ func readHome(fast bool) {
 }
 func readUserposts(userlookup string, fast bool) {
 
-	fmt.Println("user " + userlookup + "node: " + gnusocialnode)
+	fmt.Println("user " + userlookup + " @ " + gnusocialnode)
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 
