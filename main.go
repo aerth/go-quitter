@@ -64,8 +64,24 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\tgo-quitter post ____ \t\tPosts to your node.\n\tgo-quitter post \t\tPost mode.\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\n"
+//	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\tgo-quitter post ____ \t\tPosts to your node.\n\tgo-quitter post \t\tPost mode.\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\n"
+usage = "\t"+`go-quitter v0.0.3	Copyright 2016 aerth@sdf.org
+Usage:
 
+	go-quitter read			Reads 20 new posts
+	go-quitter read fast		Reads 20 new posts (no delay)
+	go-quitter home			Your home timeline.
+	go-quitter user username	Looks up "username" timeline
+	go-quitter post ____ 		Posts to your node.
+	go-quitter post 		Post mode.
+	go-quitter mentions		Mentions your @name
+
+Set your GNUSOCIALNODE environmental variable to change nodes.
+For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+
+Most commands require GNUSOCIALUSER and GNUSOCIALPASS variables set.
+
+`
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
 	}
@@ -82,7 +98,11 @@ func main() {
 		readNew(speed)
 		os.Exit(0)
 	}
-
+	// go-quitter read
+	if os.Args[1] == "mentions" {
+		readMentions(speed)
+		os.Exit(0)
+	}
 	// go-quitter home
 	if os.Args[1] == "home" {
 		readHome(speed)
@@ -138,6 +158,47 @@ func readNew(fast bool) {
 		}
 	}
 
+}
+// readMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
+func readMentions(fast bool) {
+
+	fmt.Println("node: " + gnusocialnode)
+	apipath := "https://" + gnusocialnode + "/api/statuses/mentions.json"
+	req, err := http.NewRequest("GET", apipath, nil)
+	req.Header.Set("User-Agent", goquitter)
+	req.SetBasicAuth(username, password)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	var apres Badrequest
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	_ = json.Unmarshal(body, &apres)
+	fmt.Println(apres.terror)
+	fmt.Println(apres.request)
+
+	var tweets []Tweet
+	_ = json.Unmarshal(body, &tweets)
+	//if err != nil { log.Fatalln(err) } // This fails
+	for i := range tweets {
+		if tweets[i].User.Screenname == tweets[i].User.Name {
+
+			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+		} else {
+
+			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		}
+		if fast != true {
+			time.Sleep(2000 * time.Millisecond)
+		}
+	}
 }
 
 // readHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with readHome(fast) for a quick dump.
