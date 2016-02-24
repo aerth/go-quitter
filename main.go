@@ -133,6 +133,7 @@ func readHome(fast bool) {
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
+	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
 	if err != nil {
 		log.Fatalln(err)
@@ -173,24 +174,11 @@ func postNew(content string) {
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/update.json"
 
-	/*
-		resp, err := resty.R().
-
-				SetBasicAuth(username, password).
-				SetBody(`{"status":"`+content+`"}`).
-				//SetResult(AuthSuccess{}). // or S	etResult(&AuthSuccess{}).
-				Post(apipath)
-
-			fmt.Println(resp, err)
-
-	*/
-	//var jsonStr = []byte(`{"status": "`+content+`"}`)
-	//req, err := http.NewRequest("POST", apipath, bytes.NewBuffer(jsonStr))
 	req, err := http.NewRequest("POST", apipath, bytes.NewBuffer([]byte(`{"status": "testing from go-quitter command line.... its not working."}`)))
-	req.Header.Add("Authorization", "Basic RmFuY3kgbWVldGluZyB5b3UgaGVyZSEg")
+		req.Header.Add("Authorization", "Basic RmFuY3kgbWVldGluZyB5b3UgaGVyZSEg")
 	req.SetBasicAuth(username, password)
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	//	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("User-Agent", goquitter)
 	log.Println(req)
 	client := &http.Client{}
 	resp, err := client.Do(req)
