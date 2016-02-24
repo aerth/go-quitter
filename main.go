@@ -180,7 +180,6 @@ func readUserposts(userlookup string, fast bool) {
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
-	req
 	if err != nil {
 		log.Fatalln(err)
 	}
