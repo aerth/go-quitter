@@ -60,11 +60,9 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "Usage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\tReads 20 from your Home timeline.\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n"
+	usage = "\n" + goquitter + "\nCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\tReads 20 from your Home timeline.\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n"
 
 	if len(os.Args) < 2 {
-		log.Println("go-quitter v0.0.2")
-		log.Println("Copyright 2016 aerth@sdf.org")
 		log.Fatalln(usage)
 	}
 
@@ -92,7 +90,7 @@ func main() {
 	}
 
 	// go-quitter post "Testing form console line using go-quitter"
-	if os.Args[1] == "post" && os.Args[2] != ""{
+	if os.Args[1] == "post" && os.Args[2] != "" {
 		postNew(os.Args[2])
 		os.Exit(0)
 	}
@@ -175,7 +173,7 @@ func postNew(content string) {
 	apipath := "https://" + gnusocialnode + "/api/statuses/update.json"
 
 	req, err := http.NewRequest("POST", apipath, bytes.NewBuffer([]byte(`{"status": "testing from go-quitter command line.... its not working."}`)))
-		req.Header.Add("Authorization", "Basic RmFuY3kgbWVldGluZyB5b3UgaGVyZSEg")
+	req.Header.Add("Authorization", "Basic RmFuY3kgbWVldGluZyB5b3UgaGVyZSEg")
 	req.SetBasicAuth(username, password)
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
