@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"strings"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"net/url"
 )
 
 var goquitter = "go-quitter v0.0.2"
@@ -60,7 +61,7 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n\nTry `gno-quitter read fast | more`"
+	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n\nTry `go-quitter read fast | more`"
 
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
@@ -91,7 +92,8 @@ func main() {
 
 	// go-quitter post "Testing form console line using go-quitter"
 	if os.Args[1] == "post" && os.Args[2] != "" {
-		postNew(os.Args[2])
+		content := strings.Join(os.Args[2:], " ")
+		postNew(content)
 		os.Exit(0)
 	}
 
@@ -209,13 +211,16 @@ func postNew(content string) {
 	}
 
 	log.Println("posting on node: " + gnusocialnode)
+	//content = `"`+content+`"`
+	v := url.Values{}
+	v.Set("status", content)
+	content = url.Values.Encode(v)
 	log.Println(content)
-
-	apipath := "https://" + gnusocialnode + "/api/statuses/update.json"
-
-	req, err := http.NewRequest("POST", apipath, bytes.NewBuffer([]byte(`{"status": "testing from go-quitter command line.... its not working."}`)))
+	//apipath := "https://" + gnusocialnode + "/api/statuses/update.json?status='"+content+"'"
+	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?"+content
+	req, err := http.NewRequest("POST", apipath, nil)
 	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP-REFERRER", "https://"+gnusocialnode+"/")
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	log.Println(req)
@@ -225,15 +230,17 @@ func postNew(content string) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	var apres Badrequest
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
+
+
+	/* var apres Badrequest
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
 	_ = json.Unmarshal(body, &apres)
 	fmt.Println(apres.error)
 	fmt.Println(apres.request)
-
+*/
 }
 
 func init() {
