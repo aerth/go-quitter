@@ -22,7 +22,7 @@ var fast bool = false
 var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
 
 type User struct {
-	Name string `json:"name"`
+	Name       string `json:"name"`
 	Screenname string `json:"screen_name"`
 }
 
@@ -127,7 +127,13 @@ func readNew(fast bool) {
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) }
 	for i := range tweets {
-		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "]  " + tweets[i].Text + "\n\n")
+		if tweets[i].User.Screenname == tweets[i].User.Name {
+
+			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+		} else {
+
+			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		}
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -169,11 +175,11 @@ func readHome(fast bool) {
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
 
-		fmt.Printf("@"+tweets[i].User.Screenname+" "+tweets[i].Text + "\n\n")
-	}else {
+			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+		} else {
 
-		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-	}
+			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		}
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -204,7 +210,13 @@ func readUserposts(userlookup string, fast bool) {
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
-		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		if tweets[i].User.Screenname == tweets[i].User.Name {
+
+			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+		} else {
+
+			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		}
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -223,7 +235,7 @@ func postNew(content string) {
 	if content == "" {
 		log.Fatalln("Blank status detected. Not posting.")
 	}
-	fmt.Println("Preview:\n\n["+username+"] "+content)
+	fmt.Println("Preview:\n\n[" + username + "] " + content)
 	fmt.Println("\nType YES to publish!")
 	if askForConfirmation() == false {
 		os.Exit(0)
