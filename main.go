@@ -60,7 +60,7 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\tReads 20 from your Home timeline.\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n"
+	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\tReads 20 from your Home timeline.\n\nYou may set your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\nExplore!\n\n\tGNUSOCIALNODE=gnusocial.de go-quitter read\n\tGNUSOCIALNODE=quitter.es go-quitter read\n\tGNUSOCIALNODE=shitposter.club go-quitter read\n\tGNUSOCIALNODE=sealion.club go-quitter read\n\t(defaults node is gs.sdf.org)\n\nTry `gno-quitter read fast | more`"
 
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
@@ -95,6 +95,13 @@ func main() {
 		os.Exit(0)
 	}
 
+	// go-quitter user aerth
+	if os.Args[1] == "user" && os.Args[2] != "" {
+		userlookup := os.Args[2]
+		readUserposts(userlookup, false)
+		os.Exit(0)
+	}
+
 	log.Fatalln(usage)
 
 }
@@ -122,7 +129,7 @@ func readNew(fast bool) {
 
 }
 
-// readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
+// readHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with readHome(fast) for a quick dump.
 func readHome(fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
@@ -133,6 +140,47 @@ func readHome(fast bool) {
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	var apres Badrequest
+
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	_ = json.Unmarshal(body, &apres)
+	fmt.Println(apres.error)
+	fmt.Println(apres.request)
+
+	var tweets []Tweet
+	_ = json.Unmarshal(body, &tweets)
+	//if err != nil { log.Fatalln(err) } // This fails
+	for i := range tweets {
+		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		if fast != true {
+			time.Sleep(2000 * time.Millisecond)
+		}
+	}
+
+}
+
+// readUserposts shows 20 userposts. Defaults to a 2 second delay, but can be called with readUserposts(fast) for a quick dump.
+func readUserposts(userlookup string, fast bool) {
+	if username == "" || password == "" {
+		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view use timelines.")
+	}
+	log.Println("looking up posts by " + userlookup + " on " + gnusocialnode)
+
+	apipath := "https://" + gnusocialnode + "/api/user/show.json"
+	req, err := http.NewRequest("GET", apipath, nil)
+	req.Header.Set("User-Agent", goquitter)
+	req.SetBasicAuth(username, password)
+	req
 	if err != nil {
 		log.Fatalln(err)
 	}
