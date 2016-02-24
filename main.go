@@ -172,10 +172,10 @@ func readUserposts(userlookup string, fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view use timelines.")
 	}
-	log.Println("node: " + gnusocialnode)
+	log.Println("user " + userlookup + "node: " + gnusocialnode)
 
-	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name="+userlookup
-	log.Println(apipath)
+	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
+
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
@@ -191,7 +191,6 @@ func readUserposts(userlookup string, fast bool) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) } // This fails
@@ -203,8 +202,6 @@ func readUserposts(userlookup string, fast bool) {
 	}
 
 }
-
-
 
 func postNew(content string) {
 	if username == "" || password == "" {
@@ -218,6 +215,7 @@ func postNew(content string) {
 
 	req, err := http.NewRequest("POST", apipath, bytes.NewBuffer([]byte(`{"status": "testing from go-quitter command line.... its not working."}`)))
 	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP-REFERRER", "https://"+gnusocialnode+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	log.Println(req)
