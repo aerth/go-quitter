@@ -1,15 +1,15 @@
 package main
 
 import (
-	"strings"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"time"
 	"net/url"
+	"os"
+	"strings"
+	"time"
 )
 
 var goquitter = "go-quitter v0.0.3"
@@ -56,7 +56,7 @@ type AuthError struct {
 }
 
 type Badrequest struct {
-	error   string `json:"error"`
+	terror  string `json:"error"`
 	request string `json:"request"`
 }
 
@@ -67,13 +67,13 @@ func main() {
 		log.Fatalln(usage)
 	}
 
-// Set speed
-speed := false
-lastvar := len(os.Args)
-lastvar = (lastvar - 1)
-if os.Args[lastvar] == "fast" {
-	speed = true
-}
+	// Set speed
+	speed := false
+	lastvar := len(os.Args)
+	lastvar = (lastvar - 1)
+	if os.Args[lastvar] == "fast" {
+		speed = true
+	}
 
 	// go-quitter read
 	if os.Args[1] == "read" {
@@ -156,7 +156,7 @@ func readHome(fast bool) {
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.error)
+	fmt.Println(apres.terror)
 	fmt.Println(apres.request)
 
 	var tweets []Tweet
@@ -215,32 +215,30 @@ func postNew(content string) {
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
-	log.Println(content)
+	//log.Println(content)
 	//apipath := "https://" + gnusocialnode + "/api/statuses/update.json?status='"+content+"'"
-	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?"+content
+	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?" + content
 	req, err := http.NewRequest("POST", apipath, nil)
 	req.SetBasicAuth(username, password)
 	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	log.Println(req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
+	apres := Badrequest{}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
-
-
-	/* var apres Badrequest
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	fmt.Println("\nnode response:", resp.Status)
 	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.error)
-	fmt.Println(apres.request)
-*/
+	if apres.terror != "" {
+	fmt.Println(apres.terror)
+	}
+	//	fmt.Println(apres.request)
+
 }
 
 func init() {
