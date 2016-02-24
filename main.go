@@ -168,15 +168,14 @@ func readHome(fast bool) {
 	}
 
 }
-
-// readUserposts shows 20 userposts. Defaults to a 2 second delay, but can be called with readUserposts(fast) for a quick dump.
 func readUserposts(userlookup string, fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view use timelines.")
 	}
-	log.Println("looking up posts by " + userlookup + " on " + gnusocialnode)
+	log.Println("node: " + gnusocialnode)
 
-	apipath := "https://" + gnusocialnode + "/api/user/show.json"
+	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name="+userlookup
+	log.Println(apipath)
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
@@ -189,13 +188,9 @@ func readUserposts(userlookup string, fast bool) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	var apres Badrequest
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.error)
-	fmt.Println(apres.request)
 
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
@@ -208,6 +203,8 @@ func readUserposts(userlookup string, fast bool) {
 	}
 
 }
+
+
 
 func postNew(content string) {
 	if username == "" || password == "" {
