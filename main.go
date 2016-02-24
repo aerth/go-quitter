@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var goquitter = "go-quitter v0.0.3"
+var goquitter = "go-quitter v0.0.4"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
@@ -64,7 +64,7 @@ type Badrequest struct {
 
 func main() {
 //	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\tgo-quitter post ____ \t\tPosts to your node.\n\tgo-quitter post \t\tPost mode.\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\n"
-usage = "\t"+`go-quitter v0.0.3	Copyright 2016 aerth@sdf.org
+usage = "\t"+`go-quitter v0.0.4	Copyright 2016 aerth@sdf.org
 Usage:
 
 	go-quitter read			Reads 20 new posts
@@ -75,6 +75,7 @@ Usage:
 	go-quitter post 		Post mode.
 	go-quitter mentions		Mentions your @name
 	go-quitter search ___		Searches for ____
+	go-quitter search		Search mode.
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
