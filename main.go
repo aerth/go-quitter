@@ -23,6 +23,7 @@ var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.j
 
 type User struct {
 	Name string `json:"name"`
+	Screenname string `json:"screen_name"`
 }
 
 var usage string
@@ -126,7 +127,7 @@ func readNew(fast bool) {
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) }
 	for i := range tweets {
-		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "]  " + tweets[i].Text + "\n\n")
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -166,7 +167,13 @@ func readHome(fast bool) {
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
-		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		if tweets[i].User.Screenname == tweets[i].User.Name {
+			fmt.Printf("equal")
+		fmt.Printf("@"+tweets[i].User.Screenname+" "+tweets[i].Text + "\n\n")
+	}else {
+					fmt.Printf("unequal")
+		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+	}
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -174,16 +181,14 @@ func readHome(fast bool) {
 
 }
 func readUserposts(userlookup string, fast bool) {
-	if username == "" || password == "" {
-		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view use timelines.")
-	}
+
 	fmt.Println("user " + userlookup + "node: " + gnusocialnode)
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
-	req.SetBasicAuth(username, password)
+	//req.SetBasicAuth(username, password)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -200,7 +205,7 @@ func readUserposts(userlookup string, fast bool) {
 	_ = json.Unmarshal(body, &tweets)
 	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
-		fmt.Printf("[" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
@@ -219,11 +224,11 @@ func postNew(content string) {
 	if content == "" {
 		log.Fatalln("Blank status detected. Not posting.")
 	}
-	/* fmt.Println("Preview:\n\n["+username+"] "+content)
+	fmt.Println("Preview:\n\n["+username+"] "+content)
 	fmt.Println("\nType YES to publish!")
 	if askForConfirmation() == false {
 		os.Exit(0)
-	}*/
+	}
 	fmt.Println("posting on node: " + gnusocialnode)
 	//content = `"`+content+`"`
 	v := url.Values{}
