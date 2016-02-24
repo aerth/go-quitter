@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	//"github.com/tcnksm/go-input"
 )
 
 var goquitter = "go-quitter v0.0.3"
@@ -91,8 +93,9 @@ func main() {
 	// Notice how there is no quotation marks.
 	// Also, its a pain in the ass to \#escape symbols\!
 	// Also will be adding go-quitter shoot ~/essay.txt
-	if os.Args[1] == "post" && os.Args[2] != "" {
-		content := strings.Join(os.Args[2:], " ")
+	if os.Args[1] == "post" {
+		content := ""
+		if len(os.Args) > 1 { content = strings.Join(os.Args[2:], " ") }
 		postNew(content)
 		os.Exit(0)
 	}
@@ -111,7 +114,7 @@ func main() {
 // readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readNew(fast bool) {
 
-	log.Println("node: " + gnusocialnode)
+	fmt.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
 		log.Fatalln(err)
@@ -136,7 +139,7 @@ func readHome(fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
-	log.Println("node: " + gnusocialnode)
+	fmt.Println("node: " + gnusocialnode)
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
@@ -174,7 +177,7 @@ func readUserposts(userlookup string, fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view use timelines.")
 	}
-	log.Println("user " + userlookup + "node: " + gnusocialnode)
+	fmt.Println("user " + userlookup + "node: " + gnusocialnode)
 
 	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 
@@ -209,13 +212,35 @@ func postNew(content string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
+/*	ui := &input.UI{
+	    Writer: os.Stdout,
+	    Reader: os.Stdin,
+	}
 
-	log.Println("posting on node: " + gnusocialnode)
+	query := "What you posting?"
+	content, err := ui.Ask(query, &input.Options{
+	    Required: true,
+	    Loop:     true,
+	})
+
+*/
+	if content == "" {
+	content = getTypin()
+	}
+	if content == "" {
+		log.Fatalln("Blank status detected. Not posting.")
+	}
+	/* fmt.Println("Preview:\n\n["+username+"] "+content)
+		fmt.Println("\nType YES to publish!")
+		if askForConfirmation() == false {
+			os.Exit(0)
+		}*/
+	fmt.Println("posting on node: " + gnusocialnode)
 	//content = `"`+content+`"`
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
-	//log.Println(content)
+	fmt.Println(content)
 	//apipath := "https://" + gnusocialnode + "/api/statuses/update.json?status='"+content+"'"
 	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?" + content
 	req, err := http.NewRequest("POST", apipath, nil)
@@ -246,4 +271,62 @@ func init() {
 		gnusocialnode = "gs.sdf.org"
 	}
 
+}
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
+}
+func askForConfirmation() bool {
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatal(err)
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	quitResponses := []string{"q", "Q", "exit", "quit"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else if containsString(quitResponses, response) {
+		os.Exit(0)
+		return false
+	} else {
+		fmt.Println("\nType YES to publish!")
+		return askForConfirmation()
+	}
+}
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
+}
+
+func getTypin() string {
+
+scanner := bufio.NewScanner(os.Stdin)
+ if scanner.Scan() {
+				 line := scanner.Text()
+				 fmt.Println(line)
+				 return line
+ }
+ if err := scanner.Err(); err != nil {
+				 panic(err)
+
+ }
+return ""
+}
+
+func get2Typin() string {
+	fmt.Println("Press ENTER when you are finished typing.")
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//fmt.Println(response)
+	return response
 }
