@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/crypto/nacl/secretbox"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"os"
 	"strings"
 	"time"
+	"github.com/gcmurphy/getpass"
+	"golang.org/x/crypto/nacl/secretbox"
 )
 
 const keySize = 32
@@ -427,15 +428,20 @@ func getTypin() string {
 	}
 	return ""
 }
+
+
+
+
+
 func createConfig() bool {
 	fmt.Println("What username? Example: aerth")
 	username = getTypin()
 	fmt.Println("What gnusocial node? Example: gs.sdf.org")
 	gnusocialnode = getTypin()
 	fmt.Println("What password? Example: password123")
-	password = getTypin()
+	password, _ = getpass.GetPass()
 	fmt.Println("What password to use for config file? Example: 0101")
-	configlock = getTypin()
+	configlock, _ = getpass.GetPass()
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
@@ -471,7 +477,8 @@ func DetectConfig() bool {
 }
 
 func ReadConfig() (configuser string, confignode string, configpass string, err error) {
-	configlock = getTypin()
+	fmt.Println("Unlocking config file")
+	configlock, err = getpass.GetPass()
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
