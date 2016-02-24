@@ -168,10 +168,10 @@ func readHome(fast bool) {
 	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("equal")
+
 		fmt.Printf("@"+tweets[i].User.Screenname+" "+tweets[i].Text + "\n\n")
 	}else {
-					fmt.Printf("unequal")
+
 		fmt.Printf("@"+tweets[i].User.Screenname+" [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 	}
 		if fast != true {
@@ -198,7 +198,6 @@ func readUserposts(userlookup string, fast bool) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	var tweets []Tweet
