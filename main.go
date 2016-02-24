@@ -91,8 +91,6 @@ func main() {
 
 	// go-quitter post Testing from console line using go-quitter
 	// Notice how there is no quotation marks.
-	// Also, its a pain in the ass to \#escape symbols\!
-	// Also will be adding go-quitter shoot ~/essay.txt
 	if os.Args[1] == "post" {
 		content := ""
 		if len(os.Args) > 1 {

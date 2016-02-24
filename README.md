@@ -6,6 +6,18 @@ gnusocial client in golang. work in progress. things will break.
 go get -v -u github.com/aerth/go-quitter
 
 ```
+## Configure
+```
+// cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
+export GNUSOCIALUSER=yourname
+export GNUSOCIALPASS=yourpass
+// then run this command so you dont have to log out and back in.
+. ~/.shrc
+// make sure you chmod your shell rc file
+chmod o-r ~/.shrc
+chmod g-r ~/.shrc
+
+```
 
 ## Usage
 
