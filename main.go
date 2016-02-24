@@ -50,21 +50,13 @@ type Tweet struct {
 	WithheldScope        string   `json:"withheld_scope"`
 }
 
-type AuthSuccess struct {
-	/* variables */
-}
-type AuthError struct {
-	/* variables */
-}
-
 type Badrequest struct {
 	terror  string `json:"error"`
 	request string `json:"request"`
 }
 
 func main() {
-//	usage = "\t" + goquitter + "\tCopyright 2016 aerth@sdf.org\nUsage:\n\n\tgo-quitter read\t\t\tReads 20 new posts\n\tgo-quitter read fast\t\tReads 20 new posts (no delay)\n\tgo-quitter home\t\t\tYour home timeline.\n\tgo-quitter user username\tLooks up `username` timeline\n\tgo-quitter post ____ \t\tPosts to your node.\n\tgo-quitter post \t\tPost mode.\n\nSet your GNUSOCIALNODE environmental variable to change nodes.\nFor example: `export GNUSOCIALNODE=gs.sdf.org` in your ~/.shrc or ~/.profile\n\n"
-usage = "\t"+`go-quitter v0.0.4	Copyright 2016 aerth@sdf.org
+	usage = "\t" + `go-quitter v0.0.4	Copyright 2016 aerth@sdf.org
 Usage:
 
 	go-quitter read			Reads 20 new posts
@@ -140,30 +132,26 @@ Did you know?	You can "go-quitter read | more"
 		os.Exit(0)
 	}
 
+	// this happens if we invoke with somehing like "go-quitter test"
 	log.Fatalln(usage)
 
 }
 
 // readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readNew(fast bool) {
-
 	fmt.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
-	//if err != nil { log.Fatalln(err) }
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
 		} else {
-
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
@@ -172,6 +160,7 @@ func readNew(fast bool) {
 	}
 
 }
+
 // readMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
 func readMentions(fast bool) {
 	if username == "" || password == "" {
@@ -192,22 +181,16 @@ func readMentions(fast bool) {
 	}
 	defer resp.Body.Close()
 	var apres Badrequest
-
 	body, _ := ioutil.ReadAll(resp.Body)
-
 	_ = json.Unmarshal(body, &apres)
 	fmt.Println(apres.terror)
 	fmt.Println(apres.request)
-
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
-	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
 		} else {
-
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
@@ -222,7 +205,6 @@ func readHome(fast bool) {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
 	fmt.Println("node: " + gnusocialnode)
-
 	apipath := "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
@@ -237,22 +219,16 @@ func readHome(fast bool) {
 	}
 	defer resp.Body.Close()
 	var apres Badrequest
-
 	body, _ := ioutil.ReadAll(resp.Body)
-
 	_ = json.Unmarshal(body, &apres)
 	fmt.Println(apres.terror)
 	fmt.Println(apres.request)
-
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
-	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
 		} else {
-
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
@@ -261,8 +237,6 @@ func readHome(fast bool) {
 	}
 
 }
-
-
 
 func readSearch(searchstr string, fast bool) {
 	if searchstr == "" {
@@ -276,10 +250,8 @@ func readSearch(searchstr string, fast bool) {
 	v.Set("q", searchstr)
 	searchstr = url.Values.Encode(v)
 	apipath := "https://" + gnusocialnode + "/api/search.json?" + searchstr
-
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
-	//req.SetBasicAuth(username, password)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -293,13 +265,11 @@ func readSearch(searchstr string, fast bool) {
 
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
-	//if err != nil { log.Fatalln(err) } // This fails
+
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
 		} else {
-
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
@@ -309,16 +279,11 @@ func readSearch(searchstr string, fast bool) {
 
 }
 
-
 func readUserposts(userlookup string, fast bool) {
-
 	fmt.Println("user " + userlookup + " @ " + gnusocialnode)
-
 	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
-
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
-	//req.SetBasicAuth(username, password)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -329,30 +294,24 @@ func readUserposts(userlookup string, fast bool) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
-	//if err != nil { log.Fatalln(err) } // This fails
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
-
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
 		} else {
-
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
 	}
-
 }
 
 func postNew(content string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
-
 	if content == "" {
 		content = getTypin()
 	}
@@ -365,18 +324,15 @@ func postNew(content string) {
 		os.Exit(0)
 	}
 	fmt.Println("posting on node: " + gnusocialnode)
-	//content = `"`+content+`"`
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
-	//apipath := "https://" + gnusocialnode + "/api/statuses/update.json?status='"+content+"'"
 	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?" + content
 	req, err := http.NewRequest("POST", apipath, nil)
 	req.SetBasicAuth(username, password)
 	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -390,8 +346,6 @@ func postNew(content string) {
 	if apres.terror != "" {
 		fmt.Println(apres.terror)
 	}
-	//	fmt.Println(apres.request)
-
 }
 
 func init() {
@@ -443,7 +397,6 @@ func getTypin() string {
 	}
 	if err := scanner.Err(); err != nil {
 		panic(err)
-
 	}
 	return ""
 }
