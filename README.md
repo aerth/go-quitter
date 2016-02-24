@@ -1,6 +1,12 @@
 # go-quitter
 gnusocial client in golang. work in progress. things will break.
 
+## Install
+```
+go get -v -u github.com/aerth/go-quitter
+
+```
+
 ## Usage
 
 ```
@@ -32,6 +38,7 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 * get simple posting to work
 * write tests
 * save account information in encoded config file
+* learn go
 
 
 ### Contributing
