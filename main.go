@@ -74,10 +74,9 @@ func main() {
 	speed := false
 	lastvar := len(os.Args)
 	lastvar = (lastvar - 1)
-	if os.Args[lastvar] == "fast" {
+	if os.Args[lastvar] == "fast" || os.Getenv("GNUSOCIALFAST") == "true" {
 		speed = true
 	}
-
 	// go-quitter read
 	if os.Args[1] == "read" {
 		readNew(speed)
