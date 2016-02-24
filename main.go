@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -95,7 +95,9 @@ func main() {
 	// Also will be adding go-quitter shoot ~/essay.txt
 	if os.Args[1] == "post" {
 		content := ""
-		if len(os.Args) > 1 { content = strings.Join(os.Args[2:], " ") }
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
 		postNew(content)
 		os.Exit(0)
 	}
@@ -212,35 +214,23 @@ func postNew(content string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
-/*	ui := &input.UI{
-	    Writer: os.Stdout,
-	    Reader: os.Stdin,
-	}
 
-	query := "What you posting?"
-	content, err := ui.Ask(query, &input.Options{
-	    Required: true,
-	    Loop:     true,
-	})
-
-*/
 	if content == "" {
-	content = getTypin()
+		content = getTypin()
 	}
 	if content == "" {
 		log.Fatalln("Blank status detected. Not posting.")
 	}
 	/* fmt.Println("Preview:\n\n["+username+"] "+content)
-		fmt.Println("\nType YES to publish!")
-		if askForConfirmation() == false {
-			os.Exit(0)
-		}*/
+	fmt.Println("\nType YES to publish!")
+	if askForConfirmation() == false {
+		os.Exit(0)
+	}*/
 	fmt.Println("posting on node: " + gnusocialnode)
 	//content = `"`+content+`"`
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
-	fmt.Println(content)
 	//apipath := "https://" + gnusocialnode + "/api/statuses/update.json?status='"+content+"'"
 	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?" + content
 	req, err := http.NewRequest("POST", apipath, nil)
@@ -260,7 +250,7 @@ func postNew(content string) {
 	fmt.Println("\nnode response:", resp.Status)
 	_ = json.Unmarshal(body, &apres)
 	if apres.terror != "" {
-	fmt.Println(apres.terror)
+		fmt.Println(apres.terror)
 	}
 	//	fmt.Println(apres.request)
 
@@ -306,27 +296,16 @@ func posString(slice []string, element string) int {
 }
 
 func getTypin() string {
-
-scanner := bufio.NewScanner(os.Stdin)
- if scanner.Scan() {
-				 line := scanner.Text()
-				 fmt.Println(line)
-				 return line
- }
- if err := scanner.Err(); err != nil {
-				 panic(err)
-
- }
-return ""
-}
-
-func get2Typin() string {
 	fmt.Println("Press ENTER when you are finished typing.")
-	var response string
-	_, err := fmt.Scanln(&response)
-	if err != nil {
-		log.Fatalln(err)
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		line := scanner.Text()
+		fmt.Println(line)
+		return line
 	}
-	//fmt.Println(response)
-	return response
+	if err := scanner.Err(); err != nil {
+		panic(err)
+
+	}
+	return ""
 }
