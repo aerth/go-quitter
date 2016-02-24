@@ -82,6 +82,8 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 
 Most commands require GNUSOCIALUSER and GNUSOCIALPASS variables set.
 
+Did you know?	You can "go-quitter read | more"
+
 `
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
