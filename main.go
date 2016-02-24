@@ -11,7 +11,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	//"github.com/tcnksm/go-input"
 )
 
 var goquitter = "go-quitter v0.0.3"
@@ -75,6 +74,7 @@ Usage:
 	go-quitter post ____ 		Posts to your node.
 	go-quitter post 		Post mode.
 	go-quitter mentions		Mentions your @name
+	go-quitter search ___		Searches for ____
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
@@ -262,7 +262,12 @@ func readHome(fast bool) {
 
 
 func readSearch(searchstr string, fast bool) {
-
+	if searchstr == "" {
+		searchstr = getTypin()
+	}
+	if searchstr == "" {
+		log.Fatalln("Blank search detected. Not searching.")
+	}
 	fmt.Println("searching " + searchstr + " @ " + gnusocialnode)
 	v := url.Values{}
 	v.Set("q", searchstr)
