@@ -7,35 +7,24 @@ go get -v -u github.com/aerth/go-quitter
 
 ```
 ## Configure
+
+go-quitter saves a config file at ~/.go-quitter, if it gets messed up just delete it and make a new one.
+```
+go-quitter config
+```
+For automation, you may want to use an environmental variable config, something like…
+
 ```
 // cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
 export GNUSOCIALUSER=yourname
 export GNUSOCIALPASS=yourpass
-// then run this command so you dont have to log out and back in.
-. ~/.shrc
-// make sure you chmod your shell rc file
-chmod o-r ~/.shrc
-chmod g-r ~/.shrc
-
-```
-
-## Configure
-
-```shell
-// cat ~/.shrc or ~/.bashrc (or ~/.zshrc etc)
-export GNUSOCIALUSER=yourname
-export GNUSOCIALPASS=yourpass
 
 // then run this command so you dont have to log out and back in.
-// some shells dont use . so you must use `source ~/.shrc`
 . ~/.shrc
 
-// make sure you chmod your shell rc file because your password is in plaintext there.
-// future: encrypted ~/.go-quitter config file.
+// make sure you chmod your shell rc file if shared machine.
 chmod o-r ~/.shrc
 chmod g-r ~/.shrc
-
-```
 
 ## Usage
 
@@ -69,9 +58,10 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 * include user interface with up/down scrolling
 * ~~get simple posting to work~~
 * write tests
-* save account information in encoded config file
-* cat filename.txt | go-quitter // posts the text
+* ~~save account information in encoded config file~~
+* cat filename.txt | go-quitter // may do this just because it would make uploading photos easy.
 * **learn go**
+
 
 
 ### Contributing
