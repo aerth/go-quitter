@@ -12,7 +12,7 @@ go-quitter saves a config file at ~/.go-quitter, if it gets messed up just delet
 ```
 go-quitter config
 ```
-For automation, you may want to use an environmental variable config, something like…
+For automation and cronjobs, you may want to use environmental variables instead. Something like…
 
 ```
 // cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
@@ -48,7 +48,7 @@ unset GNUSOCIALNODE
 go-quitter read fast >> tweet.log                                                   
 GNUSOCIALNODE=gnusocial.de go-quitter read fast >> treet.log                         
 GNUSOCIALNODE=quitter.es go-quitter read fast >> treet.log                           
-GNUSOCIALNODE=shitposter.club go-quitter fast read >> treet.log                      
+GNUSOCIALNODE=shitposter.club go-quitter read fast >> treet.log                      
 GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log   
 
 ```
