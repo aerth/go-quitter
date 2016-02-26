@@ -2,18 +2,24 @@
 gnusocial client in golang. work in progress.
 
 ## Install binary for your OS
-[Linux](https://github.com/aerth/go-quitter/releases/download/v0.0.4/go-quitter-v0.0.4_linux-amd64.tgz)
+[Linux](https://github.com/aerth/go-quitter/releases/download/v0.0.5/go-quitter-v0.0.5_linux-amd64.tgz)
 ```
-MD5:    50b4670858c3570a344a4a8a45c10703  go-quitter-v0.0.4_linux-amd64.tgz
-SHA1:   a8bfcf73a2ceb10442436f58a3c5dc4852122168  go-quitter-v0.0.4_linux-amd64.tgz
-SHA256: 7b51bdd663ce1101da0910da8946d7f46a50a8cf600efd53afe7f05d36a42d8d  go-quitter-v0.0.4_linux-amd64.tgz
+MD5:    e965aec65cfaab367bafd65b80fe91fe  go-quitter-v0.0.5_linux-amd64.tgz
+SHA1:   2c452cbcc71706a5ce5969f3e0be4901a36c6e9c  go-quitter-v0.0.5_linux-amd64.tgz
+SHA256: cb3b749d396d2ffc91754b0bef4f569d901d8f847132baa908221fc2e67cef15  go-quitter-v0.0.5_linux-amd64.tgz
+MD5:    10a1912a3a1949750a12eb49745dbe4b  go-quitter/go-quitter
+SHA1:   7d5c019bfd2a0579bd46872daeca431f0b843bb9  go-quitter/go-quitter
+SHA256: 0782c3d0451456ab06b3c50c2cd61fd07af4f51faf7a64cce7c1812de1ce8ff8  go-quitter/go-quitter
 ```
 
-[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.4/go-quitter-v0.0.4_netbsd-amd64.tar.gz)
+[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.5/go-quitter-v0.0.5_netbsd-amd64.tar.gz)
 ```
-MD5:    b019020684485805994205e52e525428  go-quitter-v0.0.4_netbsd-amd64.tar.gz
-SHA1:   d135d6a448c9978c869d7f6c9b8be26eae4d2030  go-quitter-v0.0.4_netbsd-amd64.tar.gz
-SHA256: e2647e110ef2d8fd22f1aedf3f776351384577ff0443a1c403b856ff3a57d91e  go-quitter-v0.0.4_netbsd-amd64.tar.gz
+MD5:    e401e0c85d71bee2efae6309222c337c  go-quitter/go-quitter
+SHA1:   ddba90e508873d5ea0297c129d083b3588ddd2d4  go-quitter/go-quitter
+SHA256: 64ba3d3caa36f8c9212af10233e4cba096e2adfb0d4230a0ccf09954b5df33be  go-quitter/go-quitter
+MD5:    ab4eb1af7c6e2f4cf7b3947f19cae24b  go-quitter-v0.0.5_netbsd-amd64.tgz
+SHA1:   ebb0a47458e4f97972fe79f038e7ef7945c61ffd  go-quitter-v0.0.5_netbsd-amd64.tgz
+SHA256: 0130cd3a6d9ab6dbc5fe6ac68e85f708ac38e915f6fe1dc3e388eb2ae9354320  go-quitter-v0.0.5_netbsd-amd64.tgz
 ```
 
 ## Install from Go source
@@ -24,18 +30,21 @@ go get -v -u github.com/aerth/go-quitter
 ## Configure
 
 go-quitter saves a config file at ~/.go-quitter, if it gets messed up just delete it and make a new one.
+
 ```
 go-quitter config
 ```
-For automation and cronjobs, you may want to use environmental variables instead. Something like…
+For automation, scripts, and cronjobs, you may want to delete config file and use environmental variables instead. Something like…
 
 ```
 // cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
 export GNUSOCIALUSER=yourname
 export GNUSOCIALPASS=yourpass
+export GNUSOCIALNODE=gnusocial.de
 
 // then run this command so you dont have to log out and back in.
 . ~/.shrc
+
 
 // make sure you chmod your shell rc file if shared machine.
 chmod o-r ~/.shrc
@@ -43,16 +52,15 @@ chmod g-r ~/.shrc
 
 ## Usage
 
+When running go-quitter with no arguments, a list of commands is printed.
+For more information, run `go-quitter help`
+
 ```shell
 
-$ go-quitter read // ticker style public timeline
-$ go-quitter read fast // reads public timeline
-$ go-quitter user aerth // looks up a user timeline
-$ go-quitter home fast // reads your home timeline
-$ go-quitter post posting totally works!
-$ go-quitter post // this presents a prompt
+$ go-quitter read // public timeline
+$ go-quitter home // home timeline
+$ go-quitter search // enters search mode
 $ go-quitter post \!group \#hashtag \#EscapeSymbolsWithABackslash
-
 ```
 
 Default node is gs.sdf.org!
