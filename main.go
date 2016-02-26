@@ -31,6 +31,9 @@ var configpass = ""
 var confignode = ""
 var configlock = ""
 var configstrings = ""
+var hashbar = strings.Repeat("#", 80)
+var versionbar = strings.Repeat("#", 10)+"\t"+goquitter+"\t"+strings.Repeat("#", 30)
+
 
 type User struct {
 	Name       string `json:"name"`
@@ -68,8 +71,8 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "\t" + goquitter +"\t"+`Copyright 2016 aerth@sdf.org
-Usage:
+
+	usage = "\n\t" + goquitter +"\t"+`Copyright 2016 aerth@sdf.org
 
 	go-quitter config		Creates config file
 	go-quitter read			Reads 20 new posts
@@ -112,7 +115,10 @@ Did you know?	You can "go-quitter read fast | more"
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
 	if containsString(helpArg, os.Args[1]) {
+		print("\033[H\033[2J");
+		fmt.Println(versionbar)
 		fmt.Println(usage)
+		fmt.Println(hashbar)
 		os.Exit(1)
 	}
 
@@ -122,7 +128,8 @@ Did you know?	You can "go-quitter read fast | more"
 		fmt.Println(goquitter)
 		os.Exit(1)
 	}
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
+
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "post", "mentions"}
 	if containsString(needLogin, os.Args[1]) {
@@ -134,13 +141,18 @@ Did you know?	You can "go-quitter read fast | more"
 		}
 	// command doesn't need login
 	}else {
-		if DetectConfig() == true {
-			// only use gnusocial node from config
-			_, gnusocialnode, _, _ = ReadConfig()
-		fmt.Println("Config file detected.")
-		}else{
-			// We are relying on environmental vars or default node.
-		}
+						if DetectConfig() == true {
+								fmt.Println("Config file detected. Do you want to use it for this session?\nType YES or NO (y/n)")
+								if askForConfirmation() == true {
+								// only use gnusocial node from config
+								_, gnusocialnode, _, _ = ReadConfig()
+								}
+
+			}else{
+				// We are relying on environmental vars or default node.
+			}
+
+
 	}
 	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {username = os.Getenv("GNUSOCIALUSER")}
@@ -249,13 +261,25 @@ func readMentions(fast bool) {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	var apres Badrequest
+
 	body, _ := ioutil.ReadAll(resp.Body)
-	_ = json.Unmarshal(body, &apres)
-	fmt.Println(body)
-	fmt.Println(apres.request)
+
+
 	var tweets []Tweet
+
+badResponses := []string{"authenticate"}
+if string(body) == `{"error":"Could not authenticate you.","request":"\/api\/statuses\/mentions.json"}` {
+	fmt.Println("error: "+string(body))
+	os.Exit(1)
+}
 	_ = json.Unmarshal(body, &tweets)
+
+
+	if containsString(badResponses, string(body)) {
+			fmt.Println("error: "+string(body))
+			os.Exit(1)
+	}
+
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
 			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
@@ -482,7 +506,7 @@ func getTypin() string {
 func createConfig() {
 	fmt.Printf("\nWhat username? Example: aerth")
 	username = getTypin()
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
 	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
 	gnusocialnode = getTypin()
 	if gnusocialnode == "" { gnusocialnode = "gs.sdf.org"}
@@ -491,18 +515,18 @@ func createConfig() {
 		fmt.Printf("\nexample: gs.sdf.org")
 		gnusocialnode = getTypin()
 	}
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
 	fmt.Println("What is your GNU Social password for "+gnusocialnode+"?")
 	password, _ = getpass.GetPass()
 	if password == "" {	password, _ = getpass.GetPass() } // try 2
 	if password == "" {	password, _ = getpass.GetPass() } // try 3
 	if password == "" {	fmt.Println("Need real password."); os.Exit(1) } // we tried.
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
 	fmt.Println("Enter a password to use with go-quitter.")
 	fmt.Println("It will be used to encrypt your config file.")
 	configlock, _ = getpass.GetPass()
 	if configlock == "" { fmt.Println("Press ENTER again for a blank password."); configlock, _ = getpass.GetPass() } // confirm empty password
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
@@ -539,10 +563,11 @@ func DetectConfig() bool {
 }
 
 func ReadConfig() (configuser string, confignode string, configpass string, err error) {
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");
+	fmt.Println(versionbar)
 	fmt.Println("Unlocking config file")
 	configlock, err = getpass.GetPass()
-	print("\033[H\033[2J")
+	print("\033[H\033[2J");	fmt.Println(versionbar)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
