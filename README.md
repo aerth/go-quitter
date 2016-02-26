@@ -12,7 +12,7 @@ SHA1:   7d5c019bfd2a0579bd46872daeca431f0b843bb9  go-quitter/go-quitter
 SHA256: 0782c3d0451456ab06b3c50c2cd61fd07af4f51faf7a64cce7c1812de1ce8ff8  go-quitter/go-quitter
 ```
 
-[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.5/go-quitter-v0.0.5_netbsd-amd64.tar.gz)
+[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.5/go-quitter-v0.0.5_netbsd-amd64.tgz)
 ```
 MD5:    e401e0c85d71bee2efae6309222c337c  go-quitter/go-quitter
 SHA1:   ddba90e508873d5ea0297c129d083b3588ddd2d4  go-quitter/go-quitter
