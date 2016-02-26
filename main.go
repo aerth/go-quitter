@@ -102,13 +102,17 @@ Did you know?	You can "go-quitter read fast | more"
 		}
 
 	}
-
+	
 	if DetectConfig() == true {
 		username, gnusocialnode, password, _ = ReadConfig()
 	log.Println("Config file detected.")
 	}else{
 	log.Println("No config file detected.")
 	}
+	if os.Getenv("GNUSOCIALUSER") != "" {username = os.Getenv("GNUSOCIALUSER")}
+	if os.Getenv("GNUSOCIALPASS") != "" {password = os.Getenv("GNUSOCIALPASS")}
+	if os.Getenv("GNUSOCIALNODE") != "" {gnusocialnode = os.Getenv("GNUSOCIALNODE")}
+
 	// Set speed
 	speed := false
 	lastvar := len(os.Args)
@@ -200,12 +204,14 @@ func readMentions(fast bool) {
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(username, password)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 	var apres Badrequest
@@ -243,7 +249,8 @@ func readHome(fast bool) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 	var apres Badrequest
@@ -286,7 +293,8 @@ func readSearch(searchstr string, fast bool) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -318,7 +326,8 @@ func readUserposts(userlookup string, fast bool) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -364,7 +373,8 @@ func postNew(content string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	apres := Badrequest{}
 	defer resp.Body.Close()
@@ -424,7 +434,8 @@ func getTypin() string {
 		return line
 	}
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	return ""
 }
