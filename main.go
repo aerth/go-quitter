@@ -33,8 +33,7 @@ var confignode = ""
 var configlock = ""
 var configstrings = ""
 var hashbar = strings.Repeat("#", 80)
-var versionbar = strings.Repeat("#", 10)+"\t"+goquitter+"\t"+strings.Repeat("#", 30)
-
+var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
 
 type User struct {
 	Name       string `json:"name"`
@@ -65,7 +64,14 @@ type Tweet struct {
 	WithheldInCountries  []string `json:"withheld_in_countries"`
 	WithheldScope        string   `json:"withheld_scope"`
 }
-
+type Group struct {
+	Id          int64  `json:"id"`
+	Url         string `json:"url"`
+	Nickname    string `json:"nickname"`
+	Fullname    string `json:"fullname"`
+	Member      bool   `json:"member"`
+	Description string  `json:"description"`
+}
 type Badrequest struct {
 	terror  string `json:"error"`
 	request string `json:"request"`
@@ -73,7 +79,7 @@ type Badrequest struct {
 
 func main() {
 
-	usage = "\n\t" + goquitter +"\t"+`Copyright 2016 aerth@sdf.org
+	usage = "\n\t" + goquitter + "\t" + `Copyright 2016 aerth@sdf.org
 
 	go-quitter config		Creates config file
 	go-quitter read			Reads 20 new posts
@@ -87,6 +93,12 @@ func main() {
 	go-quitter search		Search mode.
 	go-quitter follow		Follow a user
 	go-quitter unfollow		Unfollow a user
+	go-quitter groups		List all groups on current node
+	go-quitter mygroups		List only groups you are member of
+	go-quitter join ___		Join a !group
+	go-quitter part ___		Part a !group
+
+
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
@@ -110,7 +122,7 @@ Did you know?	You can "go-quitter read fast | more"
 			createConfig()
 		} else {
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\n")
-			fmt.Println(os.Getenv("HOME")+"/.go-quitter\n")
+			fmt.Println(os.Getenv("HOME") + "/.go-quitter\n")
 			os.Exit(1)
 		}
 	}
@@ -118,7 +130,7 @@ Did you know?	You can "go-quitter read fast | more"
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
 	if containsString(helpArg, os.Args[1]) {
-		print("\033[H\033[2J");
+		print("\033[H\033[2J")
 		fmt.Println(versionbar)
 		fmt.Println(usage)
 		fmt.Println(hashbar)
@@ -131,36 +143,41 @@ Did you know?	You can "go-quitter read fast | more"
 		fmt.Println(goquitter)
 		os.Exit(1)
 	}
-	print("\033[H\033[2J");	fmt.Println(versionbar)
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 
 	// command requires login credentials
-	needLogin := []string{"home", "follow", "post", "mentions"}
+	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave" }
 	if containsString(needLogin, os.Args[1]) {
 		if DetectConfig() == true {
 			username, gnusocialnode, password, _ = ReadConfig()
-		fmt.Println("Config file detected.")
-		}else{
-		fmt.Println("No config file detected.")
+			fmt.Println("Config file detected.")
+		} else {
+			fmt.Println("No config file detected.")
 		}
-	// command doesn't need login
-	}else {
-						if DetectConfig() == true {
-								fmt.Println("Config file detected. Do you want to use it for this session?\nType YES or NO (y/n)")
-								if askForConfirmation() == true {
-								// only use gnusocial node from config
-								_, gnusocialnode, _, _ = ReadConfig()
-								}
-
-			}else{
-				// We are relying on environmental vars or default node.
+		// command doesn't need login
+	} else {
+		if DetectConfig() == true {
+			fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
+			if askForConfirmation() == true {
+				// only use gnusocial node from config
+				_, gnusocialnode, _, _ = ReadConfig()
 			}
-
+		} else {
+			// We are relying on environmental vars or default node.
+		}
 
 	}
 	// user environmental credentials if they exist
-	if os.Getenv("GNUSOCIALUSER") != "" {username = os.Getenv("GNUSOCIALUSER")}
-	if os.Getenv("GNUSOCIALPASS") != "" {password = os.Getenv("GNUSOCIALPASS")}
-	if os.Getenv("GNUSOCIALNODE") != "" {gnusocialnode = os.Getenv("GNUSOCIALNODE")}
+	if os.Getenv("GNUSOCIALUSER") != "" {
+		username = os.Getenv("GNUSOCIALUSER")
+	}
+	if os.Getenv("GNUSOCIALPASS") != "" {
+		password = os.Getenv("GNUSOCIALPASS")
+	}
+	if os.Getenv("GNUSOCIALNODE") != "" {
+		gnusocialnode = os.Getenv("GNUSOCIALNODE")
+	}
 
 	// Set speed default slow
 	speed := false
@@ -181,7 +198,8 @@ Did you know?	You can "go-quitter read fast | more"
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
 		readSearch(searchstr, speed)
-		os.Exit(0)	}
+		os.Exit(0)
+	}
 
 	// command: go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
@@ -201,7 +219,7 @@ Did you know?	You can "go-quitter read fast | more"
 		followstr := ""
 		if len(os.Args) == 1 {
 			followstr = os.Args[2]
-		}else	if len(os.Args) > 1 {
+		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
 		DoFollow(followstr)
@@ -213,7 +231,7 @@ Did you know?	You can "go-quitter read fast | more"
 		followstr := ""
 		if len(os.Args) == 1 {
 			followstr = os.Args[2]
-		}else	if len(os.Args) > 1 {
+		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
 		DoUnfollow(followstr)
@@ -222,6 +240,23 @@ Did you know?	You can "go-quitter read fast | more"
 	// command: go-quitter home
 	if os.Args[1] == "home" {
 		readHome(speed)
+		os.Exit(0)
+	}
+
+	// command: go-quitter groups
+	if os.Args[1] == "groups" {
+		ListAllGroups(speed)
+		os.Exit(0)
+	}
+
+	// command: go-quitter mygroups
+	if os.Args[1] == "mygroups" {
+		ListMyGroups(speed)
+		os.Exit(0)
+	}
+	// command: go-quitter groups
+	if os.Args[1] == "group" {
+		ListAllGroups(speed)
 		os.Exit(0)
 	}
 
@@ -237,7 +272,7 @@ Did you know?	You can "go-quitter read fast | more"
 	}
 
 	// this happens if we invoke with somehing like "go-quitter test"
-	fmt.Println(os.Args[0]+" -h")
+	fmt.Println(os.Args[0] + " -h")
 	os.Exit(1)
 
 }
@@ -247,7 +282,8 @@ func readNew(fast bool) {
 	fmt.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
-		fmt.Println(err); os.Exit(1)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
@@ -291,20 +327,18 @@ func readMentions(fast bool) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-
 	var tweets []Tweet
 
-badResponses := []string{"authenticate"}
-if string(body) == `{"error":"Could not authenticate you.","request":"\/api\/statuses\/mentions.json"}` {
-	fmt.Println("error: "+string(body))
-	os.Exit(1)
-}
+	badResponses := []string{"authenticate"}
+	if string(body) == `{"error":"Could not authenticate you.","request":"\/api\/statuses\/mentions.json"}` {
+		fmt.Println("error: " + string(body))
+		os.Exit(1)
+	}
 	_ = json.Unmarshal(body, &tweets)
 
-
 	if containsString(badResponses, string(body)) {
-			fmt.Println("error: "+string(body))
-			os.Exit(1)
+		fmt.Println("error: " + string(body))
+		os.Exit(1)
 	}
 
 	for i := range tweets {
@@ -445,7 +479,7 @@ func DoFollow(followstr string) {
 	_ = json.Unmarshal(body, &user)
 
 	for i := range user {
-			fmt.Printf("[@" + user[i].Screenname + "]\n\n")
+		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
 	}
 
 }
@@ -494,7 +528,7 @@ func DoUnfollow(followstr string) {
 	_ = json.Unmarshal(body, &user)
 
 	for i := range user {
-			fmt.Printf("[@" + user[i].Screenname + "]\n\n")
+		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
 	}
 
 }
@@ -600,7 +634,7 @@ func askForConfirmation() bool {
 	} else if containsString(quitResponses, response) {
 		return false
 	} else {
-		fmt.Println("\nType YES to publish!")
+		fmt.Println("\nNot valid answer, try again. [y/n] [yes/no]")
 		return askForConfirmation()
 	}
 }
@@ -631,27 +665,43 @@ func getTypin() string {
 func createConfig() {
 	fmt.Printf("\nWhat username? Example: aerth")
 	username = getTypin()
-	print("\033[H\033[2J");	fmt.Println(versionbar)
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
 	gnusocialnode = getTypin()
-	if gnusocialnode == "" { gnusocialnode = "gs.sdf.org"}
+	if gnusocialnode == "" {
+		gnusocialnode = "gs.sdf.org"
+	}
 	schema := []string{"http://", "http", "https", "://", "/"}
 	if containsString(schema, gnusocialnode) {
 		fmt.Printf("\nexample: gs.sdf.org")
 		gnusocialnode = getTypin()
 	}
-	print("\033[H\033[2J");	fmt.Println(versionbar)
-	fmt.Println("What is your GNU Social password for "+gnusocialnode+"?")
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
+	fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 	password, _ = getpass.GetPass()
-	if password == "" {	password, _ = getpass.GetPass() } // try 2
-	if password == "" {	password, _ = getpass.GetPass() } // try 3
-	if password == "" {	fmt.Println("Need real password."); os.Exit(1) } // we tried.
-	print("\033[H\033[2J");	fmt.Println(versionbar)
+	if password == "" {
+		password, _ = getpass.GetPass()
+	} // try 2
+	if password == "" {
+		password, _ = getpass.GetPass()
+	} // try 3
+	if password == "" {
+		fmt.Println("Need real password.")
+		os.Exit(1)
+	} // we tried.
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 	fmt.Println("Enter a password to use with go-quitter.")
 	fmt.Println("It will be used to encrypt your config file.")
 	configlock, _ = getpass.GetPass()
-	if configlock == "" { fmt.Println("Press ENTER again for a blank password."); configlock, _ = getpass.GetPass() } // confirm empty password
-	print("\033[H\033[2J");	fmt.Println(versionbar)
+	if configlock == "" {
+		fmt.Println("Press ENTER again for a blank password.")
+		configlock, _ = getpass.GetPass()
+	} // confirm empty password
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
@@ -688,11 +738,12 @@ func DetectConfig() bool {
 }
 
 func ReadConfig() (configuser string, confignode string, configpass string, err error) {
-	print("\033[H\033[2J");
+	print("\033[H\033[2J")
 	fmt.Println(versionbar)
 	fmt.Println("Unlocking config file")
 	configlock, err = getpass.GetPass()
-	print("\033[H\033[2J");	fmt.Println(versionbar)
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
@@ -719,4 +770,81 @@ func ReadConfig() (configuser string, confignode string, configpass string, err 
 
 	return username, gnusocialnode, password, nil
 
+}
+
+func ListAllGroups(speed bool) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	initwin()
+	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list_all.json"
+	req, err := http.NewRequest("GET", apipath, nil)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Set("User-Agent", goquitter)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var groups []Group
+	_ = json.Unmarshal(body, &groups)
+	var member string
+	for i := range groups {
+			if groups[i].Member == true {
+						  member = `*member*`
+			}else { member = "" }
+			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] "+member+"\n" + groups[i].Description + "\n\n")
+			if speed != true {
+				time.Sleep(500 * time.Millisecond)
+			}
+	}
+}
+func ListMyGroups(speed bool) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	initwin()
+	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list.json"
+	req, err := http.NewRequest("GET", apipath, nil)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Set("User-Agent", goquitter)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	var groups []Group
+	_ = json.Unmarshal(body, &groups)
+	var member string
+	for i := range groups {
+			if groups[i].Member == true {
+						  member = `*member*`
+			}else { member = "" }
+			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] "+member+"\n" + groups[i].Description + "\n\n")
+			if speed != true {
+				time.Sleep(500 * time.Millisecond)
+			}
+	}
+}
+
+// This will change.
+func initwin() {
+print("\033[H\033[2J")
+fmt.Println(versionbar)
 }
