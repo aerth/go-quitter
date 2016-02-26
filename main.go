@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/gcmurphy/getpass"
+	"golang.org/x/crypto/nacl/secretbox"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,8 +15,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/gcmurphy/getpass"
-	"golang.org/x/crypto/nacl/secretbox"
 )
 
 const keySize = 32
@@ -125,7 +125,35 @@ Did you know?	You can "go-quitter read fast | more"
 		readNew(speed)
 		os.Exit(0)
 	}
-	// go-quitter read
+	// go-quitter search _____
+	if os.Args[1] == "search" {
+		searchstr := ""
+		if len(os.Args) > 1 {
+			searchstr = strings.Join(os.Args[2:], " ")
+		}
+		readSearch(searchstr, speed)
+		os.Exit(0)
+	}
+
+	// go-quitter user aerth
+	if os.Args[1] == "user" && os.Args[2] != "" {
+		userlookup := os.Args[2]
+		readUserposts(userlookup, speed)
+		os.Exit(0)
+	}
+
+	// Everything below here we have to login for. API rules, not me!
+	if DetectConfig() == true {
+		username, gnusocialnode, password, _ = ReadConfig()
+		if os.Getenv("GNUSOCIALNODE") != "" {
+			gnusocialnode = os.Getenv("GNUSOCIALNODE")
+		}
+		log.Println("Config file detected.")
+	} else {
+		log.Println("No config file detected.")
+	}
+
+	// go-quitter mentions
 	if os.Args[1] == "mentions" {
 		readMentions(speed)
 		os.Exit(0)
@@ -144,23 +172,6 @@ Did you know?	You can "go-quitter read fast | more"
 			content = strings.Join(os.Args[2:], " ")
 		}
 		postNew(content)
-		os.Exit(0)
-	}
-
-	// go-quitter search _____
-	if os.Args[1] == "search" {
-		searchstr := ""
-		if len(os.Args) > 1 {
-			searchstr = strings.Join(os.Args[2:], " ")
-		}
-		readSearch(searchstr, speed)
-		os.Exit(0)
-	}
-
-	// go-quitter user aerth
-	if os.Args[1] == "user" && os.Args[2] != "" {
-		userlookup := os.Args[2]
-		readUserposts(userlookup, speed)
 		os.Exit(0)
 	}
 
@@ -439,10 +450,6 @@ func getTypin() string {
 	}
 	return ""
 }
-
-
-
-
 
 func createConfig() bool {
 	fmt.Println("What username? Example: aerth")
