@@ -85,6 +85,8 @@ func main() {
 	go-quitter mentions		Mentions your @name
 	go-quitter search ___		Searches for ____
 	go-quitter search		Search mode.
+	go-quitter follow		Follow a user
+	go-quitter unfollow		Unfollow a user
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
