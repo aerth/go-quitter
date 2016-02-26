@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -40,7 +41,7 @@ type User struct {
 	Screenname string `json:"screen_name"`
 }
 
-var usage string
+//var usage string
 
 type Tweet struct {
 	Id                   int64    `json:"id"`
@@ -70,38 +71,39 @@ type Group struct {
 	Nickname    string `json:"nickname"`
 	Fullname    string `json:"fullname"`
 	Member      bool   `json:"member"`
-	Description string  `json:"description"`
+	Membercount int64  `json:"member_count"`
+	Description string `json:"description"`
 }
 type Badrequest struct {
 	terror  string `json:"error"`
 	request string `json:"request"`
 }
 
-func main() {
+var usage = "\n\t" + goquitter + "\t" + `Copyright 2016 aerth@sdf.org
 
-	usage = "\n\t" + goquitter + "\t" + `Copyright 2016 aerth@sdf.org
-
-	go-quitter config		Creates config file
-	go-quitter read			Reads 20 new posts
-	go-quitter read fast		Reads 20 new posts (no delay)
-	go-quitter home			Your home timeline.
-	go-quitter user username	Looks up "username" timeline
-	go-quitter post ____ 		Posts to your node.
-	go-quitter post 		Post mode.
-	go-quitter mentions		Mentions your @name
-	go-quitter search ___		Searches for ____
-	go-quitter search		Search mode.
-	go-quitter follow		Follow a user
-	go-quitter unfollow		Unfollow a user
-	go-quitter groups		List all groups on current node
-	go-quitter mygroups		List only groups you are member of
-	go-quitter join ___		Join a !group
-	go-quitter part ___		Part a !group
+go-quitter config		Creates config file
+go-quitter read			Reads 20 new posts
+go-quitter read fast		Reads 20 new posts (no delay)
+go-quitter home			Your home timeline.
+go-quitter user username	Looks up "username" timeline
+go-quitter post ____ 		Posts to your node.
+go-quitter post 		Post mode.
+go-quitter mentions		Mentions your @name
+go-quitter search ___		Searches for ____
+go-quitter search		Search mode.
+go-quitter follow		Follow a user
+go-quitter unfollow		Unfollow a user
+go-quitter groups		List all groups on current node
+go-quitter mygroups		List only groups you are member of
+go-quitter join ___		Join a !group
+go-quitter part ___		Part a !group
 
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
+
+func main() {
 
 	// command: go-quitter
 	if len(os.Args) < 2 {
@@ -142,7 +144,7 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 	fmt.Println(versionbar)
 
 	// command requires login credentials
-	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave" }
+	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave"}
 	if containsString(needLogin, os.Args[1]) {
 		if DetectConfig() == true {
 			username, gnusocialnode, password, _ = ReadConfig()
@@ -249,9 +251,20 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 		ListMyGroups(speed)
 		os.Exit(0)
 	}
-	// command: go-quitter groups
-	if os.Args[1] == "group" {
-		ListAllGroups(speed)
+	// command: go-quitter join
+	if os.Args[1] == "join" {
+		JoinGroup(os.Args[2])
+		os.Exit(0)
+	}
+
+	// command: go-quitter part
+	if os.Args[1] == "part" {
+		PartGroup(os.Args[2])
+		os.Exit(0)
+	}
+	// command: go-quitter leave
+	if os.Args[1] == "leave" {
+		PartGroup(os.Args[2])
 		os.Exit(0)
 	}
 
@@ -292,7 +305,7 @@ func readNew(fast bool) {
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
@@ -343,7 +356,7 @@ func readMentions(fast bool) {
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 }
@@ -382,7 +395,7 @@ func readHome(fast bool) {
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
@@ -424,7 +437,7 @@ func readSearch(searchstr string, fast bool) {
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
@@ -469,7 +482,7 @@ func DoFollow(followstr string) {
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	var user []User
 	_ = json.Unmarshal(body, &user)
 
@@ -518,7 +531,7 @@ func DoUnfollow(followstr string) {
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	var user []User
 	_ = json.Unmarshal(body, &user)
 
@@ -553,7 +566,7 @@ func readUserposts(userlookup string, fast bool) {
 			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
 		}
 		if fast != true {
-			time.Sleep(2000 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 }
@@ -789,17 +802,26 @@ func ListAllGroups(speed bool) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
+	//	fmt.Println("DEBUG: "+string(body))
+
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 	var member string
+	var members string
+	var id string
 	for i := range groups {
-			if groups[i].Member == true {
-						  member = `*member*`
-			}else { member = "" }
-			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] "+member+"\n" + groups[i].Description + "\n\n")
-			if speed != true {
-				time.Sleep(500 * time.Millisecond)
-			}
+		if groups[i].Member == true {
+			member = `*member*`
+		} else {
+			member = ""
+		}
+
+		id = strconv.FormatInt(groups[i].Id, 10)
+		members = strconv.FormatInt(groups[i].Membercount, 10)
+		fmt.Printf("!" + groups[i].Nickname + " (#" + id + ") [" + groups[i].Fullname + "] " + member + "\n" + groups[i].Description + "\n" + groups[i].Nickname + " has " + members + " members total.\n\n")
+		if speed != true {
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 }
 func ListMyGroups(speed bool) {
@@ -826,20 +848,130 @@ func ListMyGroups(speed bool) {
 
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
-	var member string
+
 	for i := range groups {
-			if groups[i].Member == true {
-						  member = `*member*`
-			}else { member = "" }
-			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] "+member+"\n" + groups[i].Description + "\n\n")
-			if speed != true {
-				time.Sleep(500 * time.Millisecond)
-			}
+
+		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
+		if speed != true {
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
+// command: go-quitter join ____
+func JoinGroup(groupstr string) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	if groupstr == "" {
+		fmt.Println("Which group to join?\nExample: groupname (without the !)")
+		groupstr = getTypin()
+	}
+	if groupstr == "" {
+		log.Fatalln("Blank group detected. Not going furthur.")
+	}
+	v := url.Values{}
+
+	v.Set("group_name", groupstr)
+	v.Set("group_id", groupstr)
+	v.Set("id", groupstr)
+	v.Set("nickname", groupstr)
+	groupstr = url.Values.Encode(v)
+	b := bytes.NewBufferString(v.Encode())
+	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/join.json?" + groupstr
+	req, err := http.NewRequest("POST", apipath, b)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Set("User-Agent", goquitter)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	var apres []Badrequest
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Println("\nnode response:", resp.Status)
+	_ = json.Unmarshal(body, &apres)
+	for i := range apres {
+		fmt.Println(apres[i].terror)
+	}
+
+	body, _ = ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	var user []User
+	_ = json.Unmarshal(body, &user)
+
+	for i := range user {
+		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
+	}
+}
+
+// command: go-quitter part ____
+func PartGroup(groupstr string) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	if groupstr == "" {
+		fmt.Println("Which group to leave?\nExample: groupname (without the !)")
+		groupstr = getTypin()
+	}
+	if groupstr == "" {
+		log.Fatalln("Blank group detected. Not going furthur.")
+	}
+	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
+	if askForConfirmation() == false {
+
+		fmt.Println("Not leaving group " + groupstr)
+		os.Exit(0)
+
+	}
+
+	v := url.Values{}
+
+	v.Set("group_name", groupstr)
+	v.Set("group_id", groupstr)
+	v.Set("id", groupstr)
+	v.Set("nickname", groupstr)
+	groupstr = url.Values.Encode(v)
+	b := bytes.NewBufferString(v.Encode())
+	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/leave.json?" + groupstr
+	req, err := http.NewRequest("POST", apipath, b)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Set("User-Agent", goquitter)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	var apres []Badrequest
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Println("\nnode response:", resp.Status)
+	_ = json.Unmarshal(body, &apres)
+	for i := range apres {
+		fmt.Println(apres[i].terror)
+	}
+
+	body, _ = ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	var user []User
+	_ = json.Unmarshal(body, &user)
+
+	for i := range user {
+		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
 	}
 }
 
 // This will change.
 func initwin() {
-print("\033[H\033[2J")
-fmt.Println(versionbar)
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 }
