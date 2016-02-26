@@ -1,7 +1,22 @@
 # go-quitter
 gnusocial client in golang. work in progress.
 
-## Install
+## Install binary for your OS
+[Linux](https://github.com/aerth/go-quitter/releases/download/v0.0.4/go-quitter-v0.0.4_linux-amd64.tgz)
+```
+MD5:    50b4670858c3570a344a4a8a45c10703  go-quitter-v0.0.4_linux-amd64.tgz
+SHA1:   a8bfcf73a2ceb10442436f58a3c5dc4852122168  go-quitter-v0.0.4_linux-amd64.tgz
+SHA256: 7b51bdd663ce1101da0910da8946d7f46a50a8cf600efd53afe7f05d36a42d8d  go-quitter-v0.0.4_linux-amd64.tgz
+```
+
+[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.4/go-quitter-v0.0.4_netbsd-amd64.tar.gz)
+```
+MD5:    b019020684485805994205e52e525428  go-quitter-v0.0.4_netbsd-amd64.tar.gz
+SHA1:   d135d6a448c9978c869d7f6c9b8be26eae4d2030  go-quitter-v0.0.4_netbsd-amd64.tar.gz
+SHA256: e2647e110ef2d8fd22f1aedf3f776351384577ff0443a1c403b856ff3a57d91e  go-quitter-v0.0.4_netbsd-amd64.tar.gz
+```
+
+## Install from Go source
 ```shell
 go get -v -u github.com/aerth/go-quitter
 
