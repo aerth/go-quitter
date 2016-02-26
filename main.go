@@ -387,6 +387,7 @@ func postNew(content string) {
 	fmt.Println("Preview:\n\n[" + username + "] " + content)
 	fmt.Println("\nType YES to publish!")
 	if askForConfirmation() == false {
+		fmt.Println("Your status was not updated.")
 		os.Exit(0)
 	}
 	fmt.Println("posting on node: " + gnusocialnode)
@@ -440,7 +441,6 @@ func askForConfirmation() bool {
 	} else if containsString(nokayResponses, response) {
 		return false
 	} else if containsString(quitResponses, response) {
-		os.Exit(0)
 		return false
 	} else {
 		fmt.Println("\nType YES to publish!")
