@@ -88,84 +88,98 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 Now with config file! Try it: go-quitter config
 
 Did you know?	You can "go-quitter read fast | more"
-
 `
+print("\033[H\033[2J")
+	// command: go-quitter
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
 	}
+
+	// command: go-quitter create
 	if os.Args[1] == "config" {
-		fmt.Println("Creating config file.")
+
 		if DetectConfig() == false {
+			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
+			fmt.Println("Your password will NOT echo.\n")
 			createConfig()
 		} else {
-			log.Fatalln("Config file already exists.")
+			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\n")
+			fmt.Println(os.Getenv("HOME")+"/.go-quitter\n")
+			os.Exit(1)
 		}
+	}
 
+	// command: go-quitter help
+	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
+	if containsString(helpArg, os.Args[1]) {
+		log.Fatalln(usage)
 	}
-	
-	if DetectConfig() == true {
-		username, gnusocialnode, password, _ = ReadConfig()
-	log.Println("Config file detected.")
-	}else{
-	log.Println("No config file detected.")
+
+	// command requires login credentials
+	needLogin := []string{"home", "follow", "post", "mentions"}
+	if containsString(needLogin, os.Args[1]) {
+		if DetectConfig() == true {
+			username, gnusocialnode, password, _ = ReadConfig()
+		fmt.Println("Config file detected.")
+		}else{
+		fmt.Println("No config file detected.")
+		}
+	// command doesn't need login
+	}else {
+		if DetectConfig() == true {
+			// only use gnusocial node from config
+			_, gnusocialnode, _, _ = ReadConfig()
+		fmt.Println("Config file detected.")
+		}else{
+			// We are relying on environmental vars or default node.
+		}
 	}
+	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {username = os.Getenv("GNUSOCIALUSER")}
 	if os.Getenv("GNUSOCIALPASS") != "" {password = os.Getenv("GNUSOCIALPASS")}
 	if os.Getenv("GNUSOCIALNODE") != "" {gnusocialnode = os.Getenv("GNUSOCIALNODE")}
 
-	// Set speed
+	// Set speed default slow
 	speed := false
 	lastvar := len(os.Args)
 	lastvar = (lastvar - 1)
 	if os.Args[lastvar] == "fast" || os.Getenv("GNUSOCIALFAST") == "true" {
 		speed = true
 	}
-	// go-quitter read
+	// command: go-quitter read
 	if os.Args[1] == "read" {
 		readNew(speed)
 		os.Exit(0)
 	}
-	// go-quitter search _____
+	// command: go-quitter search _____
 	if os.Args[1] == "search" {
 		searchstr := ""
 		if len(os.Args) > 1 {
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
 		readSearch(searchstr, speed)
-		os.Exit(0)
-	}
+		os.Exit(0)	}
 
-	// go-quitter user aerth
+	// command: go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
 		userlookup := os.Args[2]
 		readUserposts(userlookup, speed)
 		os.Exit(0)
 	}
 
-	// Everything below here we have to login for. API rules, not me!
-	if DetectConfig() == true {
-		username, gnusocialnode, password, _ = ReadConfig()
-		if os.Getenv("GNUSOCIALNODE") != "" {
-			gnusocialnode = os.Getenv("GNUSOCIALNODE")
-		}
-		log.Println("Config file detected.")
-	} else {
-		log.Println("No config file detected.")
-	}
-
-	// go-quitter mentions
+	// command: go-quitter mentions
 	if os.Args[1] == "mentions" {
 		readMentions(speed)
 		os.Exit(0)
 	}
-	// go-quitter home
+	// command: go-quitter home
 	if os.Args[1] == "home" {
 		readHome(speed)
 		os.Exit(0)
 	}
 
 	// go-quitter post Testing from console line using go-quitter
-	// Notice how there is no quotation marks.
+	// Notice how we dont need quotation marks.
 	if os.Args[1] == "post" {
 		content := ""
 		if len(os.Args) > 1 {
@@ -176,7 +190,8 @@ Did you know?	You can "go-quitter read fast | more"
 	}
 
 	// this happens if we invoke with somehing like "go-quitter test"
-	log.Fatalln(usage)
+	fmt.Println(os.Args[0]+" -h")
+	os.Exit(1)
 
 }
 
@@ -185,8 +200,9 @@ func readNew(fast bool) {
 	fmt.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err); os.Exit(1)
 	}
+
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	var tweets []Tweet
@@ -228,7 +244,7 @@ func readMentions(fast bool) {
 	var apres Badrequest
 	body, _ := ioutil.ReadAll(resp.Body)
 	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.terror)
+	fmt.Println(body)
 	fmt.Println(apres.request)
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
@@ -360,11 +376,13 @@ func postNew(content string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
+	// command: go-quitter post
 	if content == "" {
 		content = getTypin()
 	}
 	if content == "" {
-		log.Fatalln("Blank status detected. Not posting.")
+		fmt.Println("Blank status detected. Not posting.")
+		os.Exit(1)
 	}
 	fmt.Println("Preview:\n\n[" + username + "] " + content)
 	fmt.Println("\nType YES to publish!")
@@ -406,11 +424,13 @@ func init() {
 func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
+
 func askForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
@@ -437,7 +457,7 @@ func posString(slice []string, element string) int {
 }
 
 func getTypin() string {
-	fmt.Println("Press ENTER when you are finished typing.")
+	fmt.Printf("\nPress ENTER when you are finished typing.\n\n\t\t\t")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -451,15 +471,30 @@ func getTypin() string {
 	return ""
 }
 
-func createConfig() bool {
-	fmt.Println("What username? Example: aerth")
+func createConfig() {
+	fmt.Printf("\nWhat username? Example: aerth")
 	username = getTypin()
-	fmt.Println("What gnusocial node? Example: gs.sdf.org")
+	print("\033[H\033[2J")
+	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
 	gnusocialnode = getTypin()
-	fmt.Println("What password? Example: password123")
+	if gnusocialnode == "" { gnusocialnode = "gs.sdf.org"}
+	schema := []string{"http://", "http", "https", "://", "/"}
+	if containsString(schema, gnusocialnode) {
+		fmt.Printf("\nexample: gs.sdf.org")
+		gnusocialnode = getTypin()
+	}
+	print("\033[H\033[2J")
+	fmt.Println("What is your GNU Social password for "+gnusocialnode+"?")
 	password, _ = getpass.GetPass()
-	fmt.Println("What password to use for config file? Example: 0101")
+	if password == "" {	password, _ = getpass.GetPass() } // try 2
+	if password == "" {	password, _ = getpass.GetPass() } // try 3
+	if password == "" {	fmt.Println("Need real password."); os.Exit(1) } // we tried.
+	print("\033[H\033[2J")
+	fmt.Println("Enter a password to use with go-quitter.")
+	fmt.Println("It will be used to encrypt your config file.")
 	configlock, _ = getpass.GetPass()
+	if configlock == "" { fmt.Println("Press ENTER again for a blank password."); configlock, _ = getpass.GetPass() } // confirm empty password
+	print("\033[H\033[2J")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
@@ -471,19 +506,20 @@ func createConfig() bool {
 	// Read bytes from random and put them in nonce until it is full.
 	_, err := io.ReadFull(rand.Reader, nonce[:])
 	if err != nil {
-		log.Fatalln("Could not read from random:", err)
+		fmt.Println("Could not read from random:", err)
+		os.Exit(1)
 	}
 	out := make([]byte, nonceSize)
 	copy(out, nonce[:])
 	out = secretbox.Seal(out, message, nonce, naclKey)
-	err = ioutil.WriteFile(os.Getenv("HOME")+"/.go-quitter", out, 0644)
+	err = ioutil.WriteFile(os.Getenv("HOME")+"/.go-quitter", out, 0600)
 	if err != nil {
-		log.Fatalln("Error while writing config file: ", err)
+		fmt.Println("Error while writing config file: ", err)
+		os.Exit(1)
 	}
-	fmt.Printf("Config file saved. Total size is %d bytes. \n",
+	fmt.Printf("Config file saved at "+os.Getenv("HOME")+"/.go-quitter \nTotal size is %d bytes.\n",
 		len(out))
 	os.Exit(0)
-	return true
 }
 
 func DetectConfig() bool {
@@ -495,8 +531,10 @@ func DetectConfig() bool {
 }
 
 func ReadConfig() (configuser string, confignode string, configpass string, err error) {
+	print("\033[H\033[2J")
 	fmt.Println("Unlocking config file")
 	configlock, err = getpass.GetPass()
+	print("\033[H\033[2J")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
