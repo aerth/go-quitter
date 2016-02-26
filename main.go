@@ -20,7 +20,7 @@ import (
 const keySize = 32
 const nonceSize = 24
 
-var goquitter = "go-quitter v0.0.4"
+var goquitter = "go-quitter v0.0.5-develop"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
@@ -68,7 +68,7 @@ type Badrequest struct {
 }
 
 func main() {
-	usage = "\t" + `go-quitter v0.0.4	Copyright 2016 aerth@sdf.org
+	usage = "\t" + goquitter +"\t"+`Copyright 2016 aerth@sdf.org
 Usage:
 
 	go-quitter config		Creates config file
@@ -89,7 +89,7 @@ Now with config file! Try it: go-quitter config
 
 Did you know?	You can "go-quitter read fast | more"
 `
-print("\033[H\033[2J")
+
 	// command: go-quitter
 	if len(os.Args) < 2 {
 		log.Fatalln(usage)
@@ -112,9 +112,17 @@ print("\033[H\033[2J")
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
 	if containsString(helpArg, os.Args[1]) {
-		log.Fatalln(usage)
+		fmt.Println(usage)
+		os.Exit(1)
 	}
 
+	// command: go-quitter version (or -v)
+	versionArg := []string{"version", "-v"}
+	if containsString(versionArg, os.Args[1]) {
+		fmt.Println(goquitter)
+		os.Exit(1)
+	}
+	print("\033[H\033[2J")
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "post", "mentions"}
 	if containsString(needLogin, os.Args[1]) {
