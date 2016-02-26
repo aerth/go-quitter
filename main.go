@@ -96,7 +96,7 @@ go-quitter unfollow		Unfollow a user
 go-quitter groups		List all groups on current node
 go-quitter mygroups		List only groups you are member of
 go-quitter join ___		Join a !group
-go-quitter part ___		Part a !group
+go-quitter leave ___		Part a !group (can also use part)
 
 
 Set your GNUSOCIALNODE environmental variable to change nodes.
@@ -104,11 +104,29 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 
 func main() {
+	// list all commands here
+	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part"}
 
 	// command: go-quitter
 	if len(os.Args) < 2 {
-		log.Fatalln(usage)
+		print("\033[H\033[2J")
+		fmt.Println(versionbar)
+		fmt.Println("Current list of commands:")
+		fmt.Println(allCommands)
+		fmt.Println(hashbar)
+		os.Exit(1)
 	}
+
+
+	if !containsString(allCommands, os.Args[1]) {
+		print("\033[H\033[2J")
+		fmt.Println(versionbar)
+		fmt.Println("Current list of commands:")
+		fmt.Println(allCommands)
+		fmt.Println(hashbar)
+		os.Exit(1)
+	}
+
 
 	// command: go-quitter create
 	if os.Args[1] == "config" {
