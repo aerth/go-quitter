@@ -99,13 +99,8 @@ func main() {
 	go-quitter part ___		Part a !group
 
 
-
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
-
-Now with config file! Try it: go-quitter config
-
-Did you know?	You can "go-quitter read fast | more"
 `
 
 	// command: go-quitter
