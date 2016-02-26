@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
@@ -192,6 +193,30 @@ Did you know?	You can "go-quitter read fast | more"
 		readMentions(speed)
 		os.Exit(0)
 	}
+
+	// command: go-quitter follow
+	if os.Args[1] == "follow" {
+		followstr := ""
+		if len(os.Args) == 1 {
+			followstr = os.Args[2]
+		}else	if len(os.Args) > 1 {
+			followstr = strings.Join(os.Args[2:], " ")
+		}
+		DoFollow(followstr)
+		os.Exit(0)
+	}
+
+	// command: go-quitter unfollow
+	if os.Args[1] == "unfollow" {
+		followstr := ""
+		if len(os.Args) == 1 {
+			followstr = os.Args[2]
+		}else	if len(os.Args) > 1 {
+			followstr = strings.Join(os.Args[2:], " ")
+		}
+		DoUnfollow(followstr)
+		os.Exit(0)
+	}
 	// command: go-quitter home
 	if os.Args[1] == "home" {
 		readHome(speed)
@@ -370,6 +395,104 @@ func readSearch(searchstr string, fast bool) {
 		if fast != true {
 			time.Sleep(2000 * time.Millisecond)
 		}
+	}
+
+}
+
+func DoFollow(followstr string) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	if followstr == "" {
+		fmt.Println("Who to follow?\nExample: someone (without the @)")
+		followstr = getTypin()
+	}
+	if followstr == "" {
+		log.Fatalln("Blank search detected. Not going furthur.")
+	}
+	//fmt.Println("following " + followstr + " @ " + gnusocialnode)
+	v := url.Values{}
+
+	v.Set("id", followstr)
+	followstr = url.Values.Encode(v)
+	b := bytes.NewBufferString(v.Encode())
+	apipath := "https://" + gnusocialnode + "/api/friendships/create.json?" + followstr
+	req, err := http.NewRequest("POST", apipath, b)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Set("User-Agent", goquitter)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	apres := Badrequest{}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("\nnode response:", resp.Status)
+	_ = json.Unmarshal(body, &apres)
+	if apres.terror != "" {
+		fmt.Println(apres.terror)
+	}
+
+	body, _ = ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	var user []User
+	_ = json.Unmarshal(body, &user)
+
+	for i := range user {
+			fmt.Printf("[@" + user[i].Screenname + "]\n\n")
+	}
+
+}
+
+func DoUnfollow(followstr string) {
+	if username == "" || password == "" {
+		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
+	}
+	if followstr == "" {
+		fmt.Println("Who to unfollow?\nExample: someone (without the @)")
+		followstr = getTypin()
+	}
+	if followstr == "" {
+		log.Fatalln("Blank search detected. Not going furthur.")
+	}
+	//fmt.Println("following " + followstr + " @ " + gnusocialnode)
+	v := url.Values{}
+
+	v.Set("id", followstr)
+	followstr = url.Values.Encode(v)
+	b := bytes.NewBufferString(v.Encode())
+	apipath := "https://" + gnusocialnode + "/api/friendships/destroy.json?" + followstr
+	req, err := http.NewRequest("POST", apipath, b)
+	req.SetBasicAuth(username, password)
+	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Set("User-Agent", goquitter)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	apres := Badrequest{}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("\nnode response:", resp.Status)
+	_ = json.Unmarshal(body, &apres)
+	if apres.terror != "" {
+		fmt.Println(apres.terror)
+	}
+
+	body, _ = ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+	var user []User
+	_ = json.Unmarshal(body, &user)
+
+	for i := range user {
+			fmt.Printf("[@" + user[i].Screenname + "]\n\n")
 	}
 
 }
