@@ -6,14 +6,26 @@ gnusocial client in golang. work in progress.
 
 
 ## Install from Go source
+
+If you have Go toolchain installed you can install with:
+
 ```shell
 GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter
 sudo mv /tmp/go/bin/go-quitter /usr/local/bin/
 ```
 
+Or git checkout the `develop` branch
+```shell
+GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter
+cd $GOPATH/src/github.com/aerth/go-quitter
+git pull origin develop
+go build && go install
+```
+
+
 ## Configure
 
-go-quitter saves a config file at ~/.go-quitter, if it gets messed up just delete it and make a new one.
+To avoid storing the password in plaintext, go-quitter saves an encrypted config file at ~/.go-quitter, if it gets messed up just delete it and make a new one.
 
 ```
 go-quitter config
@@ -62,15 +74,16 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 
 ### Todo
 
-* include user interface with up/down scrolling
-* ~~get simple posting to work~~
-* write tests
-* ~~save account information in encoded config file~~
+* Include user interface with up/down scrolling
+* ~~Get simple posting to work~~
+* Write tests
+* ~~Save account information in encoded config file~~
 * cat filename.txt | go-quitter // may do this just because it would make uploading photos easy.
-* **learn go**
+* Port GNU Social to go
 
 
 
 ### Contributing
 
 * Pull requests are welcome.
+* File an issue if you have a minute.
