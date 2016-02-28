@@ -164,7 +164,7 @@ func main() {
 	bar()
 
 	// command requires login credentials
-	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
+	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
 		if DetectConfig() == true {
 			username, gnusocialnode, password, _ = ReadConfig()
@@ -273,18 +273,30 @@ func main() {
 	}
 	// command: go-quitter join
 	if os.Args[1] == "join" {
-		JoinGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		JoinGroup(content)
 		os.Exit(0)
 	}
 
 	// command: go-quitter part
 	if os.Args[1] == "part" {
-		PartGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		PartGroup(content)
 		os.Exit(0)
 	}
 	// command: go-quitter leave
 	if os.Args[1] == "leave" {
-		PartGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		PartGroup(content)
 		os.Exit(0)
 	}
 
@@ -560,16 +572,17 @@ func DoUnfollow(followstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres []Badrequest
-	defer resp.Body.Close()
+
+
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("\nnode response:", resp.Status)
+
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 
-
-
-	body, _ = ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(body))
 	var user []User
 	_ = json.Unmarshal(body, &user)
 
@@ -595,6 +608,14 @@ func readUserposts(userlookup string, fast bool) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
+
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
+
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
@@ -643,13 +664,16 @@ func postNew(content string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres Badrequest
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
+	if string(body) == "" {
 	fmt.Println("\nnode response:", resp.Status)
+}
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
 	if apres.Error != "" {
 		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 }
 
@@ -663,6 +687,8 @@ func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
+
+// Unexpected newline
 func askForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
@@ -816,12 +842,14 @@ func ReadConfig() (configuser string, confignode string, configpass string, err 
 
 }
 
+// command: go-quitter groups
 func ListAllGroups(speed bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	initwin()
 	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list_all.json"
+
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.SetBasicAuth(username, password)
 	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
@@ -831,15 +859,21 @@ func ListAllGroups(speed bool) {
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	//	fmt.Println("DEBUG: "+string(body))
-
+	body, err := ioutil.ReadAll(resp.Body)
+	if string(body) == "" {
+	fmt.Println("\nnode response:", resp.Status)
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(string(body))
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 	var member string
@@ -860,6 +894,9 @@ func ListAllGroups(speed bool) {
 		}
 	}
 }
+
+// command: go-quitter mygroups
+
 func ListMyGroups(speed bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
@@ -881,7 +918,16 @@ func ListMyGroups(speed bool) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
+	if string(body) == "" {
+	fmt.Println("\nnode response:", resp.Status)
+	}
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
+//	fmt.Println(string(body))
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 
@@ -892,6 +938,8 @@ func ListMyGroups(speed bool) {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
+
+
 }
 
 // command: go-quitter join ____
@@ -926,15 +974,19 @@ func JoinGroup(groupstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres []Badrequest
+
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
+	if string(body) == "" {
 	fmt.Println("\nnode response:", resp.Status)
-	_ = json.Unmarshal(body, &apres)
-	for i := range apres {
-		fmt.Println(apres[i].Error)
-	}
+}
+var apres Badrequest
+_ = json.Unmarshal(body, &apres)
+if apres.Error != "" {
+	fmt.Println(apres.Error)
+	os.Exit(1)
+}
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
@@ -989,8 +1041,9 @@ func PartGroup(groupstr string) {
 	var apres Badrequest
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
+	if string(body) == "" {
 	fmt.Println("\nnode response:", resp.Status)
+}
 	_ = json.Unmarshal(body, &apres)
 
 		fmt.Println(apres.Error)
