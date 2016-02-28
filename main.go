@@ -22,7 +22,7 @@ import (
 const keySize = 32
 const nonceSize = 24
 
-var goquitter = "go-quitter v0.0.5"
+var goquitter = "go-quitter v0.0.6"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
@@ -75,8 +75,8 @@ type Group struct {
 	Description string `json:"description"`
 }
 type Badrequest struct {
-	terror  string `json:"error"`
-	request string `json:"request"`
+	Error   string `json:"error"`
+	Request string `json:"request"`
 }
 
 var usage = "\n\t" + goquitter + "\t" + `Copyright 2016 aerth@sdf.org
@@ -103,41 +103,45 @@ Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 
+func bar() {
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
+}
+
 func main() {
 	// list all commands here
-	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part"}
+
+	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies", "direct", "inbox", "sent"}
 
 	// command: go-quitter
 	if len(os.Args) < 2 {
-		print("\033[H\033[2J")
-		fmt.Println(versionbar)
+		bar()
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
 		fmt.Println(hashbar)
 		os.Exit(1)
 	}
-
 
 	if !containsString(allCommands, os.Args[1]) {
-		print("\033[H\033[2J")
-		fmt.Println(versionbar)
+		bar()
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
 		fmt.Println(hashbar)
 		os.Exit(1)
 	}
-
 
 	// command: go-quitter create
 	if os.Args[1] == "config" {
 
 		if DetectConfig() == false {
+			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
-			fmt.Println("Your password will NOT echo.\n")
+			fmt.Println("Your password will NOT echo.")
 			createConfig()
 		} else {
-			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\n")
-			fmt.Println(os.Getenv("HOME") + "/.go-quitter\n")
+			bar()
+			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
+			fmt.Println(os.Getenv("HOME") + "/.go-quitter")
 			os.Exit(1)
 		}
 	}
@@ -145,8 +149,7 @@ func main() {
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
 	if containsString(helpArg, os.Args[1]) {
-		print("\033[H\033[2J")
-		fmt.Println(versionbar)
+		bar()
 		fmt.Println(usage)
 		fmt.Println(hashbar)
 		os.Exit(1)
@@ -158,11 +161,10 @@ func main() {
 		fmt.Println(goquitter)
 		os.Exit(1)
 	}
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	bar()
 
 	// command requires login credentials
-	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave"}
+	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
 		if DetectConfig() == true {
 			username, gnusocialnode, password, _ = ReadConfig()
@@ -173,11 +175,11 @@ func main() {
 		// command doesn't need login
 	} else {
 		if DetectConfig() == true {
-			fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
-			if askForConfirmation() == true {
-				// only use gnusocial node from config
-				_, gnusocialnode, _, _ = ReadConfig()
-			}
+			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
+			//if askForConfirmation() == true {
+			// only use gnusocial node from config
+			_, gnusocialnode, _, _ = ReadConfig()
+			//}
 		} else {
 			// We are relying on environmental vars or default node.
 		}
@@ -224,7 +226,7 @@ func main() {
 	}
 
 	// command: go-quitter mentions
-	if os.Args[1] == "mentions" {
+	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
 		readMentions(speed)
 		os.Exit(0)
 	}
@@ -271,18 +273,30 @@ func main() {
 	}
 	// command: go-quitter join
 	if os.Args[1] == "join" {
-		JoinGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		JoinGroup(content)
 		os.Exit(0)
 	}
 
 	// command: go-quitter part
 	if os.Args[1] == "part" {
-		PartGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		PartGroup(content)
 		os.Exit(0)
 	}
 	// command: go-quitter leave
 	if os.Args[1] == "leave" {
-		PartGroup(os.Args[2])
+		content := ""
+		if len(os.Args) > 1 {
+			content = strings.Join(os.Args[2:], " ")
+		}
+		PartGroup(content)
 		os.Exit(0)
 	}
 
@@ -355,17 +369,14 @@ func readMentions(fast bool) {
 
 	var tweets []Tweet
 
-	badResponses := []string{"authenticate"}
-	if string(body) == `{"error":"Could not authenticate you.","request":"\/api\/statuses\/mentions.json"}` {
-		fmt.Println("error: " + string(body))
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
-	_ = json.Unmarshal(body, &tweets)
 
-	if containsString(badResponses, string(body)) {
-		fmt.Println("error: " + string(body))
-		os.Exit(1)
-	}
+	_ = json.Unmarshal(body, &tweets)
 
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -399,11 +410,15 @@ func readHome(fast bool) {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	var apres Badrequest
+
 	body, _ := ioutil.ReadAll(resp.Body)
+
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.terror)
-	fmt.Println(apres.request)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
@@ -419,6 +434,7 @@ func readHome(fast bool) {
 
 }
 
+// command: go-quitter search
 func readSearch(searchstr string, fast bool) {
 	if searchstr == "" {
 		searchstr = getTypin()
@@ -429,13 +445,15 @@ func readSearch(searchstr string, fast bool) {
 	fmt.Println("searching " + searchstr + " @ " + gnusocialnode)
 	v := url.Values{}
 	v.Set("q", searchstr)
-	searchstr = url.Values.Encode(v)
-	apipath := "https://" + gnusocialnode + "/api/search.json?" + searchstr
+	searchq := url.Values.Encode(v)
+
+	apipath := "https://" + gnusocialnode + "/api/search.json?" + searchq
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -443,10 +461,21 @@ func readSearch(searchstr string, fast bool) {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
+
 	body, _ := ioutil.ReadAll(resp.Body)
+
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
+	if len(tweets) == 0 {
+		fmt.Println("No results for \"" + searchstr + "\"")
+	}
 
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -461,6 +490,7 @@ func readSearch(searchstr string, fast bool) {
 
 }
 
+// command: go-quitter follow
 func DoFollow(followstr string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
@@ -490,13 +520,14 @@ func DoFollow(followstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	apres := Badrequest{}
+
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("\nnode response:", resp.Status)
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	if apres.terror != "" {
-		fmt.Println(apres.terror)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
@@ -539,17 +570,16 @@ func DoUnfollow(followstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	apres := Badrequest{}
-	defer resp.Body.Close()
+
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("\nnode response:", resp.Status)
+
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	if apres.terror != "" {
-		fmt.Println(apres.terror)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 
-	body, _ = ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(body))
 	var user []User
 	_ = json.Unmarshal(body, &user)
 
@@ -575,6 +605,14 @@ func readUserposts(userlookup string, fast bool) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
+
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
+
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
@@ -623,13 +661,16 @@ func postNew(content string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	apres := Badrequest{}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("\nnode response:", resp.Status)
+	if string(body) == "" {
+		fmt.Println("\nnode response:", resp.Status)
+	}
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	if apres.terror != "" {
-		fmt.Println(apres.terror)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 }
 
@@ -643,6 +684,7 @@ func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
+// Unexpected newline
 func askForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
@@ -674,7 +716,7 @@ func posString(slice []string, element string) int {
 }
 
 func getTypin() string {
-	fmt.Printf("\nPress ENTER when you are finished typing.\n\n\t\t\t")
+	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -689,10 +731,23 @@ func getTypin() string {
 }
 
 func createConfig() {
+	bar()
 	fmt.Printf("\nWhat username? Example: aerth")
 	username = getTypin()
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	if username == "" {
+			fmt.Printf("\nWhat username? Example: aerth")
+			username = getTypin()
+	} // try 2
+	if username == "" {
+			fmt.Printf("\nWhat username? Example: aerth")
+			username = getTypin()
+	} // try 3
+	if username == "" {
+		// we tried.
+		fmt.Println("Need real username.")
+		os.Exit(1)
+	}
+	bar()
 	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
 	gnusocialnode = getTypin()
 	if gnusocialnode == "" {
@@ -703,22 +758,23 @@ func createConfig() {
 		fmt.Printf("\nexample: gs.sdf.org")
 		gnusocialnode = getTypin()
 	}
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	bar()
 	fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 	password, _ = getpass.GetPass()
 	if password == "" {
+			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 		password, _ = getpass.GetPass()
 	} // try 2
 	if password == "" {
+			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 		password, _ = getpass.GetPass()
 	} // try 3
 	if password == "" {
+		// we tried.
 		fmt.Println("Need real password.")
 		os.Exit(1)
-	} // we tried.
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	}
+	bar()
 	fmt.Println("Enter a password to use with go-quitter.")
 	fmt.Println("It will be used to encrypt your config file.")
 	configlock, _ = getpass.GetPass()
@@ -726,8 +782,7 @@ func createConfig() {
 		fmt.Println("Press ENTER again for a blank password.")
 		configlock, _ = getpass.GetPass()
 	} // confirm empty password
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	bar()
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
@@ -798,12 +853,14 @@ func ReadConfig() (configuser string, confignode string, configpass string, err 
 
 }
 
+// command: go-quitter groups
 func ListAllGroups(speed bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	initwin()
 	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list_all.json"
+
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.SetBasicAuth(username, password)
 	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
@@ -813,14 +870,28 @@ func ListAllGroups(speed bool) {
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if string(body) == "" {
+		fmt.Println("\nnode response:", resp.Status)
+	}
 
-	//	fmt.Println("DEBUG: "+string(body))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
@@ -842,6 +913,9 @@ func ListAllGroups(speed bool) {
 		}
 	}
 }
+
+// command: go-quitter mygroups
+
 func ListMyGroups(speed bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
@@ -863,7 +937,16 @@ func ListMyGroups(speed bool) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
+	if string(body) == "" {
+		fmt.Println("\nnode response:", resp.Status)
+	}
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
+	//	fmt.Println(string(body))
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 
@@ -874,6 +957,7 @@ func ListMyGroups(speed bool) {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
+
 }
 
 // command: go-quitter join ____
@@ -908,14 +992,18 @@ func JoinGroup(groupstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres []Badrequest
+
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	fmt.Println("\nnode response:", resp.Status)
+	if string(body) == "" {
+		fmt.Println("\nnode response:", resp.Status)
+	}
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	for i := range apres {
-		fmt.Println(apres[i].terror)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
@@ -968,15 +1056,15 @@ func PartGroup(groupstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres []Badrequest
+	var apres Badrequest
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
-	fmt.Println("\nnode response:", resp.Status)
-	_ = json.Unmarshal(body, &apres)
-	for i := range apres {
-		fmt.Println(apres[i].terror)
+	if string(body) == "" {
+		fmt.Println("\nnode response:", resp.Status)
 	}
+	_ = json.Unmarshal(body, &apres)
+
+	fmt.Println(apres.Error)
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
@@ -988,7 +1076,7 @@ func PartGroup(groupstr string) {
 	}
 }
 
-// This will change.
+// This will change with the real UI
 func initwin() {
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
