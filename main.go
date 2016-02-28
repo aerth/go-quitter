@@ -75,7 +75,7 @@ type Group struct {
 	Description string `json:"description"`
 }
 type Badrequest struct {
-	Error  string `json:"error"`
+	Error   string `json:"error"`
 	Request string `json:"request"`
 }
 
@@ -369,17 +369,14 @@ func readMentions(fast bool) {
 
 	var tweets []Tweet
 
-	badResponses := []string{"authenticate"}
-	if string(body) == `{"error":"Could not authenticate you.","request":"\/api\/statuses\/mentions.json"}` {
-		fmt.Println("error: " + string(body))
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
-	_ = json.Unmarshal(body, &tweets)
 
-	if containsString(badResponses, string(body)) {
-		fmt.Println("error: " + string(body))
-		os.Exit(1)
-	}
+	_ = json.Unmarshal(body, &tweets)
 
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -437,6 +434,7 @@ func readHome(fast bool) {
 
 }
 
+// command: go-quitter search
 func readSearch(searchstr string, fast bool) {
 	if searchstr == "" {
 		searchstr = getTypin()
@@ -476,7 +474,7 @@ func readSearch(searchstr string, fast bool) {
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
 	if len(tweets) == 0 {
-		fmt.Println("No results for \""+searchstr+"\"")
+		fmt.Println("No results for \"" + searchstr + "\"")
 	}
 
 	for i := range tweets {
@@ -490,9 +488,9 @@ func readSearch(searchstr string, fast bool) {
 		}
 	}
 
-
 }
 
+// command: go-quitter follow
 func DoFollow(followstr string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
@@ -572,7 +570,6 @@ func DoUnfollow(followstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
@@ -667,8 +664,8 @@ func postNew(content string) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
-	fmt.Println("\nnode response:", resp.Status)
-}
+		fmt.Println("\nnode response:", resp.Status)
+	}
 	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
 	if apres.Error != "" {
@@ -686,7 +683,6 @@ func init() {
 func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
-
 
 // Unexpected newline
 func askForConfirmation() bool {
@@ -720,7 +716,7 @@ func posString(slice []string, element string) int {
 }
 
 func getTypin() string {
-	fmt.Printf("\nPress ENTER when you are finished typing.\n\n\t\t\t")
+	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -738,6 +734,19 @@ func createConfig() {
 	bar()
 	fmt.Printf("\nWhat username? Example: aerth")
 	username = getTypin()
+	if username == "" {
+			fmt.Printf("\nWhat username? Example: aerth")
+			username = getTypin()
+	} // try 2
+	if username == "" {
+			fmt.Printf("\nWhat username? Example: aerth")
+			username = getTypin()
+	} // try 3
+	if username == "" {
+		// we tried.
+		fmt.Println("Need real username.")
+		os.Exit(1)
+	}
 	bar()
 	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
 	gnusocialnode = getTypin()
@@ -753,9 +762,11 @@ func createConfig() {
 	fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 	password, _ = getpass.GetPass()
 	if password == "" {
+			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 		password, _ = getpass.GetPass()
 	} // try 2
 	if password == "" {
+			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
 		password, _ = getpass.GetPass()
 	} // try 3
 	if password == "" {
@@ -867,13 +878,21 @@ func ListAllGroups(speed bool) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
-	fmt.Println("\nnode response:", resp.Status)
+		fmt.Println("\nnode response:", resp.Status)
 	}
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(string(body))
+
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
+
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 	var member string
@@ -919,7 +938,7 @@ func ListMyGroups(speed bool) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
-	fmt.Println("\nnode response:", resp.Status)
+		fmt.Println("\nnode response:", resp.Status)
 	}
 	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
@@ -927,7 +946,7 @@ func ListMyGroups(speed bool) {
 		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
-//	fmt.Println(string(body))
+	//	fmt.Println(string(body))
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 
@@ -938,7 +957,6 @@ func ListMyGroups(speed bool) {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
-
 
 }
 
@@ -979,14 +997,14 @@ func JoinGroup(groupstr string) {
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	if string(body) == "" {
-	fmt.Println("\nnode response:", resp.Status)
-}
-var apres Badrequest
-_ = json.Unmarshal(body, &apres)
-if apres.Error != "" {
-	fmt.Println(apres.Error)
-	os.Exit(1)
-}
+		fmt.Println("\nnode response:", resp.Status)
+	}
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
@@ -1042,12 +1060,11 @@ func PartGroup(groupstr string) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
-	fmt.Println("\nnode response:", resp.Status)
-}
+		fmt.Println("\nnode response:", resp.Status)
+	}
 	_ = json.Unmarshal(body, &apres)
 
-		fmt.Println(apres.Error)
-
+	fmt.Println(apres.Error)
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
