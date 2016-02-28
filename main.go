@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/gcmurphy/getpass"
+	"github.com/bgentry/speakeasy"
 	"golang.org/x/crypto/nacl/secretbox"
 	"io"
 	"io/ioutil"
@@ -760,14 +760,14 @@ func createConfig() {
 	}
 	bar()
 	fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-	password, _ = getpass.GetPass()
+	password, _ = speakeasy.Ask("Password: ")
 	if password == "" {
 			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-		password, _ = getpass.GetPass()
+		password, _ = speakeasy.Ask("Password: ")
 	} // try 2
 	if password == "" {
 			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-		password, _ = getpass.GetPass()
+		password, _ = speakeasy.Ask("Password: ")
 	} // try 3
 	if password == "" {
 		// we tried.
@@ -777,10 +777,10 @@ func createConfig() {
 	bar()
 	fmt.Println("Enter a password to use with go-quitter.")
 	fmt.Println("It will be used to encrypt your config file.")
-	configlock, _ = getpass.GetPass()
+	configlock, _ = speakeasy.Ask("Password: ")
 	if configlock == "" {
 		fmt.Println("Press ENTER again for a blank password.")
-		configlock, _ = getpass.GetPass()
+		configlock, _ = speakeasy.Ask("Password: ")
 	} // confirm empty password
 	bar()
 	var userKey = configlock
@@ -822,7 +822,7 @@ func ReadConfig() (configuser string, confignode string, configpass string, err 
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
 	fmt.Println("Unlocking config file")
-	configlock, err = getpass.GetPass()
+	configlock, err = speakeasy.Ask("Password: ")
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
 	var userKey = configlock
