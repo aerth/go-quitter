@@ -173,11 +173,11 @@ func main() {
 		// command doesn't need login
 	} else {
 		if DetectConfig() == true {
-			fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
-			if askForConfirmation() == true {
+			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
+			//if askForConfirmation() == true {
 				// only use gnusocial node from config
 				_, gnusocialnode, _, _ = ReadConfig()
-			}
+			//}
 		} else {
 			// We are relying on environmental vars or default node.
 		}
