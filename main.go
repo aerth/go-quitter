@@ -401,12 +401,14 @@ func readHome(fast bool) {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	var apres Badrequest
+
 	body, _ := ioutil.ReadAll(resp.Body)
-	//fmt.Println("\nnode response:", resp.Status)
+
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
 	if apres.Error != "" {
 		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
@@ -452,7 +454,12 @@ func readSearch(searchstr string, fast bool) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
+	}
 
 	var tweets []Tweet
 	_ = json.Unmarshal(body, &tweets)
@@ -503,13 +510,14 @@ func DoFollow(followstr string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres []Badrequest
+
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("\nnode response:", resp.Status)
+	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
-	for i := range apres {
-		fmt.Println(apres[i].Error)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
