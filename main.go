@@ -22,7 +22,7 @@ import (
 const keySize = 32
 const nonceSize = 24
 
-var goquitter = "go-quitter v0.0.5"
+var goquitter = "go-quitter v0.0.6-develop"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
