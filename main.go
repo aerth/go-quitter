@@ -111,7 +111,7 @@ func bar() {
 func main() {
 	// list all commands here
 
-	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies", "direct", "inbox", "sent"}
+	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies"}
 
 	// command: go-quitter
 	if len(os.Args) < 2 {
