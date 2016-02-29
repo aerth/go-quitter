@@ -160,7 +160,7 @@ func main() {
 		fmt.Println(goquitter)
 		os.Exit(1)
 	}
-	bar()
+//	bar()
 
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
@@ -172,15 +172,12 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			//configstrings := string(configdecoded)
-			//		fmt.Println("config strings:")
-			//		fmt.Println(configdecoded)
 			configarray := strings.Split(configdecoded, "::::")
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if len(configarray) < 2 {
+			if len(configarray) != 3 {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
@@ -194,9 +191,6 @@ func main() {
 		// command doesn't need login
 	} else {
 		if seconf.Detect("go-quitter") == true {
-			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
-			//if askForConfirmation() == true {
-			// only use gnusocial node from config
 			configdecoded, err := seconf.Read("go-quitter")
 			if err != nil {
 				fmt.Println("error:")
@@ -208,7 +202,7 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if len(configstrings) != 2 {
+			if len(configarray) != 3 {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
