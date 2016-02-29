@@ -143,7 +143,7 @@ func main() {
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
-			fmt.Println(os.Getenv("HOME") + "/.go-quitter")
+			fmt.Println(os.Getenv("HOME") + "/."+gnusocialpath)
 			os.Exit(1)
 		}
 	}

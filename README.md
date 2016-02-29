@@ -26,11 +26,22 @@ go build
 
 ## Configure
 
-To avoid storing the password in plaintext, go-quitter saves an encrypted config file at ~/.go-quitter, if it gets messed up just delete it and make a new one.
+To avoid storing the password in plaintext, go-quitter saves an encrypted config file at ~/.go-quitter, if it gets messed up just delete it and make a new one. You can switch config files on the fly using the environmental variable GNUSOCIALPATH.
 
 ```
 go-quitter config
+GNUSOCIALPATH=gnusocial.de go-quitter config
+GNUSOCIALPATH=gnusocial.no go-quitter config
+GNUSOCIALPATH=gnusocial.se go-quitter config
+
 ```
+
+Next time you run it, it will ask for the password you set on the last step of config creation.
+
+
+## Use in scripts
+
+
 For automation, scripts, and cronjobs, you may want to delete config file and use environmental variables instead. Something like…
 
 ```
