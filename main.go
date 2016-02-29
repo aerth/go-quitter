@@ -27,6 +27,7 @@ var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
 var fast bool = false
 var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
+var gnusocialpath = "go-quitter"
 var configuser = ""
 var configpass = ""
 var confignode = ""
@@ -109,7 +110,9 @@ func bar() {
 
 func main() {
 	// list all commands here
-
+  if os.Getenv("GNUSOCIALPATH") != "" {
+		gnusocialpath = os.Getenv("GNUSOCIALPATH")
+	}
 	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies"}
 
 	// command: go-quitter
@@ -132,11 +135,11 @@ func main() {
 	// command: go-quitter create
 	if os.Args[1] == "config" {
 
-		if seconf.Detect("go-quitter") == false {
+		if seconf.Detect(gnusocialpath) == false {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 			fmt.Println("Your password will NOT echo.")
-			seconf.Create("go-quitter", "GNU Social", "username", "gnusocialnode", "password")
+			seconf.Create(gnusocialpath, "GNU Social", "username", "gnusocialnode", "password")
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
@@ -165,8 +168,8 @@ func main() {
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
-		if seconf.Detect("go-quitter") == true {
-			configdecoded, err := seconf.Read("go-quitter")
+		if seconf.Detect(gnusocialpath) == true {
+			configdecoded, err := seconf.Read(gnusocialpath)
 			if err != nil {
 				fmt.Println("error:")
 				fmt.Println(err)
@@ -193,11 +196,11 @@ func main() {
 		}
 		// command doesn't need login
 	} else {
-		if seconf.Detect("go-quitter") == true {
+		if seconf.Detect(gnusocialpath) == true {
 			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
 			//if askForConfirmation() == true {
 			// only use gnusocial node from config
-			configdecoded, err := seconf.Read("go-quitter")
+			configdecoded, err := seconf.Read(gnusocialpath)
 			if err != nil {
 				fmt.Println("error:")
 				fmt.Println(err)
