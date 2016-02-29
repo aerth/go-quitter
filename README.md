@@ -19,7 +19,8 @@ Or git checkout the `develop` branch
 GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter
 cd $GOPATH/src/github.com/aerth/go-quitter
 git pull origin develop
-go build && go install
+go build
+./go-quitter help
 ```
 
 
