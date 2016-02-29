@@ -183,7 +183,7 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if len(configarray) < 2 {
+			if len(configarray) != 3 {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
@@ -211,7 +211,7 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			if len(configstrings) != 2 {
+			if len(configstrings) != 3 {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
