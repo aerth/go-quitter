@@ -21,7 +21,7 @@ import (
 const keySize = 32
 const nonceSize = 24
 
-var goquitter = "go-quitter v0.0.6"
+var goquitter = "go-quitter v0.0.7"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
@@ -78,7 +78,7 @@ type Badrequest struct {
 	Request string `json:"request"`
 }
 
-var usage = "\n\t" + goquitter + "\t" + `Copyright 2016 aerth@sdf.org
+var usage = "\n" + "\t" + `  Copyright 2016 aerth@sdf.org
 
 go-quitter config		Creates config file
 go-quitter read			Reads 20 new posts
@@ -136,7 +136,7 @@ func main() {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 			fmt.Println("Your password will NOT echo.")
-			seconf.Create("go-quitter", "username", "gnusocialnode", "password")
+			seconf.Create("go-quitter", "GNU Social", "username", "gnusocialnode", "password")
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
