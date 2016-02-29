@@ -3,12 +3,12 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/bgentry/speakeasy"
-	"golang.org/x/crypto/nacl/secretbox"
-	"io"
+
+
+	"aerth/seconf"
+
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -133,11 +133,11 @@ func main() {
 	// command: go-quitter create
 	if os.Args[1] == "config" {
 
-		if DetectConfig() == false {
+		if seconf.Detect("go-quitter") == false {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 			fmt.Println("Your password will NOT echo.")
-			createConfig()
+			seconf.Create("go-quitter", "username", "gnusocialnode", "password")
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
@@ -166,19 +166,58 @@ func main() {
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
-		if DetectConfig() == true {
-			username, gnusocialnode, password, _ = ReadConfig()
+		if seconf.Detect("go-quitter") == true {
+			fmt.Println("Config Detected.")
+			configdecoded, err := seconf.Read("go-quitter")
+			if err != nil {
+				fmt.Println("error:")
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			//configstrings := string(configdecoded)
+			fmt.Println("config strings:")
+			fmt.Println(configdecoded)
+			configarray := strings.Split(configdecoded, "::::")
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			if len(configarray) < 2 {
+				fmt.Println("Broken config file. Create a new one.")
+				os.Exit(1)
+			}
+				username = string(configarray[0])
+			gnusocialnode = string(configarray[1])
+				password = string(configarray[2])
+				fmt.Println("Hello, "+username)
+				fmt.Println("Using node: "+gnusocialnode)
 			fmt.Println("Config file detected.")
 		} else {
 			fmt.Println("No config file detected.")
 		}
 		// command doesn't need login
 	} else {
-		if DetectConfig() == true {
+		if seconf.Detect("go-quitter") == true {
 			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
 			//if askForConfirmation() == true {
 			// only use gnusocial node from config
-			_, gnusocialnode, _, _ = ReadConfig()
+			configdecoded, err := seconf.Read("go-quitter")
+			if err != nil {
+				fmt.Println("error:")
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			configarray := strings.Split(configdecoded, "::::")
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			if len(configstrings) != 2 {
+				fmt.Println("Broken config file. Create a new one.")
+				os.Exit(1)
+			}
+				gnusocialnode = string(configarray[1])
+
 			//}
 		} else {
 			// We are relying on environmental vars or default node.
@@ -730,128 +769,6 @@ func getTypin() string {
 	return ""
 }
 
-func createConfig() {
-	bar()
-	fmt.Printf("\nWhat username? Example: aerth")
-	username = getTypin()
-	if username == "" {
-			fmt.Printf("\nWhat username? Example: aerth")
-			username = getTypin()
-	} // try 2
-	if username == "" {
-			fmt.Printf("\nWhat username? Example: aerth")
-			username = getTypin()
-	} // try 3
-	if username == "" {
-		// we tried.
-		fmt.Println("Need real username.")
-		os.Exit(1)
-	}
-	bar()
-	fmt.Printf("\nWhich GNU Social node? Example: gnusocial.de\nPress ENTER to use gs.sdf.org")
-	gnusocialnode = getTypin()
-	if gnusocialnode == "" {
-		gnusocialnode = "gs.sdf.org"
-	}
-	schema := []string{"http://", "http", "https", "://", "/"}
-	if containsString(schema, gnusocialnode) {
-		fmt.Printf("\nexample: gs.sdf.org")
-		gnusocialnode = getTypin()
-	}
-	bar()
-	fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-	password, _ = speakeasy.Ask("Password: ")
-	if password == "" {
-			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-		password, _ = speakeasy.Ask("Password: ")
-	} // try 2
-	if password == "" {
-			fmt.Println("What is your GNU Social password for " + gnusocialnode + "?")
-		password, _ = speakeasy.Ask("Password: ")
-	} // try 3
-	if password == "" {
-		// we tried.
-		fmt.Println("Need real password.")
-		os.Exit(1)
-	}
-	bar()
-	fmt.Println("Enter a password to use with go-quitter.")
-	fmt.Println("It will be used to encrypt your config file.")
-	configlock, _ = speakeasy.Ask("Password: ")
-	if configlock == "" {
-		fmt.Println("Press ENTER again for a blank password.")
-		configlock, _ = speakeasy.Ask("Password: ")
-	} // confirm empty password
-	bar()
-	var userKey = configlock
-	var pad = []byte("«super jumpy fox jumps all over»")
-	var message = []byte(username + "::::" + gnusocialnode + "::::" + password)
-	key := []byte(userKey)
-	key = append(key, pad...)
-	naclKey := new([keySize]byte)
-	copy(naclKey[:], key[:keySize])
-	nonce := new([nonceSize]byte)
-	// Read bytes from random and put them in nonce until it is full.
-	_, err := io.ReadFull(rand.Reader, nonce[:])
-	if err != nil {
-		fmt.Println("Could not read from random:", err)
-		os.Exit(1)
-	}
-	out := make([]byte, nonceSize)
-	copy(out, nonce[:])
-	out = secretbox.Seal(out, message, nonce, naclKey)
-	err = ioutil.WriteFile(os.Getenv("HOME")+"/.go-quitter", out, 0600)
-	if err != nil {
-		fmt.Println("Error while writing config file: ", err)
-		os.Exit(1)
-	}
-	fmt.Printf("Config file saved at "+os.Getenv("HOME")+"/.go-quitter \nTotal size is %d bytes.\n",
-		len(out))
-	os.Exit(0)
-}
-
-func DetectConfig() bool {
-	_, err := ioutil.ReadFile(os.Getenv("HOME") + "/.go-quitter")
-	if err != nil {
-		return false
-	}
-	return true
-}
-
-func ReadConfig() (configuser string, confignode string, configpass string, err error) {
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
-	fmt.Println("Unlocking config file")
-	configlock, err = speakeasy.Ask("Password: ")
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
-	var userKey = configlock
-	var pad = []byte("«super jumpy fox jumps all over»")
-	key := []byte(userKey)
-	key = append(key, pad...)
-	naclKey := new([keySize]byte)
-	copy(naclKey[:], key[:keySize])
-	nonce := new([nonceSize]byte)
-	in, err := ioutil.ReadFile(os.Getenv("HOME") + "/.go-quitter")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	copy(nonce[:], in[:nonceSize])
-	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
-	if ok {
-		fmt.Println("Logged in. Welcome back to go-quitter!")
-	} else {
-		log.Fatalln("Could not decrypt the config file. Wrong password?")
-	}
-	configstrings := strings.Split(string(configbytes), "::::")
-
-	username = configstrings[0]
-	gnusocialnode = configstrings[1]
-	password = configstrings[2]
-
-	return username, gnusocialnode, password, nil
-
-}
 
 // command: go-quitter groups
 func ListAllGroups(speed bool) {
