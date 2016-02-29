@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-
 	"github.com/aerth/seconf"
 
 	"io/ioutil"
@@ -174,8 +173,8 @@ func main() {
 				os.Exit(1)
 			}
 			//configstrings := string(configdecoded)
-	//		fmt.Println("config strings:")
-	//		fmt.Println(configdecoded)
+			//		fmt.Println("config strings:")
+			//		fmt.Println(configdecoded)
 			configarray := strings.Split(configdecoded, "::::")
 			if err != nil {
 				fmt.Println(err)
@@ -185,10 +184,10 @@ func main() {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
-				username = string(configarray[0])
+			username = string(configarray[0])
 			gnusocialnode = string(configarray[1])
-				password = string(configarray[2])
-				fmt.Println("Hello, "+username)
+			password = string(configarray[2])
+			fmt.Println("Hello, " + username)
 		} else {
 			fmt.Println("No config file detected.")
 		}
@@ -213,7 +212,7 @@ func main() {
 				fmt.Println("Broken config file. Create a new one.")
 				os.Exit(1)
 			}
-				gnusocialnode = string(configarray[1])
+			gnusocialnode = string(configarray[1])
 
 			//}
 		} else {
@@ -765,7 +764,6 @@ func getTypin() string {
 	}
 	return ""
 }
-
 
 // command: go-quitter groups
 func ListAllGroups(speed bool) {
