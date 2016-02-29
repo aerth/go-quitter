@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 
-	"aerth/seconf"
+	"github.com/aerth/seconf"
 
 	"io/ioutil"
 	"log"
@@ -167,7 +167,6 @@ func main() {
 	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
 		if seconf.Detect("go-quitter") == true {
-			fmt.Println("Config Detected.")
 			configdecoded, err := seconf.Read("go-quitter")
 			if err != nil {
 				fmt.Println("error:")
@@ -175,8 +174,8 @@ func main() {
 				os.Exit(1)
 			}
 			//configstrings := string(configdecoded)
-			fmt.Println("config strings:")
-			fmt.Println(configdecoded)
+	//		fmt.Println("config strings:")
+	//		fmt.Println(configdecoded)
 			configarray := strings.Split(configdecoded, "::::")
 			if err != nil {
 				fmt.Println(err)
@@ -190,8 +189,6 @@ func main() {
 			gnusocialnode = string(configarray[1])
 				password = string(configarray[2])
 				fmt.Println("Hello, "+username)
-				fmt.Println("Using node: "+gnusocialnode)
-			fmt.Println("Config file detected.")
 		} else {
 			fmt.Println("No config file detected.")
 		}
