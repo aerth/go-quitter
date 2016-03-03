@@ -142,8 +142,8 @@ func main() {
 			seconf.Create(gnusocialpath, "GNU Social", "username", "gnusocialnode", "password")
 		} else {
 			bar()
-			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
-			fmt.Println(os.Getenv("HOME") + "/."+gnusocialpath)
+			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: export GNUSOCIALPATH=gnusocial.de")
+			fmt.Println("Config exists:",ReturnHome() + "/."+gnusocialpath)
 			os.Exit(1)
 		}
 	}
@@ -995,4 +995,17 @@ func PartGroup(groupstr string) {
 func initwin() {
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
+}
+func ReturnHome() (homedir string) {
+
+	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+	if homedir == "" {
+			homedir = os.Getenv("USERPROFILE")
+	}
+	if homedir == "" {
+			homedir = os.Getenv("HOME")
+	}
+
+return
+
 }
