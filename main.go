@@ -139,7 +139,7 @@ func main() {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 			fmt.Println("Your password will NOT echo.")
-			seconf.Create(gnusocialpath, "GNU Social", "username", "gnusocialnode", "password")
+			seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: export GNUSOCIALPATH=gnusocial.de")
@@ -997,7 +997,6 @@ func initwin() {
 	fmt.Println(versionbar)
 }
 func ReturnHome() (homedir string) {
-
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 	if homedir == "" {
 			homedir = os.Getenv("USERPROFILE")
@@ -1005,7 +1004,5 @@ func ReturnHome() (homedir string) {
 	if homedir == "" {
 			homedir = os.Getenv("HOME")
 	}
-
 return
-
 }
