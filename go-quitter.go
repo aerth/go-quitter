@@ -429,7 +429,7 @@ func (a Auth) PostNew(content string) {
 	}
 	fmt.Println("Preview:\n\n[" + a.Username + "] " + content)
 	fmt.Println("\nType YES to publish!")
-	if AskForConfirmation() == false {
+	if askForConfirmation() == false {
 		fmt.Println("Your status was not updated.")
 		os.Exit(0)
 	}
@@ -463,12 +463,12 @@ func (a Auth) PostNew(content string) {
 }
 
 // Does x contain y?
-func ContainsString(slice []string, element string) bool {
+func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
 // Ask user to confirm the action.
-func AskForConfirmation() bool {
+func askForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
 	if err != nil {
@@ -478,19 +478,19 @@ func AskForConfirmation() bool {
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
 	quitResponses := []string{"q", "Q", "exit", "quit"}
-	if ContainsString(okayResponses, response) {
+	if containsString(okayResponses, response) {
 		return true
-	} else if ContainsString(nokayResponses, response) {
+	} else if containsString(nokayResponses, response) {
 		return false
-	} else if ContainsString(quitResponses, response) {
+	} else if containsString(quitResponses, response) {
 		return false
 	} else {
 		fmt.Println("\nNot valid answer, try again. [y/n] [yes/no]")
-		return AskForConfirmation()
+		return askForConfirmation()
 	}
 }
 
-// For use only in ContainsString()
+// For use only in containsString()
 func posString(slice []string, element string) int {
 	for index, elem := range slice {
 		if elem == element {
@@ -691,7 +691,7 @@ func (a Auth) PartGroup(groupstr string) {
 		log.Fatalln("Blank group detected. Not going furthur.")
 	}
 	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
-	if AskForConfirmation() == false {
+	if askForConfirmation() == false {
 		fmt.Println("Not leaving group " + groupstr)
 		os.Exit(0)
 	}

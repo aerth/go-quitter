@@ -93,7 +93,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !qw.ContainsString(allCommands, os.Args[1]) {
+	if !containsString(allCommands, os.Args[1]) {
 		bar()
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
@@ -119,7 +119,7 @@ func main() {
 
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
-	if qw.ContainsString(helpArg, os.Args[1]) {
+	if containsString(helpArg, os.Args[1]) {
 		bar()
 		fmt.Println(usage)
 		fmt.Println(hashbar)
@@ -128,7 +128,7 @@ func main() {
 
 	// command: go-quitter version (or -v)
 	versionArg := []string{"version", "-v"}
-	if qw.ContainsString(versionArg, os.Args[1]) {
+	if containsString(versionArg, os.Args[1]) {
 		fmt.Println(goquitter)
 		os.Exit(1)
 	}
@@ -136,7 +136,7 @@ func main() {
 
 	// command requires login credentials
 	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
-	if qw.ContainsString(needLogin, os.Args[1]) {
+	if containsString(needLogin, os.Args[1]) {
 		if seconf.Detect(gnusocialpath) == true {
 			configdecoded, err := seconf.Read(gnusocialpath)
 			if err != nil {
@@ -328,4 +328,42 @@ func main() {
 	fmt.Println("Command not found, try ", os.Args[0] + " help")
 	os.Exit(1)
 
+}
+
+// Does x contain y?
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
+}
+
+// Ask user to confirm the action.
+func askForConfirmation() bool {
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	quitResponses := []string{"q", "Q", "exit", "quit"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else if containsString(quitResponses, response) {
+		return false
+	} else {
+		fmt.Println("\nNot valid answer, try again. [y/n] [yes/no]")
+		return askForConfirmation()
+	}
+}
+
+// For use only in containsString()
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
 }
