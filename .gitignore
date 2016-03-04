@@ -1,4 +1,5 @@
-./cmd/go-quitter/go-quitter
+cmd/go-quitter/go-quitter
+cmd/example/example
 *~
 *.log
 
