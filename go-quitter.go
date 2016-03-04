@@ -44,12 +44,16 @@ type Auth struct {
 }
 
 // Sets the Authentication method and choose node.
-// Use like this:
-// q := qw.NewAuth()
-// q.Username = "john"
-// q.Password = "pass123"
-// q.Node = "gnusocial.de"
-// q.ReadHome(false)
+//Use like this:
+/*
+
+ q := qw.NewAuth()
+ q.Username = "john"
+ q.Password = "pass123"
+ q.Node = "gnusocial.de"
+ q.GetHome(false)
+
+*/
 func NewAuth() *Auth {
 	return &Auth{
 		Username: "gopher",
@@ -108,9 +112,9 @@ type Badrequest struct {
 }
 
 
-// ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
-func (a Auth) ReadPublic(fast bool) {
-	fmt.Println("node: " + a.Node)
+// GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
+func (a Auth) GetPublic(fast bool) {
+	////fmt.Println("node: " + a.Node)
 	res, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		fmt.Println(err)
@@ -134,12 +138,12 @@ func (a Auth) ReadPublic(fast bool) {
 
 }
 
-// ReadMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
-func (a *Auth) ReadMentions(fast bool) {
+// GetMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump.
+func (a *Auth) GetMentions(fast bool) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
-	fmt.Println("node: " + a.Node)
+	//fmt.Println("node: " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/mentions.json"
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
@@ -181,12 +185,12 @@ func (a *Auth) ReadMentions(fast bool) {
 	}
 }
 
-// ReadHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with ReadHome(fast) for a quick dump.
-func (a Auth) ReadHome(fast bool) {
+// GetHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with GetHome(fast) for a quick dump.
+func (a Auth) GetHome(fast bool) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
-	fmt.Println("node: " + a.Node)
+	//fmt.Println("node: " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)

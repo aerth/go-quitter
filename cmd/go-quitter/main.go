@@ -163,8 +163,7 @@ func main() {
 			q.Username = username
 			q.Password = password
 			q.Node = gnusocialnode
-
-			fmt.Println("Hello, " + username)
+			fmt.Println("Welcome Back, " + q.Username + "@" + q.Node)
 		} else {
 			fmt.Println("No config file detected.")
 		}
@@ -218,7 +217,7 @@ func main() {
 	}
 	// command: go-quitter read
 	if os.Args[1] == "read" {
-		q.ReadPublic(speed)
+		q.GetPublic(speed)
 		os.Exit(0)
 	}
 	// command: go-quitter search _____
@@ -240,7 +239,7 @@ func main() {
 
 	// command: go-quitter mentions
 	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
-		q.ReadMentions(speed)
+		q.GetMentions(speed)
 		os.Exit(0)
 	}
 
@@ -269,7 +268,7 @@ func main() {
 	}
 	// command: go-quitter home
 	if os.Args[1] == "home" {
-		q.ReadHome(speed)
+		q.GetHome(speed)
 		os.Exit(0)
 	}
 
