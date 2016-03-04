@@ -385,11 +385,11 @@ func PrintQuip(quip qw.Quip, err error) {
 		fmt.Println(err)
 	}
 
-		if quip.User.Screenname == quip.User.Name {
-			fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
-		} else {
-			fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
-		}
+	if quip.User.Screenname == quip.User.Name {
+		fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
+	} else {
+		fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
+	}
 
 }
 
