@@ -1,9 +1,49 @@
 # go-quitter
-gnusocial client in golang. work in progress.
+
+Command line **GNU Social** client
+
+```go 
+
+$ go-quitter help
+
+##########	go-quitter v0.0.7	##############################
+
+	  Copyright 2016 aerth@sdf.org
+
+go-quitter config		Creates config file
+go-quitter read			Reads 20 new posts
+go-quitter read fast		Reads 20 new posts (no delay)
+go-quitter home			Your home timeline.
+go-quitter user username	Looks up "username" timeline
+go-quitter post ____ 		Posts to your node.
+go-quitter post 		Post mode.
+go-quitter mentions		Mentions your @name
+go-quitter search ___		Searches for ____
+go-quitter search		Search mode.
+go-quitter follow		Follow a user
+go-quitter unfollow		Unfollow a user
+go-quitter groups		List all groups on current node
+go-quitter mygroups		List only groups you are member of
+go-quitter join ___		Join a !group
+go-quitter leave ___		Part a !group (can also use part)
+
+
+Set your GNUSOCIALNODE environmental variable to change nodes.
+For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+
+################################################################################
+
+
+```
 
 ## Install binary for your OS (now for every OS)
 ### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases)
-
+[Windows](https://github.com/aerth/go-quitter/releases/download/v0.0.7/go-quitter-v0.0.7.exe) | 
+[Linux](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
+[FreeBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
+[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
+[OS X](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
+[Other OS or Architecture](https://github.com/aerth/go-quitter/releases)
 
 ## Install from Go source
 
@@ -11,8 +51,17 @@ If you have Go toolchain installed you can build it yourself with:
 
 ```shell
 GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
-sudo mv /tmp/go/bin/go-quitter /usr/local/bin/
+cd /tmp/go/src/github.com/aerth/go-quitter
+make && sudo make install
 ```
+
+Also go-gettable:
+
+```
+go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
+
+```
+
 
 ## Configure
 
@@ -26,11 +75,10 @@ GNUSOCIALPATH=gnusocial.se go-quitter config
 
 ```
 
-Next time you run it, it will ask for the password you set on the last step of config creation.
+Next time you run it, it will ask for your config password. I like to keep it blank so I just hit ENTER.
 
 
-## Use in scripts
-
+## Or.. Use in scripts
 
 For automation, scripts, and cronjobs, you may want to delete config file and use environmental variables instead. Something like…
 
@@ -61,7 +109,7 @@ $ go-quitter search // enters search mode
 $ go-quitter post \!group \#hashtag \#EscapeSymbolsWithABackslash
 ```
 
-Default node is gs.sdf.org!
+Default node is gs.sdf.org! Hosted on the SDF Public Access UNIX System.
 
 ```shell
 #!/bin/sh                                                                       
@@ -76,16 +124,12 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 
 ### Todo
 
-* Include user interface with up/down scrolling
-* ~~Get simple posting to work~~
-* Write tests
-* ~~Save account information in encoded config file~~
-* cat filename.txt | go-quitter // may do this just because it would make uploading photos easy.
-* Port GNU Social to go
+- [ ] Include user interface with up/down scrolling
+- [ ] Write tests
+- [ ] cat filename.txt | go-quitter // I may introduce this just because it would make uploading photos easy.
 
 
 
 ### Contributing
 
 * Pull requests are welcome.
-* File an issue if you have a minute.
