@@ -309,7 +309,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		PrintGroups(q.PartGroup(content))
+		PrintGroup(q.PartGroup(content))
 		os.Exit(0)
 	}
 
@@ -320,12 +320,12 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		PrintQuips(q.PostNew(content))
+		PrintQuip(q.PostNew(content))
 		os.Exit(0)
 	}
 
 	// this happens if we invoke with somehing like "go-quitter test"
-	fmt.Println("Command not found, try ", os.Args[0] + " help")
+	fmt.Println("Command not found, try ", os.Args[0]+" help")
 	os.Exit(1)
 
 }
@@ -368,7 +368,6 @@ func posString(slice []string, element string) int {
 	return -1
 }
 
-
 func PrintQuips(quips []qw.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -380,6 +379,18 @@ func PrintQuips(quips []qw.Quip, err error) {
 			fmt.Printf("@" + quips[i].User.Screenname + " [" + quips[i].User.Name + "] " + quips[i].Text + "\n\n")
 		}
 	}
+}
+func PrintQuip(quip qw.Quip, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+
+		if quip.User.Screenname == quip.User.Name {
+			fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
+		} else {
+			fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
+		}
+
 }
 
 func PrintUsers(users []qw.User, err error) {
@@ -398,14 +409,14 @@ func PrintUser(user qw.User, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("[@" + users[i].Screenname + "]\n\n")
+	fmt.Printf("[@" + user.Screenname + "]\n\n")
 
 }
-func PrintGroup(user qw.Group, err error) {
+func PrintGroup(group qw.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-			fmt.Printf("!" + groups.Nickname + " [" + groups.Fullname + "] \n" + groups.Description + "\n\n")
+	fmt.Printf("!" + group.Nickname + " [" + group.Fullname + "] \n" + group.Description + "\n\n")
 
 }
 
@@ -413,7 +424,7 @@ func PrintGroups(groups []qw.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-		for i := range groups {
-			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
-		}
+	for i := range groups {
+		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
+	}
 }

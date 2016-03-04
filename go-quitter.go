@@ -24,9 +24,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
+//	"strconv"
 	"strings"
-	"time"
+
 )
 
 const keySize = 32
@@ -396,7 +396,7 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 
 
 // go-quitter command: go-quitter post
-func (a Auth) PostNew(content string) {
+func (a Auth) PostNew(content string) (Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -440,6 +440,12 @@ func (a Auth) PostNew(content string) {
 		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
+
+	var quip Quip
+	_ = json.Unmarshal(body, &quip)
+	return quip, err
+
+
 }
 
 // Does x contain y?
@@ -538,27 +544,12 @@ func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
-	var member string
-	var members string
-	var id string
-	for i := range groups {
-		if groups[i].Member == true {
-			member = `*member*`
-		} else {
-			member = ""
-		}
 
-		id = strconv.FormatInt(groups[i].Id, 10)
-		members = strconv.FormatInt(groups[i].Membercount, 10)
-		fmt.Printf("!" + groups[i].Nickname + " (#" + id + ") [" + groups[i].Fullname + "] " + member + "\n" + groups[i].Description + "\n" + groups[i].Nickname + " has " + members + " members total.\n\n")
-		if speed != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+	return groups, err
 }
 
 // command: go-quitter mygroups
-func (a Auth) ListMyGroups(speed bool) {
+func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -592,18 +583,12 @@ func (a Auth) ListMyGroups(speed bool) {
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 
-	for i := range groups {
-
-		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
-		if speed != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+	return groups, err
 
 }
 
 // command: go-quitter join ____
-func (a Auth) JoinGroup(groupstr string) {
+func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -650,16 +635,14 @@ func (a Auth) JoinGroup(groupstr string) {
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
-	var user []User
-	_ = json.Unmarshal(body, &user)
+	var group Group
+	_ = json.Unmarshal(body, &group)
 
-	for i := range user {
-		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
-	}
+	return group, err
 }
 
 // command: go-quitter part ____
-func (a Auth) PartGroup(groupstr string) {
+func (a Auth) PartGroup(groupstr string) (Group, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -704,11 +687,10 @@ func (a Auth) PartGroup(groupstr string) {
 	fmt.Println(apres.Error)
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
-	var user []User
-	_ = json.Unmarshal(body, &user)
-	for i := range user {
-		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
-	}
+	var group Group
+	_ = json.Unmarshal(body, &group)
+
+	return group, err
 }
 
 // This will change with the real UI. Ugly on windows.
