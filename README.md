@@ -1,5 +1,40 @@
 # go-quitter
-gnusocial client in golang. work in progress.
+
+Command line GNU Social client
+
+```go 
+
+$ go-quitter help
+
+##########	go-quitter v0.0.7	##############################
+
+	  Copyright 2016 aerth@sdf.org
+
+go-quitter config		Creates config file
+go-quitter read			Reads 20 new posts
+go-quitter read fast		Reads 20 new posts (no delay)
+go-quitter home			Your home timeline.
+go-quitter user username	Looks up "username" timeline
+go-quitter post ____ 		Posts to your node.
+go-quitter post 		Post mode.
+go-quitter mentions		Mentions your @name
+go-quitter search ___		Searches for ____
+go-quitter search		Search mode.
+go-quitter follow		Follow a user
+go-quitter unfollow		Unfollow a user
+go-quitter groups		List all groups on current node
+go-quitter mygroups		List only groups you are member of
+go-quitter join ___		Join a !group
+go-quitter leave ___		Part a !group (can also use part)
+
+
+Set your GNUSOCIALNODE environmental variable to change nodes.
+For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+
+################################################################################
+
+
+```
 
 ## Install binary for your OS (now for every OS)
 ### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases)
