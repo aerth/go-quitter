@@ -5,7 +5,7 @@ USER=aerth
 all:	
 	go fmt
 	go vet
-	cd cmd/go-quitter && go build -v -o ../../go-quitter
+	go build -v -o go-quitter
 
 install:
 	mv go-quitter /usr/local/bin/go-quitter
