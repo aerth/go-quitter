@@ -42,19 +42,18 @@ var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Rep
 type Auth struct {
 	Username string
 	Password string
-	Node string
+	Node     string
 }
 
 func NewAuth() *Auth {
 	return &Auth{
-		Username:         "gopher",
-		Password:         "password",
-		Node:         "gs.sdf.org",
+		Username: "gopher",
+		Password: "password",
+		Node:     "gs.sdf.org",
 	}
 }
 
 var apipath string = "https://null/api/statuses/home_timeline.json"
-
 
 type User struct {
 	Name       string `json:"name"`
@@ -746,8 +745,8 @@ func ReturnHome() (homedir string) {
 }
 
 func init() {
-//	if a.Node == "" {
-//		a.Node = "gs.sdf.org"
-//	}
+	//	if a.Node == "" {
+	//		a.Node = "gs.sdf.org"
+	//	}
 
 }

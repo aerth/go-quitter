@@ -17,10 +17,10 @@ package main
 import (
 	"fmt"
 
+	qw "github.com/aerth/go-quitter"
 	"github.com/aerth/seconf"
 	"os"
 	"strings"
-	qw "github.com/aerth/go-quitter"
 )
 
 var goquitter = "go-quitter v0.0.7"
@@ -76,9 +76,7 @@ func main() {
 
 	q := qw.NewAuth()
 
-
-//	os.Exit(1)
-
+	//	os.Exit(1)
 
 	// list all commands here
 	if os.Getenv("GNUSOCIALPATH") != "" {
@@ -162,7 +160,6 @@ func main() {
 			gnusocialnode = string(configarray[1])
 			password = string(configarray[2])
 
-
 			q.Username = username
 			q.Password = password
 			q.Node = gnusocialnode
@@ -235,7 +232,7 @@ func main() {
 	}
 
 	// command: go-quitter user aerth
-	if os.Args[1] == "user" && os.Args[2] != "" {
+	if os.Args[1] == "user" && len(os.Args) == 3 && os.Args[2] != "" {
 		userlookup := os.Args[2]
 		q.GetUserTimeline(userlookup, speed)
 		os.Exit(0)
@@ -330,6 +327,5 @@ func main() {
 	// this happens if we invoke with somehing like "go-quitter test"
 	fmt.Println(os.Args[0] + " -h")
 	os.Exit(1)
-
 
 }
