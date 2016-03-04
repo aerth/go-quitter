@@ -121,15 +121,19 @@ func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 		os.Exit(1)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
-	var quips []Quip
-	_ = json.Unmarshal(body, &quips)
+		body, _ := ioutil.ReadAll(res.Body)
 
-	var response []Badrequest
-	err = json.Unmarshal(body, &response)
+		var apres Badrequest
+		_ = json.Unmarshal(body, &apres)
+		if apres.Error != "" {
+			fmt.Println(apres.Error)
+			os.Exit(1)
+		}
+		var quips []Quip
+		_ = json.Unmarshal(body, &quips)
 
-	return quips, err
+
+		return quips, err
 	/*
 	for i := range quips {
 		if quips[i].User.Screenname == quips[i].User.Name {
