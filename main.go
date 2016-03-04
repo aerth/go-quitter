@@ -198,7 +198,7 @@ func main() {
 	} else {
 		if seconf.Detect(gnusocialpath) == true {
 			//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
-			//if askForConfirmation() == true {
+			//if AskForConfirmation() == true {
 			// only use gnusocial node from config
 			configdecoded, err := seconf.Read(gnusocialpath)
 			if err != nil {
@@ -243,7 +243,7 @@ func main() {
 	}
 	// command: go-quitter read
 	if os.Args[1] == "read" {
-		readNew(speed)
+		ReadPublic(speed)
 		os.Exit(0)
 	}
 	// command: go-quitter search _____
@@ -252,20 +252,20 @@ func main() {
 		if len(os.Args) > 1 {
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
-		readSearch(searchstr, speed)
+		DoSearch(searchstr, speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
 		userlookup := os.Args[2]
-		readUserposts(userlookup, speed)
+		GetUserTimeline(userlookup, speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter mentions
 	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
-		readMentions(speed)
+		ReadMentions(speed)
 		os.Exit(0)
 	}
 
@@ -294,7 +294,7 @@ func main() {
 	}
 	// command: go-quitter home
 	if os.Args[1] == "home" {
-		readHome(speed)
+		ReadHome(speed)
 		os.Exit(0)
 	}
 
@@ -345,7 +345,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		postNew(content)
+		PostNew(content)
 		os.Exit(0)
 	}
 
@@ -355,8 +355,8 @@ func main() {
 
 }
 
-// readNew shows 20 new messages. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
-func readNew(fast bool) {
+// ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
+func ReadPublic(fast bool) {
 	fmt.Println("node: " + gnusocialnode)
 	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
 	if err != nil {
@@ -381,8 +381,8 @@ func readNew(fast bool) {
 
 }
 
-// readMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with readNew(fast) for a quick dump.
-func readMentions(fast bool) {
+// ReadMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
+func ReadMentions(fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -428,8 +428,8 @@ func readMentions(fast bool) {
 	}
 }
 
-// readHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with readHome(fast) for a quick dump.
-func readHome(fast bool) {
+// ReadHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with ReadHome(fast) for a quick dump.
+func ReadHome(fast bool) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
@@ -473,7 +473,7 @@ func readHome(fast bool) {
 }
 
 // command: go-quitter search
-func readSearch(searchstr string, fast bool) {
+func DoSearch(searchstr string, fast bool) {
 	if searchstr == "" {
 		searchstr = getTypin()
 	}
@@ -627,7 +627,7 @@ func DoUnfollow(followstr string) {
 
 }
 
-func readUserposts(userlookup string, fast bool) {
+func GetUserTimeline(userlookup string, fast bool) {
 	fmt.Println("user " + userlookup + " @ " + gnusocialnode)
 	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	req, err := http.NewRequest("GET", apipath, nil)
@@ -665,7 +665,7 @@ func readUserposts(userlookup string, fast bool) {
 	}
 }
 
-func postNew(content string) {
+func PostNew(content string) {
 	if username == "" || password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -679,7 +679,7 @@ func postNew(content string) {
 	}
 	fmt.Println("Preview:\n\n[" + username + "] " + content)
 	fmt.Println("\nType YES to publish!")
-	if askForConfirmation() == false {
+	if AskForConfirmation() == false {
 		fmt.Println("Your status was not updated.")
 		os.Exit(0)
 	}
@@ -723,7 +723,7 @@ func containsString(slice []string, element string) bool {
 }
 
 // Unexpected newline
-func askForConfirmation() bool {
+func AskForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
 	if err != nil {
@@ -741,7 +741,7 @@ func askForConfirmation() bool {
 		return false
 	} else {
 		fmt.Println("\nNot valid answer, try again. [y/n] [yes/no]")
-		return askForConfirmation()
+		return AskForConfirmation()
 	}
 }
 func posString(slice []string, element string) int {
@@ -944,15 +944,11 @@ func PartGroup(groupstr string) {
 		log.Fatalln("Blank group detected. Not going furthur.")
 	}
 	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
-	if askForConfirmation() == false {
-
+	if AskForConfirmation() == false {
 		fmt.Println("Not leaving group " + groupstr)
 		os.Exit(0)
-
 	}
-
 	v := url.Values{}
-
 	v.Set("group_name", groupstr)
 	v.Set("group_id", groupstr)
 	v.Set("id", groupstr)
@@ -978,24 +974,22 @@ func PartGroup(groupstr string) {
 		fmt.Println("\nnode response:", resp.Status)
 	}
 	_ = json.Unmarshal(body, &apres)
-
 	fmt.Println(apres.Error)
-
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	var user []User
 	_ = json.Unmarshal(body, &user)
-
 	for i := range user {
 		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
 	}
 }
 
-// This will change with the real UI
+// This will change with the real UI. Ugly on windows.
 func initwin() {
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
 }
+
 func ReturnHome() (homedir string) {
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 	if homedir == "" {
