@@ -193,6 +193,7 @@ func main() {
 				os.Exit(1)
 			}
 			gnusocialnode = string(configarray[1])
+			q.Node = gnusocialnode
 
 			//}
 		} else {
