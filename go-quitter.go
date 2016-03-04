@@ -33,19 +33,28 @@ const keySize = 32
 const nonceSize = 24
 
 var goquitter = "go-quitter v0.0.7"
-var username = os.Getenv("GNUSOCIALUSER")
-var password = os.Getenv("GNUSOCIALPASS")
-var gnusocialnode = os.Getenv("GNUSOCIALNODE")
+
 var fast bool = false
-var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
-var gnusocialpath = "go-quitter"
-var configuser = ""
-var configpass = ""
-var confignode = ""
-var configlock = ""
-var configstrings = ""
+
 var hashbar = strings.Repeat("#", 80)
 var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
+
+type Auth struct {
+	Username string
+	Password string
+	Node string
+}
+
+func NewAuth() *Auth {
+	return &Auth{
+		Username:         "gopher",
+		Password:         "password",
+		Node:         "gs.sdf.org",
+	}
+}
+
+var apipath string = "https://null/api/statuses/home_timeline.json"
+
 
 type User struct {
 	Name       string `json:"name"`
@@ -96,9 +105,9 @@ func bar() {
 }
 
 // ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
-func ReadPublic(fast bool) {
-	fmt.Println("node: " + gnusocialnode)
-	res, err := http.Get("https://" + gnusocialnode + "/api/statuses/public_timeline.json")
+func (a Auth) ReadPublic(fast bool) {
+	fmt.Println("node: " + a.Node)
+	res, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -122,15 +131,15 @@ func ReadPublic(fast bool) {
 }
 
 // ReadMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
-func ReadMentions(fast bool) {
-	if username == "" || password == "" {
+func (a *Auth) ReadMentions(fast bool) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
-	fmt.Println("node: " + gnusocialnode)
-	apipath := "https://" + gnusocialnode + "/api/statuses/mentions.json"
+	fmt.Println("node: " + a.Node)
+	apipath := "https://" + a.Node + "/api/statuses/mentions.json"
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
-	req.SetBasicAuth(username, password)
+	req.SetBasicAuth(a.Username, a.Password)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -169,15 +178,15 @@ func ReadMentions(fast bool) {
 }
 
 // ReadHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with ReadHome(fast) for a quick dump.
-func ReadHome(fast bool) {
-	if username == "" || password == "" {
+func (a Auth) ReadHome(fast bool) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
-	fmt.Println("node: " + gnusocialnode)
-	apipath := "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
+	fmt.Println("node: " + a.Node)
+	apipath := "https://" + a.Node + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
-	req.SetBasicAuth(username, password)
+	req.SetBasicAuth(a.Username, a.Password)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -213,19 +222,19 @@ func ReadHome(fast bool) {
 }
 
 // command: go-quitter search
-func DoSearch(searchstr string, fast bool) {
+func (a Auth) DoSearch(searchstr string, fast bool) {
 	if searchstr == "" {
 		searchstr = getTypin()
 	}
 	if searchstr == "" {
 		log.Fatalln("Blank search detected. Not searching.")
 	}
-	fmt.Println("searching " + searchstr + " @ " + gnusocialnode)
+	fmt.Println("searching " + searchstr + " @ " + a.Node)
 	v := url.Values{}
 	v.Set("q", searchstr)
 	searchq := url.Values.Encode(v)
 
-	apipath := "https://" + gnusocialnode + "/api/search.json?" + searchq
+	apipath := "https://" + a.Node + "/api/search.json?" + searchq
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	if err != nil {
@@ -269,8 +278,8 @@ func DoSearch(searchstr string, fast bool) {
 }
 
 // command: go-quitter follow
-func DoFollow(followstr string) {
-	if username == "" || password == "" {
+func (a Auth) DoFollow(followstr string) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if followstr == "" {
@@ -280,16 +289,16 @@ func DoFollow(followstr string) {
 	if followstr == "" {
 		log.Fatalln("Blank search detected. Not going furthur.")
 	}
-	//fmt.Println("following " + followstr + " @ " + gnusocialnode)
+	//fmt.Println("following " + followstr + " @ " + a.Node)
 	v := url.Values{}
 
 	v.Set("id", followstr)
 	followstr = url.Values.Encode(v)
 	b := bytes.NewBufferString(v.Encode())
-	apipath := "https://" + gnusocialnode + "/api/friendships/create.json?" + followstr
+	apipath := "https://" + a.Node + "/api/friendships/create.json?" + followstr
 	req, err := http.NewRequest("POST", apipath, b)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	client := &http.Client{}
@@ -319,8 +328,8 @@ func DoFollow(followstr string) {
 
 }
 
-func DoUnfollow(followstr string) {
-	if username == "" || password == "" {
+func (a Auth) DoUnfollow(followstr string) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if followstr == "" {
@@ -330,16 +339,16 @@ func DoUnfollow(followstr string) {
 	if followstr == "" {
 		log.Fatalln("Blank search detected. Not going furthur.")
 	}
-	//fmt.Println("following " + followstr + " @ " + gnusocialnode)
+	//fmt.Println("following " + followstr + " @ " + a.Node)
 	v := url.Values{}
 
 	v.Set("id", followstr)
 	followstr = url.Values.Encode(v)
 	b := bytes.NewBufferString(v.Encode())
-	apipath := "https://" + gnusocialnode + "/api/friendships/destroy.json?" + followstr
+	apipath := "https://" + a.Node + "/api/friendships/destroy.json?" + followstr
 	req, err := http.NewRequest("POST", apipath, b)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	client := &http.Client{}
@@ -367,9 +376,9 @@ func DoUnfollow(followstr string) {
 
 }
 
-func GetUserTimeline(userlookup string, fast bool) {
-	fmt.Println("user " + userlookup + " @ " + gnusocialnode)
-	apipath := "https://" + gnusocialnode + "/api/statuses/user_timeline.json?screen_name=" + userlookup
+func (a Auth) GetUserTimeline(userlookup string, fast bool) {
+	fmt.Println("user " + userlookup + " @ " + a.Node)
+	apipath := "https://" + a.Node + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.Header.Set("User-Agent", goquitter)
 	if err != nil {
@@ -405,8 +414,8 @@ func GetUserTimeline(userlookup string, fast bool) {
 	}
 }
 
-func PostNew(content string) {
-	if username == "" || password == "" {
+func (a Auth) PostNew(content string) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	// command: go-quitter post
@@ -417,20 +426,20 @@ func PostNew(content string) {
 		fmt.Println("Blank status detected. Not posting.")
 		os.Exit(1)
 	}
-	fmt.Println("Preview:\n\n[" + username + "] " + content)
+	fmt.Println("Preview:\n\n[" + a.Username + "] " + content)
 	fmt.Println("\nType YES to publish!")
 	if AskForConfirmation() == false {
 		fmt.Println("Your status was not updated.")
 		os.Exit(0)
 	}
-	fmt.Println("posting on node: " + gnusocialnode)
+	fmt.Println("posting on node: " + a.Node)
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
-	apipath := "https://" + gnusocialnode + "/api/statuses/update.json?" + content
+	apipath := "https://" + a.Node + "/api/statuses/update.json?" + content
 	req, err := http.NewRequest("POST", apipath, nil)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	client := &http.Client{}
@@ -452,12 +461,6 @@ func PostNew(content string) {
 	}
 }
 
-func init() {
-	if gnusocialnode == "" {
-		gnusocialnode = "gs.sdf.org"
-	}
-
-}
 func ContainsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
@@ -509,16 +512,16 @@ func getTypin() string {
 }
 
 // command: go-quitter groups
-func ListAllGroups(speed bool) {
-	if username == "" || password == "" {
+func (a Auth) ListAllGroups(speed bool) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	initwin()
-	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list_all.json"
+	apipath := "https://" + a.Node + "/api/statusnet/groups/list_all.json"
 
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Set("User-Agent", goquitter)
 	if err != nil {
 		log.Fatalln(err)
@@ -571,15 +574,15 @@ func ListAllGroups(speed bool) {
 
 // command: go-quitter mygroups
 
-func ListMyGroups(speed bool) {
-	if username == "" || password == "" {
+func (a Auth) ListMyGroups(speed bool) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	initwin()
-	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/list.json"
+	apipath := "https://" + a.Node + "/api/statusnet/groups/list.json"
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Set("User-Agent", goquitter)
 	if err != nil {
 		log.Fatalln(err)
@@ -616,8 +619,8 @@ func ListMyGroups(speed bool) {
 }
 
 // command: go-quitter join ____
-func JoinGroup(groupstr string) {
-	if username == "" || password == "" {
+func (a Auth) JoinGroup(groupstr string) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if groupstr == "" {
@@ -635,10 +638,10 @@ func JoinGroup(groupstr string) {
 	v.Set("nickname", groupstr)
 	groupstr = url.Values.Encode(v)
 	b := bytes.NewBufferString(v.Encode())
-	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/join.json?" + groupstr
+	apipath := "https://" + a.Node + "/api/statusnet/groups/join.json?" + groupstr
 	req, err := http.NewRequest("POST", apipath, b)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	client := &http.Client{}
@@ -672,8 +675,8 @@ func JoinGroup(groupstr string) {
 }
 
 // command: go-quitter part ____
-func PartGroup(groupstr string) {
-	if username == "" || password == "" {
+func (a Auth) PartGroup(groupstr string) {
+	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if groupstr == "" {
@@ -695,10 +698,10 @@ func PartGroup(groupstr string) {
 	v.Set("nickname", groupstr)
 	groupstr = url.Values.Encode(v)
 	b := bytes.NewBufferString(v.Encode())
-	apipath := "https://" + gnusocialnode + "/api/statusnet/groups/leave.json?" + groupstr
+	apipath := "https://" + a.Node + "/api/statusnet/groups/leave.json?" + groupstr
 	req, err := http.NewRequest("POST", apipath, b)
-	req.SetBasicAuth(username, password)
-	req.Header.Set("HTTP_REFERER", "https://"+gnusocialnode+"/")
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	client := &http.Client{}
@@ -740,4 +743,11 @@ func ReturnHome() (homedir string) {
 		homedir = os.Getenv("HOME")
 	}
 	return
+}
+
+func init() {
+//	if a.Node == "" {
+//		a.Node = "gs.sdf.org"
+//	}
+
 }

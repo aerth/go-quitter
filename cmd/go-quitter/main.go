@@ -16,7 +16,7 @@ package main
 
 import (
 	"fmt"
-	. "github.com/aerth/go-quitter"
+	q "github.com/aerth/go-quitter"
 	"github.com/aerth/seconf"
 	"os"
 	"strings"
@@ -60,6 +60,11 @@ go-quitter leave ___		Part a !group (can also use part)
 Set your GNUSOCIALNODE environmental variable to change nodes.
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
+
+func init() {
+	if gnusocialnode == "" {
+		gnusocialnode = "gs.sdf.org"
+	}
 
 func bar() {
 	print("\033[H\033[2J")
@@ -310,5 +315,7 @@ func main() {
 	// this happens if we invoke with somehing like "go-quitter test"
 	fmt.Println(os.Args[0] + " -h")
 	os.Exit(1)
+
+}
 
 }
