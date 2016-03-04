@@ -2,7 +2,7 @@
 gnusocial client in golang. work in progress.
 
 ## Install binary for your OS (now for every OS)
-### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases/latest)
+### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases)
 
 
 ## Install from Go source
