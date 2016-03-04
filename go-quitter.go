@@ -36,14 +36,20 @@ var fast bool = false
 var hashbar = strings.Repeat("#", 80)
 var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
 
-// Basic https authentication
+// Basic https authentication struct. Set it with NewAuth()
 type Auth struct {
 	Username string
 	Password string
 	Node     string
 }
 
-// Sets the Authentication method and choose node
+// Sets the Authentication method and choose node.
+// Use like this:
+// q := qw.NewAuth()
+// q.Username = "john"
+// q.Password = "pass123"
+// q.Node = "gnusocial.de"
+// q.ReadHome(false)
 func NewAuth() *Auth {
 	return &Auth{
 		Username: "gopher",
@@ -54,13 +60,13 @@ func NewAuth() *Auth {
 
 var apipath string = "https://null/api/statuses/home_timeline.json"
 
-// GNU Social User
+// GNU Social User, gets returned by GS API
 type User struct {
 	Name       string `json:"name"`
 	Screenname string `json:"screen_name"`
 }
 
-// GNU Social Quip
+// GNU Social Quip, gets returned by GS API.
 type Quip struct {
 	Id                   int64    `json:"id"`
 	IdStr                string   `json:"id_str"`
@@ -84,7 +90,7 @@ type Quip struct {
 	WithheldScope        string   `json:"withheld_scope"`
 }
 
-// GNU Social Group
+// GNU Social Group, gets returned by GS API.
 type Group struct {
 	Id          int64  `json:"id"`
 	Url         string `json:"url"`
@@ -95,14 +101,14 @@ type Group struct {
 	Description string `json:"description"`
 }
 
-// If the API doesn't respond how we like, it uses this struct.
+// If the API doesn't respond how we like, it replies using this struct (in json)
 type Badrequest struct {
 	Error   string `json:"error"`
 	Request string `json:"request"`
 }
 
 
-// ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
+// ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) ReadPublic(fast bool) {
 	fmt.Println("node: " + a.Node)
 	res, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
@@ -737,7 +743,7 @@ func initwin() {
 	fmt.Println(versionbar)
 }
 
-// ReturnHome gives us the true home directory for letting the user know where the config file is.
+// ReturnHome gives us the true home directory for letting the user know where the config file is. Windows, Unix, OS X
 func ReturnHome() (homedir string) {
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 	if homedir == "" {
