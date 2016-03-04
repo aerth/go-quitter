@@ -233,13 +233,14 @@ func main() {
 	// command: go-quitter user aerth
 	if os.Args[1] == "user" && len(os.Args) == 3 && os.Args[2] != "" {
 		userlookup := os.Args[2]
-		q.GetUserTimeline(userlookup, speed)
+		PrintQuips(q.GetUserTimeline(userlookup, speed))
+
 		os.Exit(0)
 	}
 
 	// command: go-quitter mentions
 	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
-		q.GetMentions(speed)
+		PrintQuips(q.GetMentions(speed))
 		os.Exit(0)
 	}
 
@@ -251,7 +252,7 @@ func main() {
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
-		q.DoFollow(followstr)
+		PrintUser(q.DoFollow(followstr))
 		os.Exit(0)
 	}
 
@@ -263,24 +264,24 @@ func main() {
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
-		q.DoUnfollow(followstr)
+		PrintUser(q.DoUnfollow(followstr))
 		os.Exit(0)
 	}
 	// command: go-quitter home
 	if os.Args[1] == "home" {
-		q.GetHome(speed)
+		PrintQuips(q.GetHome(speed))
 		os.Exit(0)
 	}
 
 	// command: go-quitter groups
 	if os.Args[1] == "groups" {
-		q.ListAllGroups(speed)
+		PrintGroups(q.ListAllGroups(speed))
 		os.Exit(0)
 	}
 
 	// command: go-quitter mygroups
 	if os.Args[1] == "mygroups" {
-		q.ListMyGroups(speed)
+		PrintGroups(q.ListMyGroups(speed))
 		os.Exit(0)
 	}
 	// command: go-quitter join
@@ -289,7 +290,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		q.JoinGroup(content)
+		PrintGroup(q.JoinGroup(content))
 		os.Exit(0)
 	}
 
@@ -299,7 +300,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		q.PartGroup(content)
+		PrintGroup(q.PartGroup(content))
 		os.Exit(0)
 	}
 	// command: go-quitter leave
@@ -308,7 +309,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		q.PartGroup(content)
+		PrintGroups(q.PartGroup(content))
 		os.Exit(0)
 	}
 
@@ -319,7 +320,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		q.PostNew(content)
+		PrintQuips(q.PostNew(content))
 		os.Exit(0)
 	}
 
@@ -365,4 +366,54 @@ func posString(slice []string, element string) int {
 		}
 	}
 	return -1
+}
+
+
+func PrintQuips(quips []qw.Quip, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+	for i := range quips {
+		if quips[i].User.Screenname == quips[i].User.Name {
+			fmt.Printf("[@" + quips[i].User.Screenname + "] " + quips[i].Text + "\n\n")
+		} else {
+			fmt.Printf("@" + quips[i].User.Screenname + " [" + quips[i].User.Name + "] " + quips[i].Text + "\n\n")
+		}
+	}
+}
+
+func PrintUsers(users []qw.User, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+	for i := range users {
+		if users[i].Screenname == users[i].Name {
+			fmt.Printf("[@" + users[i].Screenname + "]\n\n")
+		} else {
+			fmt.Printf("@" + users[i].Screenname + " [" + users[i].Name + "]\n\n")
+		}
+	}
+}
+func PrintUser(user qw.User, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("[@" + users[i].Screenname + "]\n\n")
+
+}
+func PrintGroup(user qw.Group, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+			fmt.Printf("!" + groups.Nickname + " [" + groups.Fullname + "] \n" + groups.Description + "\n\n")
+
+}
+
+func PrintGroups(groups []qw.Group, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+		for i := range groups {
+			fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
+		}
 }

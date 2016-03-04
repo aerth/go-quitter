@@ -113,7 +113,7 @@ type Badrequest struct {
 
 
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
-func (a Auth) GetPublic(fast bool) {
+func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 	////fmt.Println("node: " + a.Node)
 	res, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
@@ -123,23 +123,31 @@ func (a Auth) GetPublic(fast bool) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-	var tweets []Quip
-	_ = json.Unmarshal(body, &tweets)
-	for i := range tweets {
-		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
+	var quips []Quip
+	_ = json.Unmarshal(body, &quips)
+
+	var response []Badrequest
+	err = json.Unmarshal(body, &response)
+
+	return quips, err
+	/*
+	for i := range quips {
+		if quips[i].User.Screenname == quips[i].User.Name {
+			fmt.Printf("[@" + quips[i].User.Screenname + "] " + quips[i].Text + "\n\n")
 		} else {
-			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
+			fmt.Printf("@" + quips[i].User.Screenname + " [" + quips[i].User.Name + "] " + quips[i].Text + "\n\n")
 		}
 		if fast != true {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
+	*/
+
 }
 
 // GetMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump.
-func (a *Auth) GetMentions(fast bool) {
+func (a *Auth) GetMentions(fast bool) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -162,7 +170,7 @@ func (a *Auth) GetMentions(fast bool) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var tweets []Quip
+	var quips []Quip
 
 	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
@@ -171,22 +179,13 @@ func (a *Auth) GetMentions(fast bool) {
 		os.Exit(1)
 	}
 
-	_ = json.Unmarshal(body, &tweets)
+	_ = json.Unmarshal(body, &quips)
 
-	for i := range tweets {
-		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		}
-		if fast != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+	return quips, err
 }
 
 // GetHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with GetHome(fast) for a quick dump.
-func (a Auth) GetHome(fast bool) {
+func (a Auth) GetHome(fast bool) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to view home timeline.")
 	}
@@ -214,23 +213,16 @@ func (a Auth) GetHome(fast bool) {
 		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
-	var tweets []Quip
-	_ = json.Unmarshal(body, &tweets)
-	for i := range tweets {
-		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		}
-		if fast != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+	var quips []Quip
+	_ = json.Unmarshal(body, &quips)
+
+
+	return quips, err
 
 }
 
 // command: go-quitter search
-func (a Auth) DoSearch(searchstr string, fast bool) {
+func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 	if searchstr == "" {
 		searchstr = getTypin()
 	}
@@ -266,27 +258,18 @@ func (a Auth) DoSearch(searchstr string, fast bool) {
 		os.Exit(1)
 	}
 
-	var tweets []Quip
-	_ = json.Unmarshal(body, &tweets)
-	if len(tweets) == 0 {
+	var quips []Quip
+	_ = json.Unmarshal(body, &quips)
+	if len(quips) == 0 {
 		fmt.Println("No results for \"" + searchstr + "\"")
 	}
 
-	for i := range tweets {
-		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		}
-		if fast != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+ return quips, err
 
 }
 
 // command: go-quitter follow
-func (a Auth) DoFollow(followstr string) {
+func (a Auth) DoFollow(followstr string) (User, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -327,17 +310,15 @@ func (a Auth) DoFollow(followstr string) {
 
 	body, _ = ioutil.ReadAll(resp.Body)
 	//fmt.Println(string(body))
-	var user []User
+	var user User
 	_ = json.Unmarshal(body, &user)
 
-	for i := range user {
-		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
-	}
+	return user, err
 
 }
 
 // go-quitter command: go-quitter unfollow
-func (a Auth) DoUnfollow(followstr string) {
+func (a Auth) DoUnfollow(followstr string) (User, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -376,17 +357,15 @@ func (a Auth) DoUnfollow(followstr string) {
 		os.Exit(1)
 	}
 
-	var user []User
+	var user User
 	_ = json.Unmarshal(body, &user)
 
-	for i := range user {
-		fmt.Printf("[@" + user[i].Screenname + "]\n\n")
-	}
+	return user, err
 
 }
 
 // go-quitter command: go-quitter user
-func (a Auth) GetUserTimeline(userlookup string, fast bool) {
+func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	fmt.Println("user " + userlookup + " @ " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	req, err := http.NewRequest("GET", apipath, nil)
@@ -410,18 +389,9 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) {
 		os.Exit(1)
 	}
 
-	var tweets []Quip
-	_ = json.Unmarshal(body, &tweets)
-	for i := range tweets {
-		if tweets[i].User.Screenname == tweets[i].User.Name {
-			fmt.Printf("[@" + tweets[i].User.Screenname + "] " + tweets[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + tweets[i].User.Screenname + " [" + tweets[i].User.Name + "] " + tweets[i].Text + "\n\n")
-		}
-		if fast != true {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
+	var quips []Quip
+	_ = json.Unmarshal(body, &quips)
+	return quips, err
 }
 
 
@@ -527,7 +497,7 @@ func getTypin() string {
 }
 
 // command: go-quitter groups
-func (a Auth) ListAllGroups(speed bool) {
+func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
