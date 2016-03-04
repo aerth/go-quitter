@@ -114,44 +114,31 @@ type Badrequest struct {
 
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) GetPublic(fast bool) ([]Quip, error) {
-	////fmt.Println("node: " + a.Node)
-	res, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
+	fmt.Println("node: " + a.Node)
+	resp, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	defer resp.Body.Close()
 
-		body, _ := ioutil.ReadAll(res.Body)
+	body, _ := ioutil.ReadAll(resp.Body)
+	var quips []Quip
 
-		var apres Badrequest
-		_ = json.Unmarshal(body, &apres)
-		if apres.Error != "" {
-			fmt.Println(apres.Error)
-			os.Exit(1)
-		}
-		var quips []Quip
-		_ = json.Unmarshal(body, &quips)
-
-
-		return quips, err
-	/*
-	for i := range quips {
-		if quips[i].User.Screenname == quips[i].User.Name {
-			fmt.Printf("[@" + quips[i].User.Screenname + "] " + quips[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + quips[i].User.Screenname + " [" + quips[i].User.Name + "] " + quips[i].Text + "\n\n")
-		}
-		if fast != true {
-			time.Sleep(500 * time.Millisecond)
-		}
+	var apres Badrequest
+	_ = json.Unmarshal(body, &apres)
+	if apres.Error != "" {
+		fmt.Println(apres.Error)
+		os.Exit(1)
 	}
 
-	*/
+	_ = json.Unmarshal(body, &quips)
 
+	return quips, err
 }
 
 // GetMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump.
-func (a *Auth) GetMentions(fast bool) ([]Quip, error) {
+func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}

@@ -217,7 +217,7 @@ func main() {
 	}
 	// command: go-quitter read
 	if os.Args[1] == "read" {
-		q.GetPublic(speed)
+		PrintQuips(q.GetPublic(speed))
 		os.Exit(0)
 	}
 	// command: go-quitter search _____
@@ -372,7 +372,6 @@ func PrintQuips(quips []qw.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(quips, err)
 	for i := range quips {
 		if quips[i].User.Screenname == quips[i].User.Name {
 			fmt.Printf("[@" + quips[i].User.Screenname + "] " + quips[i].Text + "\n\n")
