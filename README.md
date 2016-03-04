@@ -7,22 +7,12 @@ gnusocial client in golang. work in progress.
 
 ## Install from Go source
 
-If you have Go toolchain installed you can install with:
+If you have Go toolchain installed you can build it yourself with:
 
 ```shell
-GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter
+GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
 sudo mv /tmp/go/bin/go-quitter /usr/local/bin/
 ```
-
-Or git checkout the `develop` branch
-```shell
-GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter
-cd $GOPATH/src/github.com/aerth/go-quitter
-git pull origin develop
-go build
-./go-quitter help
-```
-
 
 ## Configure
 
