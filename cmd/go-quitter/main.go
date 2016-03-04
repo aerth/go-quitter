@@ -1,15 +1,12 @@
 package main
 
 import (
-
-  "fmt"
-  "os"
-  	"strings"
-  . "github.com/aerth/go-quitter"
-	 "github.com/aerth/seconf"
-
+	"fmt"
+	. "github.com/aerth/go-quitter"
+	"github.com/aerth/seconf"
+	"os"
+	"strings"
 )
-
 
 var goquitter = "go-quitter v0.0.7"
 var username = os.Getenv("GNUSOCIALUSER")
