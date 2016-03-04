@@ -1,4 +1,4 @@
-go-quitter
+./cmd/go-quitter/go-quitter
 *~
 *.log
 
