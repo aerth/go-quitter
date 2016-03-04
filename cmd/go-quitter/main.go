@@ -16,10 +16,11 @@ package main
 
 import (
 	"fmt"
-	qw "github.com/aerth/go-quitter"
+
 	"github.com/aerth/seconf"
 	"os"
 	"strings"
+	qw "github.com/aerth/go-quitter"
 )
 
 var goquitter = "go-quitter v0.0.7"
@@ -72,6 +73,13 @@ func bar() {
 }
 
 func main() {
+
+	q := qw.NewAuth()
+
+
+//	os.Exit(1)
+
+
 	// list all commands here
 	if os.Getenv("GNUSOCIALPATH") != "" {
 		gnusocialpath = os.Getenv("GNUSOCIALPATH")
@@ -153,6 +161,12 @@ func main() {
 			username = string(configarray[0])
 			gnusocialnode = string(configarray[1])
 			password = string(configarray[2])
+
+
+			q.Username = username
+			q.Password = password
+			q.Node = gnusocialnode
+
 			fmt.Println("Hello, " + username)
 		} else {
 			fmt.Println("No config file detected.")
@@ -206,7 +220,7 @@ func main() {
 	}
 	// command: go-quitter read
 	if os.Args[1] == "read" {
-		qw.ReadPublic(speed)
+		q.ReadPublic(speed)
 		os.Exit(0)
 	}
 	// command: go-quitter search _____
@@ -215,20 +229,20 @@ func main() {
 		if len(os.Args) > 1 {
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
-		qw.DoSearch(searchstr, speed)
+		q.DoSearch(searchstr, speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter user aerth
 	if os.Args[1] == "user" && os.Args[2] != "" {
 		userlookup := os.Args[2]
-		qw.GetUserTimeline(userlookup, speed)
+		q.GetUserTimeline(userlookup, speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter mentions
 	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
-		qw.ReadMentions(speed)
+		q.ReadMentions(speed)
 		os.Exit(0)
 	}
 
@@ -240,7 +254,7 @@ func main() {
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
-		qw.DoFollow(followstr)
+		q.DoFollow(followstr)
 		os.Exit(0)
 	}
 
@@ -252,24 +266,24 @@ func main() {
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
-		qw.DoUnfollow(followstr)
+		q.DoUnfollow(followstr)
 		os.Exit(0)
 	}
 	// command: go-quitter home
 	if os.Args[1] == "home" {
-		qw.ReadHome(speed)
+		q.ReadHome(speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter groups
 	if os.Args[1] == "groups" {
-		qw.ListAllGroups(speed)
+		q.ListAllGroups(speed)
 		os.Exit(0)
 	}
 
 	// command: go-quitter mygroups
 	if os.Args[1] == "mygroups" {
-		qw.ListMyGroups(speed)
+		q.ListMyGroups(speed)
 		os.Exit(0)
 	}
 	// command: go-quitter join
@@ -278,7 +292,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		qw.JoinGroup(content)
+		q.JoinGroup(content)
 		os.Exit(0)
 	}
 
@@ -288,7 +302,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		qw.PartGroup(content)
+		q.PartGroup(content)
 		os.Exit(0)
 	}
 	// command: go-quitter leave
@@ -297,7 +311,7 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		qw.PartGroup(content)
+		q.PartGroup(content)
 		os.Exit(0)
 	}
 
@@ -308,12 +322,13 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		qw.PostNew(content)
+		q.PostNew(content)
 		os.Exit(0)
 	}
 
 	// this happens if we invoke with somehing like "go-quitter test"
 	fmt.Println(os.Args[0] + " -h")
 	os.Exit(1)
+
 
 }
