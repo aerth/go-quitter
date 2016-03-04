@@ -110,7 +110,7 @@ func bar() {
 
 func main() {
 	// list all commands here
-  if os.Getenv("GNUSOCIALPATH") != "" {
+	if os.Getenv("GNUSOCIALPATH") != "" {
 		gnusocialpath = os.Getenv("GNUSOCIALPATH")
 	}
 	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies"}
@@ -139,11 +139,11 @@ func main() {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 			fmt.Println("Your password will NOT echo.")
-			seconf.Create(gnusocialpath, "GNU Social", "username", "gnusocialnode", "password")
+			seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 		} else {
 			bar()
-			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.")
-			fmt.Println(os.Getenv("HOME") + "/."+gnusocialpath)
+			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: export GNUSOCIALPATH=gnusocial.de")
+			fmt.Println("Config exists:", ReturnHome()+"/."+gnusocialpath)
 			os.Exit(1)
 		}
 	}
@@ -184,7 +184,7 @@ func main() {
 				os.Exit(1)
 			}
 			if len(configarray) != 3 {
-				fmt.Println("Broken config file. Create a new one.")
+				fmt.Println("Broken config file. Create a new one. :(")
 				os.Exit(1)
 			}
 			username = string(configarray[0])
@@ -995,4 +995,14 @@ func PartGroup(groupstr string) {
 func initwin() {
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
+}
+func ReturnHome() (homedir string) {
+	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+	if homedir == "" {
+		homedir = os.Getenv("USERPROFILE")
+	}
+	if homedir == "" {
+		homedir = os.Getenv("HOME")
+	}
+	return
 }
