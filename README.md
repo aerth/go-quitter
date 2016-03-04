@@ -53,11 +53,11 @@ If you have Go toolchain installed you can build it yourself with:
 
 ```shell
 GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
-cd /tmp/go/src/github.com/aerth/go-quitter
+cd $GOPATH/src/github.com/aerth/go-quitter/cmd/go-quitter
 make && sudo make install
 ```
 
-Also go-gettable:
+Or use go get:
 
 ```
 go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
