@@ -31,20 +31,19 @@ import (
 
 const keySize = 32
 const nonceSize = 24
-
 var goquitter = "go-quitter v0.0.7"
-
 var fast bool = false
-
 var hashbar = strings.Repeat("#", 80)
 var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
 
+// Basic https authentication
 type Auth struct {
 	Username string
 	Password string
 	Node     string
 }
 
+// Sets the Authentication method and choose node
 func NewAuth() *Auth {
 	return &Auth{
 		Username: "gopher",
@@ -55,14 +54,14 @@ func NewAuth() *Auth {
 
 var apipath string = "https://null/api/statuses/home_timeline.json"
 
+// GNU Social User
 type User struct {
 	Name       string `json:"name"`
 	Screenname string `json:"screen_name"`
 }
 
-//var usage string
-
-type Tweet struct {
+// GNU Social Quip
+type Quip struct {
 	Id                   int64    `json:"id"`
 	IdStr                string   `json:"id_str"`
 	InReplyToScreenName  string   `json:"in_reply_to_screen_name"`
@@ -75,7 +74,7 @@ type Tweet struct {
 	PossiblySensitive    bool     `json:"possibly_sensitive"`
 	RetweetCount         int      `json:"retweet_count"`
 	Retweeted            bool     `json:"retweeted"`
-	RetweetedStatus      *Tweet   `json:"retweeted_status"`
+	RetweetedStatus      *Quip   `json:"retweeted_status"`
 	Source               string   `json:"source"`
 	Text                 string   `json:"text"`
 	Truncated            bool     `json:"truncated"`
@@ -84,6 +83,8 @@ type Tweet struct {
 	WithheldInCountries  []string `json:"withheld_in_countries"`
 	WithheldScope        string   `json:"withheld_scope"`
 }
+
+// GNU Social Group
 type Group struct {
 	Id          int64  `json:"id"`
 	Url         string `json:"url"`
@@ -93,15 +94,13 @@ type Group struct {
 	Membercount int64  `json:"member_count"`
 	Description string `json:"description"`
 }
+
+// If the API doesn't respond how we like, it uses this struct.
 type Badrequest struct {
 	Error   string `json:"error"`
 	Request string `json:"request"`
 }
 
-func bar() {
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
-}
 
 // ReadPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with ReadPublic(fast) for a quick dump.
 func (a Auth) ReadPublic(fast bool) {
@@ -114,7 +113,7 @@ func (a Auth) ReadPublic(fast bool) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-	var tweets []Tweet
+	var tweets []Quip
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -153,7 +152,7 @@ func (a *Auth) ReadMentions(fast bool) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var tweets []Tweet
+	var tweets []Quip
 
 	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
@@ -205,7 +204,7 @@ func (a Auth) ReadHome(fast bool) {
 		fmt.Println(apres.Error)
 		os.Exit(1)
 	}
-	var tweets []Tweet
+	var tweets []Quip
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -257,7 +256,7 @@ func (a Auth) DoSearch(searchstr string, fast bool) {
 		os.Exit(1)
 	}
 
-	var tweets []Tweet
+	var tweets []Quip
 	_ = json.Unmarshal(body, &tweets)
 	if len(tweets) == 0 {
 		fmt.Println("No results for \"" + searchstr + "\"")
@@ -327,6 +326,7 @@ func (a Auth) DoFollow(followstr string) {
 
 }
 
+// go-quitter command: go-quitter unfollow
 func (a Auth) DoUnfollow(followstr string) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
@@ -375,6 +375,7 @@ func (a Auth) DoUnfollow(followstr string) {
 
 }
 
+// go-quitter command: go-quitter user
 func (a Auth) GetUserTimeline(userlookup string, fast bool) {
 	fmt.Println("user " + userlookup + " @ " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/user_timeline.json?screen_name=" + userlookup
@@ -399,7 +400,7 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) {
 		os.Exit(1)
 	}
 
-	var tweets []Tweet
+	var tweets []Quip
 	_ = json.Unmarshal(body, &tweets)
 	for i := range tweets {
 		if tweets[i].User.Screenname == tweets[i].User.Name {
@@ -413,11 +414,12 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) {
 	}
 }
 
+
+// go-quitter command: go-quitter post
 func (a Auth) PostNew(content string) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
-	// command: go-quitter post
 	if content == "" {
 		content = getTypin()
 	}
@@ -460,11 +462,12 @@ func (a Auth) PostNew(content string) {
 	}
 }
 
+// Does x contain y?
 func ContainsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
-// Unexpected newline
+// Ask user to confirm the action.
 func AskForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
@@ -486,6 +489,8 @@ func AskForConfirmation() bool {
 		return AskForConfirmation()
 	}
 }
+
+// For use only in ContainsString()
 func posString(slice []string, element string) int {
 	for index, elem := range slice {
 		if elem == element {
@@ -495,6 +500,7 @@ func posString(slice []string, element string) int {
 	return -1
 }
 
+// Receive non-hidden input from user.
 func getTypin() string {
 	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
 	scanner := bufio.NewScanner(os.Stdin)
@@ -572,7 +578,6 @@ func (a Auth) ListAllGroups(speed bool) {
 }
 
 // command: go-quitter mygroups
-
 func (a Auth) ListMyGroups(speed bool) {
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")

@@ -325,7 +325,7 @@ func main() {
 	}
 
 	// this happens if we invoke with somehing like "go-quitter test"
-	fmt.Println(os.Args[0] + " -h")
+	fmt.Println("Command not found, try ", os.Args[0] + " help")
 	os.Exit(1)
 
 }
