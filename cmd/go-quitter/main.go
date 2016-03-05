@@ -303,24 +303,21 @@ func main() {
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
+		if strings.HasPrefix(content, "!"){
+			content = strings.TrimPrefix(content, "!")
+		}
 		PrintGroup(q.JoinGroup(content))
 		os.Exit(0)
 	}
 
-	// command: go-quitter part
-	if os.Args[1] == "part" {
+	// command: go-quitter leave
+	if os.Args[1] == "leave" || os.Args[1] == "part" {
 		content := ""
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
-		PrintGroup(q.PartGroup(content))
-		os.Exit(0)
-	}
-	// command: go-quitter leave
-	if os.Args[1] == "leave" {
-		content := ""
-		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ")
+		if strings.HasPrefix(content, "!"){
+			content = strings.TrimPrefix(content, "!")
 		}
 		PrintGroup(q.PartGroup(content))
 		os.Exit(0)

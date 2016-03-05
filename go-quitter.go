@@ -640,6 +640,9 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	if groupstr == "" {
 	log.Fatalln("Blank group detected. Not going furthur.")
 	}
+	if strings.HasPrefix(groupstr, "!"){
+		groupstr = strings.StripPrefix(groupstr, "!")
+	}
 	v := url.Values{}
 
 	v.Set("group_name", groupstr)
@@ -693,11 +696,14 @@ func (a Auth) PartGroup(groupstr string) (Group, error) {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
 	if groupstr == "" {
-		fmt.Println("Which group to leave?\nExample: groupname (without the !)")
+		fmt.Println("Which group to leave?\nExample: groupname or !group")
 		groupstr = getTypin()
 	}
 	if groupstr == "" {
 		log.Fatalln("Blank group detected. Not going furthur.")
+	}
+	if strings.HasPrefix(groupstr, "!"){
+		groupstr = strings.StripPrefix(groupstr, "!")
 	}
 	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
 	if askForConfirmation() == false {
