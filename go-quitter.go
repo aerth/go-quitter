@@ -112,9 +112,9 @@ type Badrequest struct {
 }
 
 
+
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) GetPublic(fast bool) ([]Quip, error) {
-	fmt.Println("node: " + a.Node)
 	resp, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		fmt.Println(err)
@@ -128,7 +128,7 @@ func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 	var apres Badrequest
 	_ = json.Unmarshal(body, &apres)
 	if apres.Error != "" {
-		fmt.Println(apres.Error)
+		return nil, NewError(apres.Error)
 		os.Exit(1)
 	}
 
@@ -145,7 +145,17 @@ func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 	//fmt.Println("node: " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/mentions.json"
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+		req.Header = http.Header{}
+	}
+	if req.Header.Get("User-Agent") == "" {
+		if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
+	}
 	req.SetBasicAuth(a.Username, a.Password)
 	if err != nil {
 		fmt.Println(err)
@@ -183,7 +193,12 @@ func (a Auth) GetHome(fast bool) ([]Quip, error) {
 	//fmt.Println("node: " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/home_timeline.json"
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	req.SetBasicAuth(a.Username, a.Password)
 	if err != nil {
 		log.Fatalln(err)
@@ -227,7 +242,12 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 
 	apipath := "https://" + a.Node + "/api/search.json?" + searchq
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -282,7 +302,12 @@ func (a Auth) DoFollow(followstr string) (User, error) {
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -331,7 +356,12 @@ func (a Auth) DoUnfollow(followstr string) (User, error) {
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -360,7 +390,12 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	fmt.Println("user " + userlookup + " @ " + a.Node)
 	apipath := "https://" + a.Node + "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	req, err := http.NewRequest("GET", apipath, nil)
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -413,7 +448,12 @@ func (a Auth) PostNew(content string) (Quip, error) {
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -504,7 +544,12 @@ func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -549,7 +594,12 @@ func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -588,7 +638,7 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 		groupstr = getTypin()
 	}
 	if groupstr == "" {
-		log.Fatalln("Blank group detected. Not going furthur.")
+	log.Fatalln("Blank group detected. Not going furthur.")
 	}
 	v := url.Values{}
 
@@ -603,7 +653,12 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -661,7 +716,12 @@ func (a Auth) PartGroup(groupstr string) (Group, error) {
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	if req.Header == nil {
+  req.Header = http.Header{}
+}
+if req.Header.Get("User-Agent") == "" {
+  req.Header.Set("User-Agent", goquitter)
+}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -707,4 +767,15 @@ func init() {
 	//		a.Node = "gs.sdf.org"
 	//	}
 
+}
+func NewError(text string) error {
+    return &errorString{text}
+}
+// errorString is a trivial implementation of error.
+type errorString struct {
+    s string
+}
+
+func (e *errorString) Error() string {
+    return e.s
 }
