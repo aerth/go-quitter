@@ -10,8 +10,8 @@ func main() {
 
 	if len(os.Args) == 2 && os.Args[1] == "home" {
 		q := qw.NewAuth()
-		q.Username = "john"
-		q.Password = "pass123"
+		q.Username = "obviouslychangethis"
+		q.Password = "nopassword?"
 		q.Node = "gnusocial.de"
 		quips, err := q.GetHome(false)
     if err != nil {

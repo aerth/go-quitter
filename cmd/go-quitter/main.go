@@ -16,7 +16,6 @@ package main
 
 import (
 	"fmt"
-
 	qw "github.com/aerth/go-quitter"
 	"github.com/aerth/seconf"
 	"os"
@@ -199,13 +198,13 @@ func main() {
 	}
 	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {
-		username = os.Getenv("GNUSOCIALUSER")
+		qw.User = os.Getenv("GNUSOCIALUSER")
 	}
 	if os.Getenv("GNUSOCIALPASS") != "" {
-		password = os.Getenv("GNUSOCIALPASS")
+		q.Password = os.Getenv("GNUSOCIALPASS")
 	}
 	if os.Getenv("GNUSOCIALNODE") != "" {
-		gnusocialnode = os.Getenv("GNUSOCIALNODE")
+		q.Node = os.Getenv("GNUSOCIALNODE")
 	}
 
 	// Set speed default slow
@@ -226,7 +225,7 @@ func main() {
 		if len(os.Args) > 1 {
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
-		q.DoSearch(searchstr, speed)
+		PrintQuips(q.DoSearch(searchstr, speed))
 		os.Exit(0)
 	}
 
@@ -385,11 +384,11 @@ func PrintQuip(quip qw.Quip, err error) {
 		fmt.Println(err)
 	}
 
-	if quip.User.Screenname == quip.User.Name {
-		fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
-	} else {
-		fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
-	}
+		if quip.User.Screenname == quip.User.Name {
+			fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
+		} else {
+			fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
+		}
 
 }
 
