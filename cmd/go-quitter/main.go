@@ -16,13 +16,14 @@ package main
 
 import (
 	"fmt"
-	qw "github.com/aerth/go-quitter"
-	"github.com/aerth/seconf"
 	"os"
 	"strings"
+	"github.com/aerth/seconf"
+//	"github.com/jroimartin/gocui"
+	qw "github.com/aerth/go-quitter"
 )
 
-var goquitter = "go-quitter v0.0.7"
+var goquitter = "go-quitter v0.0.8"
 var username = os.Getenv("GNUSOCIALUSER")
 var password = os.Getenv("GNUSOCIALPASS")
 var gnusocialnode = os.Getenv("GNUSOCIALNODE")
@@ -162,7 +163,20 @@ func main() {
 			q.Username = username
 			q.Password = password
 			q.Node = gnusocialnode
-			fmt.Println("Welcome Back, " + q.Username + "@" + q.Node)
+			if os.Getenv("GNUSOCIALUSER") != "" {
+				q.Username = os.Getenv("GNUSOCIALUSER")
+			}
+			if os.Getenv("GNUSOCIALPASS") != "" {
+				q.Password = os.Getenv("GNUSOCIALPASS")
+			}
+			if os.Getenv("GNUSOCIALNODE") != "" {
+				q.Node = os.Getenv("GNUSOCIALNODE")
+			}
+			if q.Username == username {
+				fmt.Println("Welcome back, " + q.Username + "@" + q.Node)
+			}else {
+				fmt.Println("Welcome, " + q.Username + "@" + q.Node)
+			}
 		} else {
 			fmt.Println("No config file detected.")
 		}
@@ -198,7 +212,7 @@ func main() {
 	}
 	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {
-		qw.User = os.Getenv("GNUSOCIALUSER")
+		q.Username = os.Getenv("GNUSOCIALUSER")
 	}
 	if os.Getenv("GNUSOCIALPASS") != "" {
 		q.Password = os.Getenv("GNUSOCIALPASS")
