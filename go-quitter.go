@@ -641,7 +641,7 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	log.Fatalln("Blank group detected. Not going furthur.")
 	}
 	if strings.HasPrefix(groupstr, "!"){
-		groupstr = strings.StripPrefix(groupstr, "!")
+		groupstr = strings.TrimPrefix(groupstr, "!")
 	}
 	v := url.Values{}
 
@@ -703,7 +703,7 @@ func (a Auth) PartGroup(groupstr string) (Group, error) {
 		log.Fatalln("Blank group detected. Not going furthur.")
 	}
 	if strings.HasPrefix(groupstr, "!"){
-		groupstr = strings.StripPrefix(groupstr, "!")
+		groupstr = strings.TrimPrefix(groupstr, "!")
 	}
 	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
 	if askForConfirmation() == false {

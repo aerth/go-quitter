@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+  "time"
 	"os/signal"
 	"syscall"
   "github.com/jroimartin/gocui"
@@ -157,7 +158,7 @@ func layout(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v3.Editable = true
+		v3.Editable = false
 
 
 	}
@@ -315,13 +316,22 @@ func refreshHome(g *gocui.Gui, v *gocui.View) error {
 
 
 func refresh(g *gocui.Gui, v *gocui.View) error {
+  go ReadPub(g, v)
+  go g.SetCurrentView("main")
+	return nil
+}
+
+func ReadPub(g *gocui.Gui, v *gocui.View) error {
   g.SetCurrentView("main")
   q2 := qw.NewAuth()
   q2.Node = "gs.sdf.org"
+  t2 := time.Now()
   quips, err := q2.GetPublic(true)
+  t3 := time.Now()
   if err != nil {
     return err
   }
+  fmt.Fprintln(v, "Took ", t3.Sub(t2))
   for i := range quips {
     if quips[i].User.Screenname == quips[i].User.Name {
       fmt.Fprintln(v, "[@"+quips[i].User.Screenname+"] "+quips[i].Text+"\n")
@@ -334,10 +344,10 @@ func refresh(g *gocui.Gui, v *gocui.View) error {
 }
 
 func nextView(g *gocui.Gui, v *gocui.View) error {
-	if v == nil || v.Name() == "shell" {
+	if v == nil || v.Name() == "main" {
 		return g.SetCurrentView("main")
 	}
-	return g.SetCurrentView("shell")
+	return g.SetCurrentView("main")
 }
 
 
