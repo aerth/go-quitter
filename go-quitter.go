@@ -31,7 +31,7 @@ import (
 const keySize = 32
 const nonceSize = 24
 
-var goquitter = "go-quitter v0.0.7"
+var goquitter = "go-quitter v0.0.8"
 var fast bool = false
 var hashbar = strings.Repeat("#", 80)
 var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
@@ -105,6 +105,21 @@ type Group struct {
 	Description string `json:"description"`
 }
 
+// Set User Agent
+var tr = &http.Transport{
+	DisableCompression: true,
+}
+var apigun = &http.Client{
+	CheckRedirect: redirectPolicyFunc,
+	Transport:     tr,
+}
+
+func redirectPolicyFunc(req *http.Request, reqs []*http.Request) error {
+	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Set("User-Agent", goquitter)
+	return nil
+}
+
 // If the API doesn't respond how we like, it replies using this struct (in json)
 type Badrequest struct {
 	Error   string `json:"error"`
@@ -114,7 +129,7 @@ type Badrequest struct {
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 	fmt.Println("node: " + a.Node)
-	resp, err := http.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
+	resp, err := apigun.Get("https://" + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -147,14 +162,12 @@ func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 	req.Header.Set("User-Agent", goquitter)
 	req.SetBasicAuth(a.Username, a.Password)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -187,8 +200,7 @@ func (a Auth) GetHome(fast bool) ([]Quip, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -230,8 +242,7 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 		log.Fatalln(err)
 	}
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -281,8 +292,8 @@ func (a Auth) DoFollow(followstr string) (User, error) {
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -330,8 +341,8 @@ func (a Auth) DoUnfollow(followstr string) (User, error) {
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -362,8 +373,8 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -411,8 +422,8 @@ func (a Auth) PostNew(content string) (Quip, error) {
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -504,8 +515,8 @@ func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 
 	if err != nil {
 		fmt.Println(err)
@@ -549,8 +560,8 @@ func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -600,8 +611,8 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -658,8 +669,8 @@ func (a Auth) PartGroup(groupstr string) (Group, error) {
 	req.Header.Set("HTTP_REFERER", "https://"+a.Node+"/")
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := apigun.Do(req)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
