@@ -18,8 +18,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
 	"github.com/aerth/seconf"
-//	"github.com/jroimartin/gocui"
+	//	"github.com/jroimartin/gocui"
 	qw "github.com/aerth/go-quitter"
 )
 
@@ -107,12 +108,12 @@ func main() {
 		if seconf.Detect(gnusocialpath) == false {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
-			fmt.Println("Your password will NOT echo.")
+			fmt.Println("Your password will not echo.")
 			seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 		} else {
 			bar()
-			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: export GNUSOCIALPATH=gnusocial.de")
-			fmt.Println("Config exists:", qw.ReturnHome()+"/."+gnusocialpath)
+			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: GNUSOCIALPATH=gnusocial.de go-quitter config")
+			fmt.Println("\nConfig exists:", qw.ReturnHome()+"/."+gnusocialpath)
 			os.Exit(1)
 		}
 	}
@@ -158,6 +159,8 @@ func main() {
 			}
 			username = string(configarray[0])
 			gnusocialnode = string(configarray[1])
+			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
+			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
 			password = string(configarray[2])
 
 			q.Username = username
@@ -174,7 +177,7 @@ func main() {
 			}
 			if q.Username == username {
 				fmt.Println("Welcome back, " + q.Username + "@" + q.Node)
-			}else {
+			} else {
 				fmt.Println("Welcome, " + q.Username + "@" + q.Node)
 			}
 		} else {
@@ -202,6 +205,8 @@ func main() {
 				os.Exit(1)
 			}
 			gnusocialnode = string(configarray[1])
+			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
+			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
 			q.Node = gnusocialnode
 
 			//}
@@ -327,7 +332,7 @@ func main() {
 	}
 
 	// go-quitter post Testing from console line using go-quitter
-	// Notice how we dont need quotation marks.
+	// Notice how we dont need quotation marks. If no arguments to go-quitter post, we will enter post mode.
 	if os.Args[1] == "post" {
 		content := ""
 		if len(os.Args) > 1 {
@@ -398,11 +403,11 @@ func PrintQuip(quip qw.Quip, err error) {
 		fmt.Println(err)
 	}
 
-		if quip.User.Screenname == quip.User.Name {
-			fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
-		} else {
-			fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
-		}
+	if quip.User.Screenname == quip.User.Name {
+		fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
+	} else {
+		fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
+	}
 
 }
 
