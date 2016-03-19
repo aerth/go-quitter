@@ -19,9 +19,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aerth/seconf"
-	//	"github.com/jroimartin/gocui"
 	qw "github.com/aerth/go-quitter"
+	"github.com/aerth/seconf"
 )
 
 var goquitter = "go-quitter v0.0.8"
@@ -41,7 +40,7 @@ var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Rep
 
 var usage = "\n" + "\t" + `  Copyright 2016 aerth@sdf.org
 
-go-quitter config		Creates config file
+go-quitter config		Creates config file	*do this first*
 go-quitter read			Reads 20 new posts
 go-quitter read fast		Reads 20 new posts (no delay)
 go-quitter home			Your home timeline.
@@ -58,8 +57,16 @@ go-quitter mygroups		List only groups you are member of
 go-quitter join ___		Join a !group
 go-quitter leave ___		Part a !group (can also use part)
 
+Using environmental variables will override the config:
 
-Set your GNUSOCIALNODE environmental variable to change nodes.
+GNUSOCIALNODE
+GNUSOCIALPASS
+GNUSOCIALUSER
+GNUSOCIALPATH
+
+Set your environmental variable to change nodes, use a different config,
+	or change user or password for a one-time session.
+
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 

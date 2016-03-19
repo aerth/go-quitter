@@ -24,13 +24,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-//	"strconv"
+	//	"strconv"
 	"strings"
-
 )
 
 const keySize = 32
 const nonceSize = 24
+
 var goquitter = "go-quitter v0.0.7"
 var fast bool = false
 var hashbar = strings.Repeat("#", 80)
@@ -84,7 +84,7 @@ type Quip struct {
 	PossiblySensitive    bool     `json:"possibly_sensitive"`
 	RetweetCount         int      `json:"retweet_count"`
 	Retweeted            bool     `json:"retweeted"`
-	RetweetedStatus      *Quip   `json:"retweeted_status"`
+	RetweetedStatus      *Quip    `json:"retweeted_status"`
 	Source               string   `json:"source"`
 	Text                 string   `json:"text"`
 	Truncated            bool     `json:"truncated"`
@@ -111,7 +111,6 @@ type Badrequest struct {
 	Request string `json:"request"`
 }
 
-
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 	fmt.Println("node: " + a.Node)
@@ -125,10 +124,10 @@ func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var quips []Quip
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -163,10 +162,10 @@ func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 
 	var quips []Quip
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -198,15 +197,14 @@ func (a Auth) GetHome(fast bool) ([]Quip, error) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 	var quips []Quip
 	_ = json.Unmarshal(body, &quips)
-
 
 	return quips, err
 
@@ -242,10 +240,10 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -255,7 +253,7 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 		fmt.Println("No results for \"" + searchstr + "\"")
 	}
 
- return quips, err
+	return quips, err
 
 }
 
@@ -292,10 +290,10 @@ func (a Auth) DoFollow(followstr string) (User, error) {
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -341,10 +339,10 @@ func (a Auth) DoUnfollow(followstr string) (User, error) {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -373,10 +371,10 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -384,7 +382,6 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	_ = json.Unmarshal(body, &quips)
 	return quips, err
 }
-
 
 // go-quitter command: go-quitter post
 func (a Auth) PostNew(content string) (Quip, error) {
@@ -425,17 +422,16 @@ func (a Auth) PostNew(content string) (Quip, error) {
 	if string(body) == "" {
 		fmt.Println("\nnode response:", resp.Status)
 	}
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
 	var quip Quip
 	_ = json.Unmarshal(body, &quip)
 	return quip, err
-
 
 }
 
@@ -526,10 +522,10 @@ func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 		os.Exit(1)
 	}
 
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -564,10 +560,10 @@ func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 	if string(body) == "" {
 		fmt.Println("\nnode response:", resp.Status)
 	}
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 	//	fmt.Println(string(body))
@@ -617,10 +613,10 @@ func (a Auth) JoinGroup(groupstr string) (Group, error) {
 	if string(body) == "" {
 		fmt.Println("\nnode response:", resp.Status)
 	}
-	var apres Badrequest
-	_ = json.Unmarshal(body, &apres)
-	if apres.Error != "" {
-		fmt.Println(apres.Error)
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		fmt.Println(apiresponse.Error)
 		os.Exit(1)
 	}
 
@@ -668,14 +664,14 @@ func (a Auth) PartGroup(groupstr string) (Group, error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var apres Badrequest
+	var apiresponse Badrequest
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
 		fmt.Println("\nnode response:", resp.Status)
 	}
-	_ = json.Unmarshal(body, &apres)
-	fmt.Println(apres.Error)
+	_ = json.Unmarshal(body, &apiresponse)
+	fmt.Println(apiresponse.Error)
 	body, _ = ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	var group Group
