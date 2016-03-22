@@ -8,11 +8,11 @@ GNU Social Library and Command line **GNU Social** client
 
 $ go-quitter help
 
-##########	go-quitter v0.0.7	##############################
+##########	go-quitter v0.0.8	##############################
 
 	  Copyright 2016 aerth@sdf.org
 
-go-quitter config		Creates config file
+go-quitter config		Creates config file	*do this first*
 go-quitter read			Reads 20 new posts
 go-quitter read fast		Reads 20 new posts (no delay)
 go-quitter home			Your home timeline.
@@ -29,9 +29,19 @@ go-quitter mygroups		List only groups you are member of
 go-quitter join ___		Join a !group
 go-quitter leave ___		Part a !group (can also use part)
 
+Using environmental variables will override the config:
 
-Set your GNUSOCIALNODE environmental variable to change nodes.
+GNUSOCIALNODE
+GNUSOCIALPASS
+GNUSOCIALUSER
+GNUSOCIALPATH
+
+Set your environmental variable to change nodes, use a different config,
+	or change user or password for a one-time session.
+
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+
+
 
 ################################################################################
 
@@ -47,7 +57,7 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 [OS X](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
 [Other OS or Architecture](https://github.com/aerth/go-quitter/releases)
 
-## Install from Go source
+## Install from Go source (sometimes newer)
 
 If you have Go toolchain installed you can build it yourself with:
 
@@ -56,6 +66,8 @@ GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
 cd $GOPATH/src/github.com/aerth/go-quitter/cmd/go-quitter
 make && sudo make install
 ```
+
+## Go Get-able
 
 Or use go get:
 
@@ -82,7 +94,7 @@ Next time you run it, it will ask for your config password. I like to keep it bl
 
 ## Or.. Use in scripts
 
-For automation, scripts, and cronjobs, you may want to delete config file and use environmental variables instead. Something like…
+For automation, scripts, and cronjobs, you *need* to delete config file and use environmental variables instead. Something like…
 
 ```
 // cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
@@ -126,6 +138,7 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 
 ### Todo
 
+- [ ] Learn Go
 - [ ] Include user interface with up/down scrolling
 - [ ] Write tests
 - [ ] cat filename.txt | go-quitter // I may introduce this just because it would make uploading photos easy.
