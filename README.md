@@ -123,12 +123,9 @@ $ go-quitter search // enters search mode
 $ go-quitter post \!group \#hashtag \#EscapeSymbolsWithABackslash
 ```
 
-Default node is gs.sdf.org! Hosted on the SDF Public Access UNIX System.
-
 ```shell
 #!/bin/sh                                                                       
-unset GNUSOCIALNODE                                                             
-go-quitter read fast >> tweet.log                                                   
+unset GNUSOCIALNODE                                                          
 GNUSOCIALNODE=gnusocial.de go-quitter read fast >> treet.log                         
 GNUSOCIALNODE=quitter.es go-quitter read fast >> treet.log                           
 GNUSOCIALNODE=shitposter.club go-quitter read fast >> treet.log                      
