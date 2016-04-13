@@ -1,6 +1,6 @@
 # go-quitter
 
-GNU Social Library and Command line **GNU Social** client
+Command line **GNU Social** client and Go library
 
 [![GoDoc](https://godoc.org/github.com/aerth/go-quitter?status.svg)](https://godoc.org/github.com/aerth/go-quitter)
 
