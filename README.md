@@ -12,7 +12,7 @@ $ go-quitter help
 
 	  Copyright 2016 aerth@sdf.org
 
-go-quitter config		Creates config file	*do this first*
+go-quitter config		Creates config file	**do this first**
 go-quitter read			Reads 20 new posts
 go-quitter read fast		Reads 20 new posts (no delay)
 go-quitter home			Your home timeline.
@@ -49,13 +49,13 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 ```
 
 ## Install binary for your OS (now for every OS)
-### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases)
-[Windows](https://github.com/aerth/go-quitter/releases/download/v0.0.7/go-quitter-v0.0.7.exe) | 
-[Linux](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
-[FreeBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
-[NetBSD](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
-[OS X](https://github.com/aerth/go-quitter/releases/download/v0.0.6/go-quitter-v0.0.6_linux-amd64.tar.gz) | 
-[Other OS or Architecture](https://github.com/aerth/go-quitter/releases)
+### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases/latest)
+[Windows](https://github.com/aerth/go-quitter/releases/latest) | 
+[Linux](https://github.com/aerth/go-quitter/releases/latest) | 
+[FreeBSD](https://github.com/aerth/go-quitter/releases/latest) | 
+[NetBSD](https://github.com/aerth/go-quitter/releases/latest) | 
+[OS X](https://github.com/aerth/go-quitter/releases/latest) | 
+[Other OS or Architecture](https://github.com/aerth/go-quitter/releases/latest)
 
 ## Install from Go source (sometimes newer)
 
