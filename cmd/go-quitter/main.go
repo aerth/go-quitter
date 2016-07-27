@@ -166,8 +166,8 @@ func main() {
 			}
 			username = string(configarray[0])
 			gnusocialnode = string(configarray[1])
-			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
-			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
+			gnusocialnode = strings.Replace(gnusocialnode, "http://", "", -1)
+			gnusocialnode = strings.Replace(gnusocialnode, "https://", "", -1)
 			password = string(configarray[2])
 
 			q.Username = username
@@ -212,8 +212,11 @@ func main() {
 				os.Exit(1)
 			}
 			gnusocialnode = string(configarray[1])
-			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
-			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
+			//fmt.Println(gnusocialnode)
+			gnusocialnode = strings.Replace(gnusocialnode, "http://", "", -1)
+			gnusocialnode = strings.Replace(gnusocialnode, "https://", "", -1)
+			//			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
+			//			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
 			q.Node = gnusocialnode
 
 			//}

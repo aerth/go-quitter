@@ -24,19 +24,18 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	//	"strconv"
 	"strings"
+	"errors"
 )
 
-const keySize = 32
-const nonceSize = 24
+var (
+goquitter       = "go-quitter v0.0.8"
+fast       bool = false
+hashbar =         strings.Repeat("#", 80)
+versionbar      = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
+)
 
-var goquitter = "go-quitter v0.0.8"
-var fast bool = false
-var hashbar = strings.Repeat("#", 80)
-var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
-
-// Basic https authentication struct. Set it with NewAuth()
+// Auth is the Basic https authentication struct. Set it with NewAuth()
 type Auth struct {
 	Username string
 	Password string
@@ -58,11 +57,11 @@ func NewAuth() *Auth {
 	return &Auth{
 		Username: "gopher",
 		Password: "password",
-		Node:     "gs.sdf.org",
+		Node:     "localhost",
 	}
 }
 
-var apipath string = "https://null/api/statuses/home_timeline.json"
+var apipath string = "https://localhost/api/statuses/home_timeline.json"
 
 // GNU Social User, gets returned by GS API
 type User struct {
@@ -270,6 +269,7 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 
 // command: go-quitter follow
 func (a Auth) DoFollow(followstr string) (User, error) {
+	var user User
 	if a.Username == "" || a.Password == "" {
 		log.Fatalln("Please run \"go-quitter config\" or set the GNUSOCIALUSER and GNUSOCIALPASS environmental variables to post.")
 	}
@@ -304,13 +304,12 @@ func (a Auth) DoFollow(followstr string) (User, error) {
 	var apiresponse Badrequest
 	_ = json.Unmarshal(body, &apiresponse)
 	if apiresponse.Error != "" {
-		fmt.Println(apiresponse.Error)
+		return user, errors.New(apiresponse.Error)
 		os.Exit(1)
 	}
 
 	body, _ = ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(body))
-	var user User
+	// Return one user
 	_ = json.Unmarshal(body, &user)
 
 	return user, err

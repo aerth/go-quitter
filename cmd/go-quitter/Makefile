@@ -7,8 +7,11 @@ RELEASE:=v${VERSION}.$(shell git rev-parse --verify --short HEAD)
 PREFIX=/usr/local/bin
 all:
 	go fmt
-	go vet
 	go build -v -o ${NAME}-${RELEASE}
+
+deps:
+	go get -d ./...
+
 
 install:
 	mv ${NAME}-${RELEASE} ${PREFIX}/${NAME}
@@ -19,7 +22,7 @@ update:
 	mv ${NAME} /usr/local/bin/${NAME}
 
 cross:
-	mkdir bin || true
+	mkdir -p bin
 	GOOS=windows GOARCH=386 go build -v -o bin/${NAME}-${RELEASE}-WIN32.exe
 	GOOS=windows GOARCH=amd64 go build -v -o bin/${NAME}-${RELEASE}-WIN64.exe
 	GOOS=darwin GOARCH=386 go build -v -o bin/${NAME}-${RELEASE}-OSX-x86
