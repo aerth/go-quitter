@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -35,8 +36,10 @@ var configpass = ""
 var confignode = ""
 var configlock = ""
 var configstrings = ""
-var hashbar = strings.Repeat("#", 80)
-var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
+var hashbar = ""
+
+//var hashbar = strings.Repeat("#", 80)
+//var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
 
 var usage = "\n" + "\t" + `  Copyright 2016 aerth@sdf.org
 
@@ -72,17 +75,19 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 
 func init() {
 	if gnusocialnode == "" {
-		gnusocialnode = "gs.sdf.org"
+		gnusocialnode = "gnusocial.de"
 	}
 }
 func bar() {
-	print("\033[H\033[2J")
-	fmt.Println(versionbar)
+	//	print("\033[H\033[2J")
+	//	fmt.Println(versionbar)
 }
 
 func main() {
-
 	q := qw.NewAuth()
+	if containsString(os.Args, "-debug") {
+		q.Scheme = "http://"
+	}
 
 	//	os.Exit(1)
 
@@ -90,11 +95,12 @@ func main() {
 	if os.Getenv("GNUSOCIALPATH") != "" {
 		gnusocialpath = os.Getenv("GNUSOCIALPATH")
 	}
+
 	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies"}
 
 	// command: go-quitter
 	if len(os.Args) < 2 {
-		bar()
+		fmt.Println(usage)
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
 		fmt.Println(hashbar)
@@ -102,7 +108,7 @@ func main() {
 	}
 
 	if !containsString(allCommands, os.Args[1]) {
-		bar()
+		fmt.Println(usage)
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
 		fmt.Println(hashbar)
@@ -111,7 +117,6 @@ func main() {
 
 	// command: go-quitter create
 	if os.Args[1] == "config" {
-
 		if seconf.Detect(gnusocialpath) == false {
 			bar()
 			fmt.Println("Creating config file. You will be asked for your user, node, and password.")
@@ -120,7 +125,7 @@ func main() {
 		} else {
 			bar()
 			fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: GNUSOCIALPATH=gnusocial.de go-quitter config")
-			fmt.Println("\nConfig exists:", qw.ReturnHome()+"/."+gnusocialpath)
+			fmt.Println("\nConfig exists:", returnHomeDir()+"/."+gnusocialpath)
 			os.Exit(1)
 		}
 	}
@@ -238,129 +243,143 @@ func main() {
 
 	// Set speed default slow
 	speed := false
-	lastvar := len(os.Args)
-	lastvar = (lastvar - 1)
+	lastvar := len(os.Args) - 1
+
 	if os.Args[lastvar] == "fast" || os.Getenv("GNUSOCIALFAST") == "true" {
 		speed = true
 	}
+
+	switch os.Args[1] {
 	// command: go-quitter read
-	if os.Args[1] == "read" {
+	case "read":
 		PrintQuips(q.GetPublic(speed))
 		os.Exit(0)
-	}
-	// command: go-quitter search _____
-	if os.Args[1] == "search" {
+
+		// command: go-quitter search _____
+	case "search":
 		searchstr := ""
 		if len(os.Args) > 1 {
 			searchstr = strings.Join(os.Args[2:], " ")
 		}
+		if searchstr == "" {
+			searchstr = getTypin()
+		}
 		PrintQuips(q.DoSearch(searchstr, speed))
 		os.Exit(0)
-	}
 
-	// command: go-quitter user aerth
-	if os.Args[1] == "user" && len(os.Args) == 3 && os.Args[2] != "" {
-		userlookup := os.Args[2]
-		PrintQuips(q.GetUserTimeline(userlookup, speed))
+		// command: go-quitter user aerth
+	case "user":
+		if len(os.Args) > 2 && os.Args[2] != "" {
+			userlookup := os.Args[2]
+			PrintQuips(q.GetUserTimeline(userlookup, speed))
 
-		os.Exit(0)
-	}
+			os.Exit(0)
+		}
+		fmt.Println("Need user to search for")
+		os.Exit(1)
 
-	// command: go-quitter mentions
-	if os.Args[1] == "mentions" || os.Args[1] == "replies" || os.Args[1] == "mention" {
+		// command: go-quitter mentions
+	case "mentions", "replies", "mention":
 		PrintQuips(q.GetMentions(speed))
 		os.Exit(0)
-	}
 
-	// command: go-quitter follow
-	if os.Args[1] == "follow" {
+		// command: go-quitter follow
+	case "follow":
 		followstr := ""
 		if len(os.Args) == 1 {
 			followstr = os.Args[2]
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
+		}
+		if followstr == "" {
+			fmt.Println("Who to follow?\nExample: someone (without the @)")
+			followstr = getTypin()
 		}
 		PrintUser(q.DoFollow(followstr))
 		os.Exit(0)
-	}
 
 	// command: go-quitter unfollow
-	if os.Args[1] == "unfollow" {
+	case "unfollow":
 		followstr := ""
 		if len(os.Args) == 1 {
 			followstr = os.Args[2]
 		} else if len(os.Args) > 1 {
 			followstr = strings.Join(os.Args[2:], " ")
 		}
+		if followstr == "" {
+			fmt.Println("Who to unfollow?\nExample: someone (without the @)")
+			followstr = getTypin()
+		}
 		PrintUser(q.DoUnfollow(followstr))
 		os.Exit(0)
-	}
+
 	// command: go-quitter home
-	if os.Args[1] == "home" {
+	case "home":
 		PrintQuips(q.GetHome(speed))
 		os.Exit(0)
-	}
 
 	// command: go-quitter groups
-	if os.Args[1] == "groups" {
+	case "groups":
 		PrintGroups(q.ListAllGroups(speed))
 		os.Exit(0)
-	}
 
-	// command: go-quitter mygroups
-	if os.Args[1] == "mygroups" {
+		// command: go-quitter mygroups
+	case "mygroups":
 		PrintGroups(q.ListMyGroups(speed))
 		os.Exit(0)
-	}
-	// command: go-quitter join
-	if os.Args[1] == "join" {
-		content := ""
-		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ")
-		}
-		PrintGroup(q.JoinGroup(content))
-		os.Exit(0)
-	}
 
-	// command: go-quitter part
-	if os.Args[1] == "part" {
+		// command: go-quitter join
+	case "join":
+		groupstr := ""
+		if len(os.Args) > 1 {
+			groupstr = strings.Join(os.Args[2:], " ")
+		}
+		if groupstr == "" {
+			fmt.Println("Which group to join?\nExample: groupname (without the !)")
+			groupstr = getTypin()
+		}
+		PrintGroup(q.JoinGroup(groupstr))
+		os.Exit(0)
+
+		// command: go-quitter part
+	case "part":
+		groupstr := ""
+		if len(os.Args) > 1 {
+			groupstr = strings.Join(os.Args[2:], " ")
+		}
+		if groupstr == "" {
+			fmt.Println("Which group to leave?\nExample: groupname (without the !)")
+			groupstr = getTypin()
+		}
+		PrintGroup(q.PartGroup(groupstr))
+		os.Exit(0)
+
+		// command: go-quitter leave
+	case "leave":
 		content := ""
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ")
 		}
 		PrintGroup(q.PartGroup(content))
 		os.Exit(0)
-	}
-	// command: go-quitter leave
-	if os.Args[1] == "leave" {
-		content := ""
-		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ")
-		}
-		PrintGroup(q.PartGroup(content))
-		os.Exit(0)
-	}
 
-	// go-quitter post Testing from console line using go-quitter
-	// Notice how we dont need quotation marks. If no arguments to go-quitter post, we will enter post mode.
-	if os.Args[1] == "post" {
+		// go-quitter
+	case "post":
 		content := ""
 		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ")
+			content = strings.Join(os.Args[2:], " ") // go-quitter post wow this is a post\!
+		}
+		if content == "" {
+			content = getTypin()
 		}
 		PrintQuip(q.PostNew(content))
 		os.Exit(0)
+
+	default:
+		// this happens if we invoke with somehing like "go-quitter test"
+		fmt.Println("Command not found, try ", os.Args[0]+" help")
+		os.Exit(1)
 	}
-
-	// this happens if we invoke with somehing like "go-quitter test"
-	fmt.Println("Command not found, try ", os.Args[0]+" help")
-	os.Exit(1)
-
-}
-
-// Does x contain y?
-func containsString(slice []string, element string) bool {
-	return !(posString(slice, element) == -1)
 }
 
 // Ask user to confirm the action.
@@ -386,7 +405,12 @@ func askForConfirmation() bool {
 	}
 }
 
-// For use only in containsString()
+// Does []string contain element?
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
+}
+
+// Find the index of a string in a []string
 func posString(slice []string, element string) int {
 	for index, elem := range slice {
 		if elem == element {
@@ -399,6 +423,12 @@ func posString(slice []string, element string) int {
 func PrintQuips(quips []qw.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
+
+	}
+	if len(quips) == 0 && err == nil {
+		fmt.Println("No results.")
+		return
 	}
 	for i := range quips {
 		if quips[i].User.Screenname == quips[i].User.Name {
@@ -411,8 +441,12 @@ func PrintQuips(quips []qw.Quip, err error) {
 func PrintQuip(quip qw.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-
+	if quip.Text == "" && err == nil {
+		fmt.Println("No quip.")
+		return
+	}
 	if quip.User.Screenname == quip.User.Name {
 		fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
 	} else {
@@ -424,6 +458,11 @@ func PrintQuip(quip qw.Quip, err error) {
 func PrintUsers(users []qw.User, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	if len(users) == 0 && err == nil {
+		fmt.Println("No users.")
+		return
 	}
 	for i := range users {
 		if users[i].Screenname == users[i].Name {
@@ -436,6 +475,11 @@ func PrintUsers(users []qw.User, err error) {
 func PrintUser(user qw.User, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	if user.Screenname == "" && err == nil {
+		fmt.Println("No user.")
+		return
 	}
 	fmt.Printf("[@" + user.Screenname + "]\n\n")
 
@@ -443,6 +487,11 @@ func PrintUser(user qw.User, err error) {
 func PrintGroup(group qw.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	if group.Nickname == "" && err == nil {
+		fmt.Println("No group.")
+		return
 	}
 	fmt.Printf("!" + group.Nickname + " [" + group.Fullname + "] \n" + group.Description + "\n\n")
 
@@ -451,8 +500,41 @@ func PrintGroup(group qw.Group, err error) {
 func PrintGroups(groups []qw.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	if len(groups) == 0 && err == nil {
+		fmt.Println("No groups.")
+		return
 	}
 	for i := range groups {
 		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
 	}
+}
+
+// returnHomeDir gives us the true home directory for letting the user know where the config file is. Windows, Unix, OS X
+func returnHomeDir() (homedir string) {
+	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+	if homedir == "" {
+		homedir = os.Getenv("USERPROFILE")
+	}
+	if homedir == "" {
+		homedir = os.Getenv("HOME")
+	}
+	return homedir
+}
+
+// Receive non-hidden input from user.
+func getTypin() string {
+	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
+	scanner := bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		line := scanner.Text()
+		//	fmt.Println(line)
+		return line
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return ""
 }
