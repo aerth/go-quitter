@@ -9,7 +9,7 @@ import (
 func main() {
 
 	if len(os.Args) == 2 && os.Args[1] == "home" {
-		q := qw.NewAuth()
+		q := qw.NewSocial()
 		q.Username = "obviouslychangethis"
 		q.Password = "nopassword?"
 		q.Node = "gnusocial.de"
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	if len(os.Args) == 2 && os.Args[1] == "public" {
-		q2 := qw.NewAuth()
+		q2 := qw.NewSocial()
 		q2.Node = "gnusocial.de"
 		quips, err := q2.GetPublic(true)
     if err != nil {

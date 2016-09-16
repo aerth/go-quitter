@@ -1,17 +1,20 @@
-// The MIT License (MIT)
-//
-// Copyright (c) 2016 aerth
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+/*
+Package quitter is a Go library to interact with GNU Social instances.
 
+		The MIT License (MIT)
+
+		Copyright (c) 2016 aerth
+
+		Permission is hereby granted, free of charge, to any person obtaining a copy
+		of this software and associated documentation files (the "Software"), to deal
+		in the Software without restriction, including without limitation the rights
+		to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+		copies of the Software, and to permit persons to whom the Software is
+		furnished to do so, subject to the following conditions:
+
+		The above copyright notice and this permission notice shall be included in all
+		copies or substantial portions of the Software.
+*/
 package quitter
 
 import (
@@ -22,7 +25,7 @@ import (
 )
 
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
-func (a Auth) GetPublic(fast bool) ([]Quip, error) {
+func (a Social) GetPublic() ([]Quip, error) {
 	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		return nil, err
@@ -44,7 +47,7 @@ func (a Auth) GetPublic(fast bool) ([]Quip, error) {
 }
 
 // GetMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump.
-func (a Auth) GetMentions(fast bool) ([]Quip, error) {
+func (a Social) GetMentions() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
@@ -60,7 +63,7 @@ func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 }
 
 // GetHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with GetHome(fast) for a quick dump.
-func (a Auth) GetHome(fast bool) ([]Quip, error) {
+func (a Social) GetHome() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
@@ -79,12 +82,12 @@ func (a Auth) GetHome(fast bool) ([]Quip, error) {
 }
 
 // command: go-quitter search
-func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
+func (a Social) DoSearch(searchstr string) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
 	if searchstr == "" {
-		return nil, errors.New("Blank search detected. Not searching.")
+		return nil, errors.New("No query")
 	}
 
 	v := url.Values{}
@@ -104,9 +107,9 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 }
 
 // command: go-quitter psearch
-func (a Auth) DoPublicSearch(searchstr string, fast bool) ([]Quip, error) {
+func (a Social) DoPublicSearch(searchstr string) ([]Quip, error) {
 	if searchstr == "" {
-		return nil, errors.New("Blank search detected. Not searching.")
+		return nil, errors.New("No query")
 	}
 
 	v := url.Values{}
@@ -133,13 +136,13 @@ func (a Auth) DoPublicSearch(searchstr string, fast bool) ([]Quip, error) {
 }
 
 // command: go-quitter follow
-func (a Auth) DoFollow(followstr string) (user User, err error) {
+func (a Social) DoFollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
 	}
 
 	if followstr == "" {
-		return user, errors.New("Blank search detected. Not going furthur.")
+		return user, errors.New("No query.")
 	}
 
 	v := url.Values{}
@@ -161,12 +164,12 @@ func (a Auth) DoFollow(followstr string) (user User, err error) {
 }
 
 // go-quitter command: go-quitter unfollow
-func (a Auth) DoUnfollow(followstr string) (user User, err error) {
+func (a Social) DoUnfollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
 	}
 	if followstr == "" {
-		return user, errors.New("Blank search detected. Not going furthur.")
+		return user, errors.New("No query")
 	}
 	v := url.Values{}
 	v.Set("id", followstr)
@@ -183,7 +186,7 @@ func (a Auth) DoUnfollow(followstr string) (user User, err error) {
 }
 
 // go-quitter command: go-quitter user
-func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
+func (a Social) GetUserTimeline(userlookup string) ([]Quip, error) {
 
 	path := "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	body, err := a.FireGET(path)
@@ -196,14 +199,14 @@ func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
 	return quips, err
 }
 
-// go-quitter command: go-quitter post
-func (a Auth) PostNew(content string) (q Quip, err error) {
+// PostNew publishes content on a.Node, returns the new quip or an error.
+func (a Social) PostNew(content string) (q Quip, err error) {
 	if a.Username == "" || a.Password == "" {
 		return q, errors.New("No user/password")
 	}
 
 	if content == "" {
-		return q, errors.New("Blank status detected. Not posting.")
+		return q, errors.New("No query")
 	}
 	content = url.QueryEscape(content)
 
@@ -221,7 +224,7 @@ func (a Auth) PostNew(content string) (q Quip, err error) {
 }
 
 // command: go-quitter groups
-func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
+func (a Social) ListAllGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
@@ -239,7 +242,7 @@ func (a Auth) ListAllGroups(speed bool) ([]Group, error) {
 }
 
 // command: go-quitter mygroups
-func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
+func (a Social) ListMyGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
@@ -258,7 +261,7 @@ func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 }
 
 // command: go-quitter join ____
-func (a Auth) JoinGroup(groupstr string) (g Group, err error) {
+func (a Social) JoinGroup(groupstr string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}
@@ -286,7 +289,7 @@ func (a Auth) JoinGroup(groupstr string) (g Group, err error) {
 }
 
 // command: go-quitter part ____
-func (a Auth) PartGroup(groupstr string) (g Group, err error) {
+func (a Social) PartGroup(groupstr string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}

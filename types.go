@@ -1,26 +1,26 @@
 package quitter
 
-// Auth is credentials needed for logging in. Set it with NewAuth()
-type Auth struct {
+// Social is credentials needed for logging in. Set it with NewSocial()
+type Social struct {
 	Username string
 	Password string
 	Node     string
 	Scheme   string
 }
 
-// Sets the Authentication method and choose node.
+// Sets the authentication method and choose node.
 //Use like this:
 /*
 
- q := qw.NewAuth()
+ q := qw.NewSocial()
  q.Username = "john"
  q.Password = "pass123"
  q.Node = "gnusocial.de"
  q.GetHome(false)
 
 */
-func NewAuth() *Auth {
-	return &Auth{
+func NewSocial() *Social {
+	return &Social{
 		Username: "gopher",
 		Password: "password",
 		Node:     "localhost",

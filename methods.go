@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-func (a Auth) FireGET(path string) ([]byte, error) {
+func (a Social) FireGET(path string) ([]byte, error) {
 	if path == "" {
 		return nil, errors.New("No path")
 	}
@@ -38,7 +38,7 @@ func (a Auth) FireGET(path string) ([]byte, error) {
 
 	return body, nil
 }
-func (a Auth) FirePOST(path string, v url.Values) ([]byte, error) {
+func (a Social) FirePOST(path string, v url.Values) ([]byte, error) {
 	if path == "" {
 		return nil, errors.New("No path")
 	}
