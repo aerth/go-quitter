@@ -351,6 +351,13 @@ func main() {
 			fmt.Println("Which group to leave?\nExample: groupname (without the !)")
 			groupstr = getTypin()
 		}
+
+		fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
+		if askForConfirmation() == false {
+			fmt.Println("Not leaving group " + groupstr)
+			os.Exit(0)
+		}
+
 		PrintGroup(q.PartGroup(groupstr))
 		os.Exit(0)
 
@@ -372,6 +379,14 @@ func main() {
 		if content == "" {
 			content = getTypin()
 		}
+
+		fmt.Println("Preview:\n\n[" + q.Username + "] " + content)
+		fmt.Println("\nType YES to publish!")
+		if askForConfirmation() == false {
+			fmt.Println("Your status was not updated.")
+			os.Exit(0)
+		}
+
 		PrintQuip(q.PostNew(content))
 		os.Exit(0)
 

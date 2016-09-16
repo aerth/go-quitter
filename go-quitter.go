@@ -17,16 +17,12 @@ package quitter
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
-	"os"
 )
 
 // GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
 func (a Auth) GetPublic(fast bool) ([]Quip, error) {
-	fmt.Println("node: " + a.Node)
 	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		return nil, err
@@ -52,7 +48,6 @@ func (a Auth) GetMentions(fast bool) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
-	//fmt.Println("node: " + a.Node)
 	path := a.Scheme + a.Node + "/api/statuses/mentions.json"
 	body, err := a.FireGET(path)
 	if err != nil {
@@ -91,7 +86,7 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 	if searchstr == "" {
 		return nil, errors.New("Blank search detected. Not searching.")
 	}
-	//	fmt.Println("searching " + searchstr + " @ " + a.Node)
+
 	v := url.Values{}
 	v.Set("q", searchstr)
 	searchq := url.Values.Encode(v)
@@ -103,9 +98,35 @@ func (a Auth) DoSearch(searchstr string, fast bool) ([]Quip, error) {
 	}
 	var quips []Quip
 	_ = json.Unmarshal(body, &quips)
-	if len(quips) == 0 {
-		fmt.Println("No results for \"" + searchstr + "\"")
+
+	return quips, err
+
+}
+
+// command: go-quitter psearch
+func (a Auth) DoPublicSearch(searchstr string, fast bool) ([]Quip, error) {
+	if searchstr == "" {
+		return nil, errors.New("Blank search detected. Not searching.")
 	}
+
+	v := url.Values{}
+	v.Set("q", searchstr)
+	searchq := url.Values.Encode(v)
+	resp, err := apigun.Get(a.Scheme + a.Node + "/api/search.json?" + searchq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	var quips []Quip
+	var apiresponse Badrequest
+	_ = json.Unmarshal(body, &apiresponse)
+	if apiresponse.Error != "" {
+		return nil, errors.New(apiresponse.Error)
+	}
+
+	_ = json.Unmarshal(body, &quips)
 
 	return quips, err
 
@@ -120,7 +141,7 @@ func (a Auth) DoFollow(followstr string) (user User, err error) {
 	if followstr == "" {
 		return user, errors.New("Blank search detected. Not going furthur.")
 	}
-	//fmt.Println("following " + followstr + " @ " + a.Node)
+
 	v := url.Values{}
 
 	v.Set("id", followstr)
@@ -163,7 +184,7 @@ func (a Auth) DoUnfollow(followstr string) (user User, err error) {
 
 // go-quitter command: go-quitter user
 func (a Auth) GetUserTimeline(userlookup string, fast bool) ([]Quip, error) {
-	fmt.Println("user " + userlookup + " @ " + a.Node)
+
 	path := "/api/statuses/user_timeline.json?screen_name=" + userlookup
 	body, err := a.FireGET(path)
 	if err != nil {
@@ -184,15 +205,8 @@ func (a Auth) PostNew(content string) (q Quip, err error) {
 	if content == "" {
 		return q, errors.New("Blank status detected. Not posting.")
 	}
-
-	fmt.Println("Preview:\n\n[" + a.Username + "] " + content)
-	fmt.Println("\nType YES to publish!")
 	content = url.QueryEscape(content)
-	if askForConfirmation() == false {
-		fmt.Println("Your status was not updated.")
-		os.Exit(0)
-	}
-	fmt.Println("posting on node: " + a.Node)
+
 	v := url.Values{}
 	v.Set("status", content)
 	content = url.Values.Encode(v)
@@ -236,7 +250,6 @@ func (a Auth) ListMyGroups(speed bool) ([]Group, error) {
 		return nil, err
 	}
 
-	//	fmt.Println(string(body))
 	var groups []Group
 	_ = json.Unmarshal(body, &groups)
 
@@ -251,7 +264,7 @@ func (a Auth) JoinGroup(groupstr string) (g Group, err error) {
 	}
 
 	if groupstr == "" {
-		log.Fatalln("Blank group detected. Not going furthur.")
+		return g, errors.New("Blank group detected. Not going furthur.")
 	}
 	v := url.Values{}
 
@@ -264,13 +277,12 @@ func (a Auth) JoinGroup(groupstr string) (g Group, err error) {
 	path := "/api/statusnet/groups/join.json?" + groupstr
 	body, err := a.FirePOST(path, v)
 	if err != nil {
-		return nil, err
+		return g, err
 	}
 
-	var group Group
-	_ = json.Unmarshal(body, &group)
+	_ = json.Unmarshal(body, &g)
 
-	return group, err
+	return g, err
 }
 
 // command: go-quitter part ____
@@ -282,11 +294,7 @@ func (a Auth) PartGroup(groupstr string) (g Group, err error) {
 	if groupstr == "" {
 		return g, errors.New("Blank group detected. Not going furthur.")
 	}
-	fmt.Println("Are you sure you want to leave from group !" + groupstr + "\n Type yes or no [y/n]\n")
-	if askForConfirmation() == false {
-		fmt.Println("Not leaving group " + groupstr)
-		os.Exit(0)
-	}
+
 	v := url.Values{}
 	v.Set("group_name", groupstr)
 	v.Set("group_id", groupstr)
@@ -296,10 +304,10 @@ func (a Auth) PartGroup(groupstr string) (g Group, err error) {
 	path := "/api/statusnet/groups/leave.json?" + groupstr
 	body, err := a.FirePOST(path, v)
 	if err != nil {
-		return nil, err
+		return g, err
 	}
-	var group Group
-	_ = json.Unmarshal(body, &group)
 
-	return group, err
+	_ = json.Unmarshal(body, &g)
+
+	return g, err
 }
