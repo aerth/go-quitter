@@ -8,14 +8,14 @@ import (
 	"github.com/aerth/seconf"
 )
 
-func runConfig() {
+func makeConfig() {
 	if seconf.Detect(gnusocialpath) == false {
-		bar()
+
 		fmt.Println("Creating config file. You will be asked for your user, node, and password.")
 		fmt.Println("Your password will not echo.")
 		seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 	} else {
-		bar()
+
 		fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: GNUSOCIALPATH=gnusocial.de go-quitter config")
 		fmt.Println("\nConfig exists:", returnHomeDir()+"/."+gnusocialpath)
 		os.Exit(1)
@@ -50,7 +50,9 @@ func dontNeedConfig() {
 	q.Node = gnusocialnode
 
 }
-
+func configExists() bool {
+	return seconf.Detect(gnusocialpath)
+}
 func needConfig() {
 
 	if seconf.Detect(gnusocialpath) == true {

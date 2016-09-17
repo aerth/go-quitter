@@ -24,7 +24,7 @@ import (
 	"net/url"
 )
 
-// GetPublic shows 20 new messages. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump. This and DoSearch() and GetUserTimeline() are some of the only functions that don't require auth.Username + auth.Password
+// GetPublic shows 20 new messages.
 func (a Social) GetPublic() ([]Quip, error) {
 	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
@@ -46,7 +46,7 @@ func (a Social) GetPublic() ([]Quip, error) {
 	return quips, err
 }
 
-// GetMentions shows 20 newest mentions of your username. Defaults to a 2 second delay, but can be called with GetPublic(fast) for a quick dump.
+// GetMentions shows 20 newest mentions of your username.
 func (a Social) GetMentions() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
@@ -62,7 +62,7 @@ func (a Social) GetMentions() ([]Quip, error) {
 	return quips, err
 }
 
-// GetHome shows 20 from home timeline. Defaults to a 2 second delay, but can be called with GetHome(fast) for a quick dump.
+// GetHome shows 20 from home timeline.
 func (a Social) GetHome() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
@@ -81,7 +81,7 @@ func (a Social) GetHome() ([]Quip, error) {
 
 }
 
-// command: go-quitter search
+// DoSearch returns results for query searchstr. Does send auth info.
 func (a Social) DoSearch(searchstr string) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
@@ -106,7 +106,7 @@ func (a Social) DoSearch(searchstr string) ([]Quip, error) {
 
 }
 
-// command: go-quitter psearch
+// DoPublicSearch returns results for query searchstr. Does not send auth info.
 func (a Social) DoPublicSearch(searchstr string) ([]Quip, error) {
 	if searchstr == "" {
 		return nil, errors.New("No query")
@@ -135,7 +135,7 @@ func (a Social) DoPublicSearch(searchstr string) ([]Quip, error) {
 
 }
 
-// command: go-quitter follow
+// DoFollow sends a request to follow a user
 func (a Social) DoFollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
@@ -163,7 +163,7 @@ func (a Social) DoFollow(followstr string) (user User, err error) {
 
 }
 
-// go-quitter command: go-quitter unfollow
+// DoUnfollow sends a request to unfollow a user
 func (a Social) DoUnfollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
@@ -185,7 +185,7 @@ func (a Social) DoUnfollow(followstr string) (user User, err error) {
 
 }
 
-// go-quitter command: go-quitter user
+// GetUserTimeline returns a userlookup's timeline
 func (a Social) GetUserTimeline(userlookup string) ([]Quip, error) {
 
 	path := "/api/statuses/user_timeline.json?screen_name=" + userlookup
@@ -223,7 +223,8 @@ func (a Social) PostNew(content string) (q Quip, err error) {
 
 }
 
-// command: go-quitter groups
+//  ListAllGroups lists each group in a.Node
+//  Some nodes don't return anything.
 func (a Social) ListAllGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
@@ -241,7 +242,7 @@ func (a Social) ListAllGroups() ([]Group, error) {
 	return groups, err
 }
 
-// command: go-quitter mygroups
+// ListMyGroups lists each group a a.Username is a member of
 func (a Social) ListMyGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
@@ -260,24 +261,24 @@ func (a Social) ListMyGroups() ([]Group, error) {
 
 }
 
-// command: go-quitter join ____
-func (a Social) JoinGroup(groupstr string) (g Group, err error) {
+// JoinGroup sends a request to join group grp.
+func (a Social) JoinGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}
 
-	if groupstr == "" {
+	if grp == "" {
 		return g, errors.New("Blank group detected. Not going furthur.")
 	}
 	v := url.Values{}
 
-	v.Set("group_name", groupstr)
-	v.Set("group_id", groupstr)
-	v.Set("id", groupstr)
-	v.Set("nickname", groupstr)
-	groupstr = url.Values.Encode(v)
+	v.Set("group_name", grp)
+	v.Set("group_id", grp)
+	v.Set("id", grp)
+	v.Set("nickname", grp)
+	grp = url.Values.Encode(v)
 
-	path := "/api/statusnet/groups/join.json?" + groupstr
+	path := "/api/statusnet/groups/join.json?" + grp
 	body, err := a.FirePOST(path, v)
 	if err != nil {
 		return g, err
@@ -288,23 +289,23 @@ func (a Social) JoinGroup(groupstr string) (g Group, err error) {
 	return g, err
 }
 
-// command: go-quitter part ____
-func (a Social) PartGroup(groupstr string) (g Group, err error) {
+// PartGroup sends a request to part group grp.
+func (a Social) PartGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}
 
-	if groupstr == "" {
+	if grp == "" {
 		return g, errors.New("Blank group detected. Not going furthur.")
 	}
 
 	v := url.Values{}
-	v.Set("group_name", groupstr)
-	v.Set("group_id", groupstr)
-	v.Set("id", groupstr)
-	v.Set("nickname", groupstr)
-	groupstr = url.Values.Encode(v)
-	path := "/api/statusnet/groups/leave.json?" + groupstr
+	v.Set("group_name", grp)
+	v.Set("group_id", grp)
+	v.Set("id", grp)
+	v.Set("nickname", grp)
+	grp = url.Values.Encode(v)
+	path := "/api/statusnet/groups/leave.json?" + grp
 	body, err := a.FirePOST(path, v)
 	if err != nil {
 		return g, err

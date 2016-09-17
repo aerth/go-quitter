@@ -1,3 +1,7 @@
+/*
+Some example functions for godoc
+*/
+
 package quitter_test
 
 import (
@@ -6,6 +10,21 @@ import (
 
 	quitter "github.com/aerth/go-quitter"
 )
+
+func Example() {
+	q := quitter.NewSocial()
+	q.Username = "username"
+	q.Password = "password"
+	q.Node = "localhost"
+	quips, err := q.GetHome()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	for _, quip := range quips {
+		fmt.Printf("%s %s", quip.IdStr, quip.Text)
+	}
+}
 
 func ExampleNewSocial() {
 	q := quitter.NewSocial()

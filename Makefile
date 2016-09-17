@@ -6,11 +6,15 @@ VERSION=0.0.9
 RELEASE:=v${VERSION}.$(shell git rev-parse --verify --short HEAD)
 PREFIX=/usr/local/bin
 all:
+	@echo
+	@echo "building go-quitter command line GNU Social client to"
+	@echo "		\"bin/${NAME}-${RELEASE}\""
+	@echo
 	@mkdir -p bin
-	go build -v -o bin/${NAME}-${RELEASE}
+	@go build -v -o bin/${NAME}-${RELEASE} ./cmd/go-quitter
 
 deps:
-	go get -d .
+	go get -d ./...
 
 
 install:

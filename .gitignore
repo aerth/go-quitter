@@ -1,6 +1,8 @@
+bin
+pkg
+cmd/go-quitter/test
 cmd/go-quitter/go-quitter*
 cmd/go-quitter/go-quitter/bin/*
-cmd/example/example
 *~
 *.log
 

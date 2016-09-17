@@ -15,31 +15,31 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
-	qw "github.com/aerth/go-quitter"
-	"github.com/aerth/seconf"
+	"github.com/aerth/go-quitter"
 )
 
-var goquitter = "go-quitter v0.0.8"
-var username = os.Getenv("GNUSOCIALUSER")
-var password = os.Getenv("GNUSOCIALPASS")
-var gnusocialnode = os.Getenv("GNUSOCIALNODE")
-
-var apipath string = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
-var gnusocialpath = "go-quitter"
-var configuser = ""
-var configpass = ""
-var confignode = ""
-var configlock = ""
-var configstrings = ""
-var hashbar = ""
+var (
+	goquitter     = "go-quitter v0.0.9"
+	username      = os.Getenv("GNUSOCIALUSER")
+	password      = os.Getenv("GNUSOCIALPASS")
+	gnusocialnode = os.Getenv("GNUSOCIALNODE")
+	apipath       = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
+	gnusocialpath = "go-quitter"
+	configuser    string
+	configpass    string
+	confignode    string
+	configlock    string
+	configstrings string
+	hashbar       string
+)
 
 //var hashbar = strings.Repeat("#", 80)
-//var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
+var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
 
 var usage = "\n" + "\t" + `  Copyright 2016 aerth@sdf.org
 
@@ -73,85 +73,51 @@ Set your environmental variable to change nodes, use a different config,
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 
-func init() {
-	if gnusocialnode == "" {
-		gnusocialnode = "gnusocial.de"
-	}
-}
-func bar() {
-	//	print("\033[H\033[2J")
-	//	fmt.Println(versionbar)
-}
-
-var q *qw.Social
+var q *quitter.Social
+var allCommands = []string{"test", "gui", "help", "config",
+	"read", "user", "search", "home", "follow", "unfollow",
+	"post", "mentions", "groups", "mygroups", "join", "leave",
+	"part", "mention", "replies"}
 
 func main() {
 
-	q = qw.NewSocial()
-
+	q = quitter.NewSocial()
 	if containsString(os.Args, "-debug") {
 		q.Scheme = "http://"
 	}
 
-	//	os.Exit(1)
-
-	// list all commands here
-	if os.Getenv("GNUSOCIALPATH") != "" {
-		gnusocialpath = os.Getenv("GNUSOCIALPATH")
-	}
-
-	allCommands := []string{"help", "config", "read", "user", "search", "home", "follow", "unfollow", "post", "mentions", "groups", "mygroups", "join", "leave", "part", "mention", "replies"}
-
-	// command: go-quitter
-	if len(os.Args) < 2 {
-
-		fmt.Println("Current list of commands:")
-		fmt.Println(allCommands)
-		fmt.Printf("Run '%s -help' for more information.\n", os.Args[0])
-		fmt.Println(hashbar)
-		os.Exit(1)
-	}
-
-	if !containsString(allCommands, os.Args[1]) {
-		fmt.Println(usage)
-		fmt.Println("Current list of commands:")
-		fmt.Println(allCommands)
-		fmt.Println(hashbar)
-		os.Exit(1)
-	}
-
-	// command: go-quitter create
 	if os.Args[1] == "config" {
-		runConfig()
-		os.Exit(1)
+		makeConfig()
+		os.Exit(0)
 	}
 
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
 	if containsString(helpArg, os.Args[1]) {
-		bar()
 		fmt.Println(usage)
 		fmt.Println(hashbar)
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	// command: go-quitter version (or -v)
 	versionArg := []string{"version", "-v"}
 	if containsString(versionArg, os.Args[1]) {
 		fmt.Println(goquitter)
-		os.Exit(1)
+		os.Exit(0)
 	}
-	bar()
 
 	// command requires login credentials
-	needLogin := []string{"home", "follow", "unfollow", "post", "mentions", "mygroups", "join", "leave", "mention", "replies", "direct", "inbox", "sent"}
+	needLogin := []string{"gui", "home", "follow", "unfollow",
+		"post", "mentions", "mygroups", "join", "leave", "mention",
+		"replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
 		needConfig()
 	} else { // command doesn't need login
-		if seconf.Detect(gnusocialpath) {
+		if configExists() {
 			dontNeedConfig()
 		}
 	}
+
 	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {
 		q.Username = os.Getenv("GNUSOCIALUSER")
@@ -165,6 +131,13 @@ func main() {
 
 	switch os.Args[1] {
 	// command: go-quitter read
+	case "test":
+		runtests()
+	case "gui":
+
+		initgui()
+		os.Exit(0)
+
 	case "read":
 		PrintQuips(q.GetPublic())
 		os.Exit(0)
@@ -349,7 +322,7 @@ func posString(slice []string, element string) int {
 	return -1
 }
 
-func PrintQuips(quips []qw.Quip, err error) {
+func PrintQuips(quips []quitter.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -367,7 +340,7 @@ func PrintQuips(quips []qw.Quip, err error) {
 		}
 	}
 }
-func PrintQuip(quip qw.Quip, err error) {
+func PrintQuip(quip quitter.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -384,7 +357,7 @@ func PrintQuip(quip qw.Quip, err error) {
 
 }
 
-func PrintUsers(users []qw.User, err error) {
+func PrintUsers(users []quitter.User, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -401,7 +374,7 @@ func PrintUsers(users []qw.User, err error) {
 		}
 	}
 }
-func PrintUser(user qw.User, err error) {
+func PrintUser(user quitter.User, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -413,7 +386,7 @@ func PrintUser(user qw.User, err error) {
 	fmt.Printf("[@" + user.Screenname + "]\n\n")
 
 }
-func PrintGroup(group qw.Group, err error) {
+func PrintGroup(group quitter.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -426,7 +399,7 @@ func PrintGroup(group qw.Group, err error) {
 
 }
 
-func PrintGroups(groups []qw.Group, err error) {
+func PrintGroups(groups []quitter.Group, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -440,30 +413,32 @@ func PrintGroups(groups []qw.Group, err error) {
 	}
 }
 
-// returnHomeDir gives us the true home directory for letting the user know where the config file is. Windows, Unix, OS X
-func returnHomeDir() (homedir string) {
-	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-	if homedir == "" {
-		homedir = os.Getenv("USERPROFILE")
-	}
-	if homedir == "" {
-		homedir = os.Getenv("HOME")
-	}
-	return homedir
-}
+func init() {
 
-// Receive non-hidden input from user.
-func getTypin() string {
-	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
-	scanner := bufio.NewScanner(os.Stdin)
-	if scanner.Scan() {
-		line := scanner.Text()
-		//	fmt.Println(line)
-		return line
+	if len(os.Args) < 2 {
+
+		fmt.Println("\n\n" + versionbar)
+
+		fmt.Println("\n\nPlease report any bugs or issues at:\n\thttps://github.com/aerth/go-quitter")
+		fmt.Println("This message (and hopefully bugs) will be removed before v0.1.0!!\n\n")
+		time.Sleep(1 * time.Second)
+		fmt.Println("Current list of commands:")
+		fmt.Println(allCommands)
+		fmt.Printf("Run '%s -help' for more information.\n\n", os.Args[0])
+
+		os.Exit(0)
 	}
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
+	if os.Getenv("GNUSOCIALPATH") != "" {
+		gnusocialpath = os.Getenv("GNUSOCIALPATH")
+	}
+	if gnusocialnode == "" {
+		gnusocialnode = "gnusocial.de"
+	}
+	if !containsString(allCommands, os.Args[1]) {
+		fmt.Println(usage)
+		fmt.Println("Current list of commands:")
+		fmt.Println(allCommands)
+		fmt.Println(hashbar)
 		os.Exit(1)
 	}
-	return ""
 }
