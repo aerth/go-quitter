@@ -74,14 +74,15 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 
 var q *quitter.Social
-var allCommands = []string{"test", "gui", "help", "config",
+var allCommands = []string{"help", "config",
 	"read", "user", "search", "home", "follow", "unfollow",
 	"post", "mentions", "groups", "mygroups", "join", "leave",
-	"part", "mention", "replies"}
+	"part", "mention", "replies", "gui"}
 
 func main() {
 
 	q = quitter.NewSocial()
+	q.Proxy = os.Getenv("SOCKS")
 	if containsString(os.Args, "-debug") {
 		q.Scheme = "http://"
 	}
@@ -132,7 +133,7 @@ func main() {
 	switch os.Args[1] {
 	// command: go-quitter read
 	case "test":
-		runtests()
+		//		runtests()
 	case "gui":
 
 		initgui()

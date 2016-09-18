@@ -24,6 +24,8 @@ import (
 	"net/url"
 )
 
+var Socks string = ""
+
 // GetPublic shows 20 new messages.
 func (a Social) GetPublic() ([]Quip, error) {
 	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")

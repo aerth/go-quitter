@@ -6,6 +6,7 @@ type Social struct {
 	Password string
 	Node     string
 	Scheme   string
+	Proxy    string
 }
 
 // Sets the authentication method and choose node.

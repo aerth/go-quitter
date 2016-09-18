@@ -10,6 +10,7 @@ import (
 )
 
 func (a Social) FireGET(path string) ([]byte, error) {
+
 	if path == "" {
 		return nil, errors.New("No path")
 	}
@@ -21,7 +22,14 @@ func (a Social) FireGET(path string) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := apigun.Do(req)
+	var resp *http.Response
+
+	if socks != "" {
+		resp, err = proxygun.Do(req)
+	} else {
+		resp, err = apigun.Do(req)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +61,14 @@ func (a Social) FirePOST(path string, v url.Values) ([]byte, error) {
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 
-	resp, err := apigun.Do(req)
+	var resp *http.Response
+
+	if socks != "" {
+		resp, err = proxygun.Do(req)
+	} else {
+		resp, err = apigun.Do(req)
+	}
+
 	if err != nil {
 		return nil, err
 	}
