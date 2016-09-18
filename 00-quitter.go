@@ -216,7 +216,7 @@ func (a Social) PostNew(content string) (q Quip, err error) {
 	v.Set("status", content)
 	content = url.Values.Encode(v)
 	path := "/api/statuses/update.json?" + content
-	body, err := a.FirePOST(path, v)
+	body, err := a.FirePOST(path, nil)
 	if err != nil {
 		return q, err
 	}

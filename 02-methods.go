@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func (a Social) FireGET(path string) ([]byte, error) {
@@ -50,7 +51,7 @@ func (a Social) FirePOST(path string, v url.Values) ([]byte, error) {
 	if path == "" {
 		return nil, errors.New("No path")
 	}
-	if v.Encode() == "" {
+	if v.Encode() == "" && !strings.Contains(path, "update") { // update needs a blank post request..
 		return nil, errors.New("No values to post")
 	}
 	apipath := a.Scheme + a.Node + path

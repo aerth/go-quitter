@@ -21,21 +21,19 @@ var tr = &http.Transport{
 }
 
 var (
-	goquitter = "go-quitter v0.0.8"
+	goquitter = "go-quitter v0.0.9"
 )
 
 // // Set User Agent
-var proxytr = &http.Transport{}
 var apigun = &http.Client{
 	CheckRedirect: redirectPolicyFunc,
 	Transport:     tr,
 }
+var proxytr = &http.Transport{}
 var proxygun = apigun
 
 func init() {
 	if socks != "" {
-		log.Println("Using proxy", socks)
-
 		urlsocks, err := url.Parse(socks)
 		if err != nil {
 			log.Fatal("Error parsing SOCKS proxy URL:", socks, ".", err)
@@ -54,16 +52,12 @@ func init() {
 			CheckRedirect: redirectPolicyFunc,
 			Transport:     proxytr,
 		}
-	}
-	if socks != "" {
-		log.Println("Using proxy")
 		apigun = &http.Client{
 			CheckRedirect: redirectPolicyFunc,
 			Transport:     proxytr,
 		}
 	}
 }
-
 func redirectPolicyFunc(req *http.Request, reqs []*http.Request) error {
 	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
