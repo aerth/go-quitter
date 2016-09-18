@@ -53,7 +53,7 @@ func (a Social) GetMentions() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
-	path := a.Scheme + a.Node + "/api/statuses/mentions.json"
+	path := "/api/statuses/mentions.json"
 	body, err := a.FireGET(path)
 	if err != nil {
 		return nil, err
@@ -210,7 +210,7 @@ func (a Social) PostNew(content string) (q Quip, err error) {
 	if content == "" {
 		return q, errors.New("No query")
 	}
-	content = url.QueryEscape(content)
+	//content = url.QueryEscape(content)
 
 	v := url.Values{}
 	v.Set("status", content)
@@ -232,7 +232,7 @@ func (a Social) ListAllGroups() ([]Group, error) {
 		return nil, errors.New("No user/password")
 	}
 
-	path := a.Scheme + a.Node + "/api/statusnet/groups/list_all.json"
+	path := "/api/statusnet/groups/list_all.json"
 	body, err := a.FireGET(path)
 	if err != nil {
 		return nil, err
