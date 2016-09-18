@@ -109,7 +109,7 @@ func main() {
 
 	// command requires login credentials
 	needLogin := []string{"gui", "home", "follow", "unfollow",
-		"post", "mentions", "mygroups", "join", "leave", "mention",
+		"post", "mentions", "mygroups", "groups", "search", "join", "leave", "mention",
 		"replies", "direct", "inbox", "sent"}
 	if containsString(needLogin, os.Args[1]) {
 		needConfig()

@@ -1,6 +1,7 @@
 package quitter
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,11 +14,10 @@ var apipath string = "https://localhost/api/statuses/home_timeline.json"
 var proxyDialer proxy.Dialer
 var socks = os.Getenv("SOCKS")
 var err error
-
-// Set User Agent
-
+var tlsConf *tls.Config
 var tr = &http.Transport{
 	DisableCompression: true,
+	TLSClientConfig:    tlsConf,
 }
 
 var (
@@ -31,8 +31,10 @@ var apigun = &http.Client{
 }
 var proxytr = &http.Transport{}
 var proxygun = apigun
+var unsafe = os.Getenv("GNUSOCIALUNSAFE")
 
 func init() {
+
 	if socks != "" {
 		urlsocks, err := url.Parse(socks)
 		if err != nil {
@@ -47,6 +49,7 @@ func init() {
 		proxytr = &http.Transport{
 			DisableCompression: true,
 			Dial:               proxyDialer.Dial,
+			TLSClientConfig:    tlsConf,
 		}
 		proxygun = &http.Client{
 			CheckRedirect: redirectPolicyFunc,
@@ -55,6 +58,30 @@ func init() {
 		apigun = &http.Client{
 			CheckRedirect: redirectPolicyFunc,
 			Transport:     proxytr,
+		}
+		if unsafe != "" {
+			apigun = &http.Client{
+				CheckRedirect: redirectPolicyFunc,
+				Transport:     proxytr,
+			}
+			proxygun = apigun
+		}
+
+	} else {
+		if unsafe != "" {
+			unsafessl := &tls.Config{
+				InsecureSkipVerify: true,
+			}
+			proxytr = &http.Transport{
+				DisableCompression: true,
+				Dial:               proxyDialer.Dial,
+				TLSClientConfig:    unsafessl,
+			}
+			tr = &http.Transport{
+				DisableCompression: true,
+				TLSClientConfig:    unsafessl,
+			}
+
 		}
 	}
 }
