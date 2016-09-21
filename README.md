@@ -8,7 +8,7 @@ Command line **GNU Social** client and Go library
 
 $ go-quitter help
 
-##########	go-quitter v0.0.8	##############################
+##########	go-quitter v0.0.9	##############################
 
 	  Copyright 2016 aerth@sdf.org
 
