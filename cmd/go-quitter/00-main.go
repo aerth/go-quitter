@@ -1,3 +1,5 @@
+// go-quitter command is a console GNU Social client.
+
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 aerth

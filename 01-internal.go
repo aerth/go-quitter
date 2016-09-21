@@ -10,6 +10,8 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// internal functions and vars not exported
+
 var apipath string = "https://localhost/api/statuses/home_timeline.json"
 var proxyDialer proxy.Dialer
 var socks = os.Getenv("SOCKS")
