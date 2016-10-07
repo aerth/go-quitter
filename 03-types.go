@@ -1,7 +1,7 @@
 package quitter
 
-// Social is credentials needed for logging in. Set it with NewSocial()
-type Social struct {
+// Account is credentials needed for logging in. Set it with NewAccount()
+type Account struct {
 	Username string
 	Password string
 	Node     string
@@ -9,19 +9,20 @@ type Social struct {
 	Proxy    string
 }
 
-// Sets the authentication method and choose node.
-//Use like this:
+// NewAccount sets the authentication method and choose node.
+// It does NOT register a new account on a node.
+// Use like this:
 /*
 
- q := qw.NewSocial()
+ q := qw.NewAccount()
  q.Username = "john"
  q.Password = "pass123"
  q.Node = "gnusocial.de"
- q.GetHome(false)
+ resp, err := q.GetHome()
 
 */
-func NewSocial() *Social {
-	return &Social{
+func NewAccount() *Account {
+	return &Account{
 		Username: "gopher",
 		Password: "password",
 		Node:     "localhost",
@@ -36,14 +37,22 @@ type User struct {
 }
 
 // Quip is a GNU Social Quip, gets returned by GS API.
+/*
+
+	if q.User.Screenname == "joe" {
+		fmt.Println(q.ID, q.User, q.Text)
+	}
+
+
+*/
 type Quip struct {
-	Id                   int64    `json:"id"`
-	IdStr                string   `json:"id_str"`
+	ID                   int64    `json:"id"`
+	IDStr                string   `json:"id_str"`
 	InReplyToScreenName  string   `json:"in_reply_to_screen_name"`
 	InReplyToStatusID    int64    `json:"in_reply_to_status_id"`
-	InReplyToStatusIdStr string   `json:"in_reply_to_status_id_str"`
+	InReplyToStatusIDStr string   `json:"in_reply_to_status_id_str"`
 	InReplyToUserID      int64    `json:"in_reply_to_user_id"`
-	InReplyToUserIdStr   string   `json:"in_reply_to_user_id_str"`
+	InReplyToUserIDStr   string   `json:"in_reply_to_user_id_str"`
 	Lang                 string   `json:"lang"`
 	Place                string   `json:"place"`
 	PossiblySensitive    bool     `json:"possibly_sensitive"`
@@ -61,8 +70,8 @@ type Quip struct {
 
 // Group is a GNU Social Group, gets returned by GS API.
 type Group struct {
-	Id          int64  `json:"id"`
-	Url         string `json:"url"`
+	ID          int64  `json:"id"`
+	URL         string `json:"url"`
 	Nickname    string `json:"nickname"`
 	Fullname    string `json:"fullname"`
 	Member      bool   `json:"member"`

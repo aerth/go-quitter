@@ -24,10 +24,8 @@ import (
 	"net/url"
 )
 
-var Socks string = ""
-
 // GetPublic shows 20 new messages.
-func (a Social) GetPublic() ([]Quip, error) {
+func (a Account) GetPublic() ([]Quip, error) {
 	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")
 	if err != nil {
 		return nil, err
@@ -49,12 +47,12 @@ func (a Social) GetPublic() ([]Quip, error) {
 }
 
 // GetMentions shows 20 newest mentions of your username.
-func (a Social) GetMentions() ([]Quip, error) {
+func (a Account) GetMentions() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
 	path := "/api/statuses/mentions.json"
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -65,14 +63,14 @@ func (a Social) GetMentions() ([]Quip, error) {
 }
 
 // GetHome shows 20 from home timeline.
-func (a Social) GetHome() ([]Quip, error) {
+func (a Account) GetHome() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
 
 	path := "/api/statuses/home_timeline.json"
 
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +81,8 @@ func (a Social) GetHome() ([]Quip, error) {
 
 }
 
-// DoSearch returns results for query searchstr. Does send auth info.
-func (a Social) DoSearch(searchstr string) ([]Quip, error) {
+// Search returns results for query searchstr. Does send auth info.
+func (a Account) Search(searchstr string) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
@@ -97,7 +95,7 @@ func (a Social) DoSearch(searchstr string) ([]Quip, error) {
 	searchq := url.Values.Encode(v)
 
 	path := "/api/search.json?" + searchq
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +106,8 @@ func (a Social) DoSearch(searchstr string) ([]Quip, error) {
 
 }
 
-// DoPublicSearch returns results for query searchstr. Does not send auth info.
-func (a Social) DoPublicSearch(searchstr string) ([]Quip, error) {
+// PublicSearch returns results for query searchstr. Does not send auth info.
+func (a Account) PublicSearch(searchstr string) ([]Quip, error) {
 	if searchstr == "" {
 		return nil, errors.New("No query")
 	}
@@ -137,8 +135,8 @@ func (a Social) DoPublicSearch(searchstr string) ([]Quip, error) {
 
 }
 
-// DoFollow sends a request to follow a user
-func (a Social) DoFollow(followstr string) (user User, err error) {
+// Follow sends a request to follow a user
+func (a Account) Follow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
 	}
@@ -153,7 +151,7 @@ func (a Social) DoFollow(followstr string) (user User, err error) {
 	followstr = url.Values.Encode(v)
 
 	path := "/api/friendships/create.json?" + followstr
-	body, err := a.FirePOST(path, v)
+	body, err := a.firePOST(path, v)
 	if err != nil {
 		return user, err
 	}
@@ -165,8 +163,8 @@ func (a Social) DoFollow(followstr string) (user User, err error) {
 
 }
 
-// DoUnfollow sends a request to unfollow a user
-func (a Social) DoUnfollow(followstr string) (user User, err error) {
+// UnFollow sends a request to unfollow a user
+func (a Account) UnFollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
 		return user, errors.New("No user/password")
 	}
@@ -177,7 +175,7 @@ func (a Social) DoUnfollow(followstr string) (user User, err error) {
 	v.Set("id", followstr)
 	followstr = url.Values.Encode(v)
 	path := "/api/friendships/destroy.json?" + followstr
-	body, err := a.FirePOST(path, v)
+	body, err := a.firePOST(path, v)
 	if err != nil {
 		return user, err
 	}
@@ -188,10 +186,10 @@ func (a Social) DoUnfollow(followstr string) (user User, err error) {
 }
 
 // GetUserTimeline returns a userlookup's timeline
-func (a Social) GetUserTimeline(userlookup string) ([]Quip, error) {
+func (a Account) GetUserTimeline(userlookup string) ([]Quip, error) {
 
 	path := "/api/statuses/user_timeline.json?screen_name=" + userlookup
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +200,7 @@ func (a Social) GetUserTimeline(userlookup string) ([]Quip, error) {
 }
 
 // PostNew publishes content on a.Node, returns the new quip or an error.
-func (a Social) PostNew(content string) (q Quip, err error) {
+func (a Account) PostNew(content string) (q Quip, err error) {
 	if a.Username == "" || a.Password == "" {
 		return q, errors.New("No user/password")
 	}
@@ -216,7 +214,7 @@ func (a Social) PostNew(content string) (q Quip, err error) {
 	v.Set("status", content)
 	content = url.Values.Encode(v)
 	path := "/api/statuses/update.json?" + content
-	body, err := a.FirePOST(path, nil)
+	body, err := a.firePOST(path, nil)
 	if err != nil {
 		return q, err
 	}
@@ -225,15 +223,15 @@ func (a Social) PostNew(content string) (q Quip, err error) {
 
 }
 
-//  ListAllGroups lists each group in a.Node
-//  Some nodes don't return anything.
-func (a Social) ListAllGroups() ([]Group, error) {
+// ListAllGroups lists each group in a.Node
+// Some nodes don't return anything.
+func (a Account) ListAllGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
 
 	path := "/api/statusnet/groups/list_all.json"
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -245,13 +243,13 @@ func (a Social) ListAllGroups() ([]Group, error) {
 }
 
 // ListMyGroups lists each group a a.Username is a member of
-func (a Social) ListMyGroups() ([]Group, error) {
+func (a Account) ListMyGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
 		return nil, errors.New("No user/password")
 	}
 
 	path := "/api/statusnet/groups/list.json"
-	body, err := a.FireGET(path)
+	body, err := a.fireGET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +262,7 @@ func (a Social) ListMyGroups() ([]Group, error) {
 }
 
 // JoinGroup sends a request to join group grp.
-func (a Social) JoinGroup(grp string) (g Group, err error) {
+func (a Account) JoinGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}
@@ -281,7 +279,7 @@ func (a Social) JoinGroup(grp string) (g Group, err error) {
 	grp = url.Values.Encode(v)
 
 	path := "/api/statusnet/groups/join.json?" + grp
-	body, err := a.FirePOST(path, v)
+	body, err := a.firePOST(path, v)
 	if err != nil {
 		return g, err
 	}
@@ -292,7 +290,7 @@ func (a Social) JoinGroup(grp string) (g Group, err error) {
 }
 
 // PartGroup sends a request to part group grp.
-func (a Social) PartGroup(grp string) (g Group, err error) {
+func (a Account) PartGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
 		return g, errors.New("No user/password")
 	}
@@ -308,7 +306,7 @@ func (a Social) PartGroup(grp string) (g Group, err error) {
 	v.Set("nickname", grp)
 	grp = url.Values.Encode(v)
 	path := "/api/statusnet/groups/leave.json?" + grp
-	body, err := a.FirePOST(path, v)
+	body, err := a.firePOST(path, v)
 	if err != nil {
 		return g, err
 	}

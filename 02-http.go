@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-func (a Social) FireGET(path string) ([]byte, error) {
+// fireGET sends a get request and returns byte, error.
+func (a Account) fireGET(path string) ([]byte, error) {
 
 	if path == "" {
 		return nil, errors.New("No path")
@@ -25,11 +26,7 @@ func (a Social) FireGET(path string) ([]byte, error) {
 
 	var resp *http.Response
 
-	if socks != "" {
-		resp, err = proxygun.Do(req)
-	} else {
-		resp, err = apigun.Do(req)
-	}
+	resp, err = apigun.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -39,6 +36,12 @@ func (a Social) FireGET(path string) ([]byte, error) {
 	if string(body) == "" {
 		return nil, errors.New("node response: " + resp.Status)
 	}
+
+	/*
+		Here, I tried a couple ways of telling if the response was an error.
+		This one ended up working the most reliably. TODO:
+
+	*/
 	var apiresponse Badrequest
 	_ = json.Unmarshal(body, &apiresponse)
 	if apiresponse.Error != "" {
@@ -47,7 +50,10 @@ func (a Social) FireGET(path string) ([]byte, error) {
 
 	return body, nil
 }
-func (a Social) FirePOST(path string, v url.Values) ([]byte, error) {
+
+// firePOST uses the account details to send a POST request to the node.
+// HTTP_REFERER is added to keep nodes happy.
+func (a Account) firePOST(path string, v url.Values) ([]byte, error) {
 	if path == "" {
 		return nil, errors.New("No path")
 	}
@@ -59,21 +65,14 @@ func (a Social) FirePOST(path string, v url.Values) ([]byte, error) {
 	req, err := http.NewRequest("POST", apipath, b)
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", a.Scheme+a.Node+"/")
-	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	// req.Header.Add("Content-Type", "[application/json; charset=utf-8") // is this a typo ?
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
-
 	var resp *http.Response
-
-	if socks != "" {
-		resp, err = proxygun.Do(req)
-	} else {
-		resp, err = apigun.Do(req)
-	}
-
+	resp, err = apigun.Do(req)
 	if err != nil {
 		return nil, err
 	}
-
 	body, _ := ioutil.ReadAll(resp.Body)
 	if string(body) == "" {
 		return nil, errors.New("node response: " + resp.Status)

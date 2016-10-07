@@ -16,7 +16,9 @@ all:
 deps:
 	go get -d ./...
 
-
+test:
+	go test -v
+	
 install:
 	sudo mv bin/${NAME}-${RELEASE} ${PREFIX}/${NAME}
 

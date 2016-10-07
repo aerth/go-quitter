@@ -1,20 +1,21 @@
-// go-quitter command is a console GNU Social client.
-
-// The MIT License (MIT)
-//
-// Copyright (c) 2016 aerth
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
+// go-quitter is a console GNU Social client.
 package main
+
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 aerth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+*/
 
 import (
 	"fmt"
@@ -75,7 +76,7 @@ Set your environmental variable to change nodes, use a different config,
 For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 `
 
-var q *quitter.Social
+var q *quitter.Account
 var allCommands = []string{"help", "config",
 	"read", "user", "search", "home", "follow", "unfollow",
 	"post", "mentions", "groups", "mygroups", "join", "leave",
@@ -83,7 +84,7 @@ var allCommands = []string{"help", "config",
 
 func main() {
 
-	q = quitter.NewSocial()
+	q = quitter.NewAccount()
 	q.Proxy = os.Getenv("SOCKS")
 	if containsString(os.Args, "-debug") {
 		q.Scheme = "http://"
@@ -154,7 +155,7 @@ func main() {
 		if searchstr == "" {
 			searchstr = getTypin()
 		}
-		PrintQuips(q.DoSearch(searchstr))
+		PrintQuips(q.Search(searchstr))
 		os.Exit(0)
 
 		// command: go-quitter user aerth
@@ -185,7 +186,7 @@ func main() {
 			fmt.Println("Who to follow?\nExample: someone (without the @)")
 			followstr = getTypin()
 		}
-		PrintUser(q.DoFollow(followstr))
+		PrintUser(q.Follow(followstr))
 		os.Exit(0)
 
 	// command: go-quitter unfollow
@@ -200,7 +201,7 @@ func main() {
 			fmt.Println("Who to unfollow?\nExample: someone (without the @)")
 			followstr = getTypin()
 		}
-		PrintUser(q.DoUnfollow(followstr))
+		PrintUser(q.UnFollow(followstr))
 		os.Exit(0)
 
 	// command: go-quitter home

@@ -12,7 +12,7 @@ import (
 )
 
 func Example() {
-	q := quitter.NewSocial()
+	q := quitter.NewAccount()
 	q.Username = "username"
 	q.Password = "password"
 	q.Node = "localhost"
@@ -22,12 +22,12 @@ func Example() {
 		os.Exit(1)
 	}
 	for _, quip := range quips {
-		fmt.Printf("%s %s", quip.IdStr, quip.Text)
+		fmt.Printf("%s %s", quip.IDStr, quip.Text)
 	}
 }
 
-func ExampleNewSocial() {
-	q := quitter.NewSocial()
+func ExampleNewAccount() {
+	q := quitter.NewAccount()
 	q.Username = "username"
 	q.Password = "password"
 	q.Node = "localhost"
@@ -37,11 +37,12 @@ func ExampleNewSocial() {
 		os.Exit(1)
 	}
 	for _, quip := range quips {
-		fmt.Printf("%s %s", quip.IdStr, quip.Text)
+		fmt.Printf("%s %s", quip.IDStr, quip.Text)
 	}
 }
-func ExampleSocial_PostNew() {
-	q := quitter.NewSocial()
+
+func ExampleAccount_PostNew() {
+	q := quitter.NewAccount()
 	q.Username = "username"
 	q.Password = "password"
 	q.Node = "localhost"
@@ -51,11 +52,11 @@ func ExampleSocial_PostNew() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Printf("%s %s", quip.IdStr, quip.Text)
+	fmt.Printf("%s %s", quip.IDStr, quip.Text)
 }
 
-func ExampleSocial_GetPublic() {
-	q := quitter.NewSocial()
+func ExampleAccount_GetPublic() {
+	q := quitter.NewAccount()
 	q.Username = "username"
 	q.Password = "password"
 	q.Node = "localhost"
@@ -65,7 +66,7 @@ func ExampleSocial_GetPublic() {
 		os.Exit(1)
 	}
 	for _, quip := range quips {
-		fmt.Printf("%s %s", quip.IdStr, quip.Text)
+		fmt.Printf("%s %s", quip.IDStr, quip.Text)
 	}
 
 }

@@ -1,3 +1,6 @@
+// Minimal quitter library example
+package main
+
 /*
 
 Copyright 2016 aerth
@@ -9,8 +12,6 @@ You can import the libary as whatever name you want.
 Default is quitter, here it has an alias of qw.
 
 */
-package main
-
 import (
 	"fmt"
 	"os"
@@ -21,7 +22,7 @@ import (
 func main() {
 
 	if len(os.Args) == 2 && os.Args[1] == "home" {
-		q := qw.NewSocial()
+		q := qw.NewAccount()
 		q.Username = "username"
 		q.Password = "nopassword"
 		q.Node = "gnusocial.de"
@@ -41,7 +42,7 @@ func main() {
 	}
 
 	if len(os.Args) == 2 && os.Args[1] == "public" {
-		q2 := qw.NewSocial()
+		q2 := qw.NewAccount()
 		q2.Node = "gnusocial.de"
 		quips, err := q2.GetPublic(true)
 		if err != nil {
