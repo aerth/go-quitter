@@ -330,11 +330,14 @@ func PrintQuips(quips []quitter.Quip, err error) {
 	if err != nil {
 		fmt.Println(err)
 		return
-
 	}
 	if len(quips) == 0 && err == nil {
 		fmt.Println("No results.")
 		return
+	}
+
+	for i, j := 0, len(quips)-1; i < j; i, j = i+1, j-1 {
+		quips[i], quips[j] = quips[j], quips[i]
 	}
 	for i := range quips {
 		if quips[i].User.Screenname == quips[i].User.Name {
