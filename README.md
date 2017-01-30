@@ -31,15 +31,15 @@ go-quitter leave ___		Part a !group (can also use part)
 
 Using environmental variables will override the config:
 
-GNUSOCIALNODE
-GNUSOCIALPASS
-GNUSOCIALUSER
-GNUSOCIALPATH
+GNUSOCIALNODE - GNU Social Node to connect to
+GNUSOCIALPASS - Password to use
+GNUSOCIALUSER - Username to use
+GNUSOCIALPATH - Path to config file
 
 Set your environmental variable to change nodes, use a different config,
 	or change user or password for a one-time session.
 
-For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+For example: ```export GNUSOCIALNODE="gnusocial.de"``` in your ~/.shrc or ~/.profile or ~/.bashrc
 
 
 
@@ -48,14 +48,8 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 
 ```
 
-## Install binary for your OS (now for every OS)
+## Install (outdated) binary for your OS
 ### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases/latest)
-[Windows](https://github.com/aerth/go-quitter/releases/latest) |
-[Linux](https://github.com/aerth/go-quitter/releases/latest) |
-[FreeBSD](https://github.com/aerth/go-quitter/releases/latest) |
-[NetBSD](https://github.com/aerth/go-quitter/releases/latest) |
-[OS X](https://github.com/aerth/go-quitter/releases/latest) |
-[Other OS or Architecture](https://github.com/aerth/go-quitter/releases/latest)
 
 ## Install from Go source (sometimes newer)
 
@@ -90,23 +84,6 @@ GNUSOCIALPATH=gnusocial.se go-quitter config
 ```
 
 Next time you run it, it will ask for your config password. I like to keep it blank so I just hit ENTER.
-
-
-## Or.. Use in scripts
-
-```
-// cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
-export GNUSOCIALUSER=yourname
-export GNUSOCIALPASS=yourpass
-export GNUSOCIALNODE=gnusocial.de
-
-// then run this command so you dont have to log out and back in.
-. ~/.shrc
-
-
-// make sure you chmod your shell rc file if shared machine.
-chmod o-r ~/.shrc
-chmod g-r ~/.shrc
 
 ## Usage
 
