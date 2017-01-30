@@ -4,7 +4,7 @@ Command line **GNU Social** client and Go library
 
 [![GoDoc](https://godoc.org/github.com/aerth/go-quitter?status.svg)](https://godoc.org/github.com/aerth/go-quitter)
 
-```go 
+```go
 
 $ go-quitter help
 
@@ -50,11 +50,11 @@ For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
 
 ## Install binary for your OS (now for every OS)
 ### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases/latest)
-[Windows](https://github.com/aerth/go-quitter/releases/latest) | 
-[Linux](https://github.com/aerth/go-quitter/releases/latest) | 
-[FreeBSD](https://github.com/aerth/go-quitter/releases/latest) | 
-[NetBSD](https://github.com/aerth/go-quitter/releases/latest) | 
-[OS X](https://github.com/aerth/go-quitter/releases/latest) | 
+[Windows](https://github.com/aerth/go-quitter/releases/latest) |
+[Linux](https://github.com/aerth/go-quitter/releases/latest) |
+[FreeBSD](https://github.com/aerth/go-quitter/releases/latest) |
+[NetBSD](https://github.com/aerth/go-quitter/releases/latest) |
+[OS X](https://github.com/aerth/go-quitter/releases/latest) |
 [Other OS or Architecture](https://github.com/aerth/go-quitter/releases/latest)
 
 ## Install from Go source (sometimes newer)
@@ -93,8 +93,6 @@ Next time you run it, it will ask for your config password. I like to keep it bl
 
 
 ## Or.. Use in scripts
-
-For automation, scripts, and cronjobs, you *need* to delete config file and use environmental variables instead. Something like…
 
 ```
 // cat ~/.shrc || cat ~/.zshrc || cat ~/.bashrc || cat ~/.whatrc
