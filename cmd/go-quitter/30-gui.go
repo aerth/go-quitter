@@ -12,10 +12,6 @@ import (
 	runewidth "github.com/mattn/go-runewidth"
 )
 
-//	"github.com/mattn/go-runewidth"
-//	"github.com/zyedidia/tcell"
-//	"github.com/gdamore/tcell"
-
 var row = 1
 var style = tcell.StyleDefault
 
