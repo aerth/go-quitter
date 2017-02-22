@@ -68,19 +68,21 @@ Using environmental variables will override the config:
 GNUSOCIALNODE
 GNUSOCIALPASS
 GNUSOCIALUSER
-GNUSOCIALPATH
+GNUSOCIALPATH - path to config file (default ~/.go-quitter)
 
 Set your environmental variable to change nodes, use a different config,
 	or change user or password for a one-time session.
 
-For example: "export GNUSOCIALNODE=gs.sdf.org" in your ~/.shrc or ~/.profile
+Want to use a SOCKS proxy? Set the SOCKS environmental variable. Here is an example:
+
+	SOCKS=socks5://127.0.0.1:1080 ./go-quitter
 `
 
 var q *quitter.Account
 var allCommands = []string{"help", "config",
 	"read", "user", "search", "home", "follow", "unfollow",
 	"post", "mentions", "groups", "mygroups", "join", "leave",
-	"part", "mention", "replies", "gui"}
+	"part", "mention", "replies", "gui-test", "upload"}
 
 func main() {
 
@@ -111,9 +113,9 @@ func main() {
 	}
 
 	// command requires login credentials
-	needLogin := []string{"gui", "home", "follow", "unfollow",
+	needLogin := []string{"gui-test", "home", "follow", "unfollow",
 		"post", "mentions", "mygroups", "groups", "search", "join", "leave", "mention",
-		"replies", "direct", "inbox", "sent"}
+		"replies", "direct", "inbox", "sent", "upload"}
 	if containsString(needLogin, os.Args[1]) {
 		needConfig()
 	} else { // command doesn't need login
@@ -137,7 +139,7 @@ func main() {
 	// command: go-quitter read
 	case "test":
 		//		runtests()
-	case "gui":
+	case "gui-test":
 
 		initgui()
 		os.Exit(0)
@@ -261,26 +263,56 @@ func main() {
 		PrintGroup(q.PartGroup(content))
 		os.Exit(0)
 
-		// go-quitter
+		// command: go-quitter post
 	case "post":
-		content := ""
+		var content string
 		if len(os.Args) > 1 {
 			content = strings.Join(os.Args[2:], " ") // go-quitter post wow this is a post\!
 		}
 		if content == "" {
 			content = getTypin()
 		}
-
-		fmt.Println("Preview:\n\n[" + q.Username + "] " + content)
-		fmt.Println("\nType YES to publish!")
-		if askForConfirmation() == false {
-			fmt.Println("Your status was not updated.")
-			os.Exit(0)
+		// go-quitter post -y hello world
+		if !strings.HasPrefix(content, "-y ") {
+			fmt.Println("Preview:\n\n[" + q.Username + "] " + content)
+			fmt.Println("\nType YES to publish!")
+			if askForConfirmation() == false {
+				fmt.Println("Your status was not updated.")
+				os.Exit(0)
+			}
+		} else {
+			content = strings.TrimPrefix(content, "-y ")
 		}
 
 		PrintQuip(q.PostNew(content))
-		os.Exit(0)
 
+		os.Exit(0)
+		// command: go-quitter post
+	case "upload":
+		var path, content string // go-quitter upload cat.gif lol
+		if len(os.Args) > 1 {
+			path = os.Args[2] // cat.gif
+		}
+		if path == "" {
+			path = getTypin()
+		}
+		if len(os.Args) > 2 {
+			content = strings.Join(os.Args[3:], " ") // lol
+		}
+		if content == "" {
+			content = getTypin()
+		}
+		fmt.Printf("Uploading %q", path)
+		if content != "" {
+			fmt.Printf(" with caption %q", content)
+		}
+		fmt.Println()
+		time.Sleep(time.Second)
+		out, err := q.Upload(path, content)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		fmt.Println(out)
 	default:
 		// this happens if we invoke with somehing like "go-quitter test"
 		fmt.Println("Command not found, try ", os.Args[0]+" help")
@@ -425,13 +457,9 @@ func init() {
 	if len(os.Args) < 2 {
 
 		fmt.Println("\n\n" + versionbar)
-
-		fmt.Println("\n\nPlease report any bugs or issues at:\n\thttps://github.com/aerth/go-quitter")
-		fmt.Println("This message (and hopefully bugs) will be removed before v0.1.0!!\n\n")
-		time.Sleep(1 * time.Second)
 		fmt.Println("Current list of commands:")
 		fmt.Println(allCommands)
-		fmt.Printf("Run '%s -help' for more information.\n\n", os.Args[0])
+		fmt.Printf("\nRun '%s -help' for more information.\n\n", os.Args[0])
 
 		os.Exit(0)
 	}

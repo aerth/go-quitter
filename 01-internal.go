@@ -97,7 +97,7 @@ func Init() {
 }
 
 func redirectPolicyFunc(req *http.Request, reqs []*http.Request) error {
-	req.Header.Add("Content-Type", "[application/json; charset=utf-8")
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("User-Agent", goquitter)
 	return nil
 }

@@ -3,7 +3,7 @@ Package quitter is a Go library to interact with GNU Social instances.
 
 		The MIT License (MIT)
 
-		Copyright (c) 2016 aerth
+		Copyright (c) 2016-2017 aerth <aerth@riseup.net>
 
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -18,10 +18,17 @@ Package quitter is a Go library to interact with GNU Social instances.
 package quitter
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"mime/multipart"
+	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 // GetPublic shows 20 new messages.
@@ -49,7 +56,7 @@ func (a Account) GetPublic() ([]Quip, error) {
 // GetMentions shows 20 newest mentions of your username.
 func (a Account) GetMentions() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
-		return nil, errors.New("No user/password")
+		return nil, errors.New("Invalid Credentials")
 	}
 	path := "/api/statuses/mentions.json"
 	body, err := a.fireGET(path)
@@ -65,7 +72,7 @@ func (a Account) GetMentions() ([]Quip, error) {
 // GetHome shows 20 from home timeline.
 func (a Account) GetHome() ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
-		return nil, errors.New("No user/password")
+		return nil, errors.New("Invalid Credentials")
 	}
 
 	path := "/api/statuses/home_timeline.json"
@@ -84,7 +91,7 @@ func (a Account) GetHome() ([]Quip, error) {
 // Search returns results for query searchstr. Does send auth info.
 func (a Account) Search(searchstr string) ([]Quip, error) {
 	if a.Username == "" || a.Password == "" {
-		return nil, errors.New("No user/password")
+		return nil, errors.New("Invalid Credentials")
 	}
 	if searchstr == "" {
 		return nil, errors.New("No query")
@@ -138,11 +145,11 @@ func (a Account) PublicSearch(searchstr string) ([]Quip, error) {
 // Follow sends a request to follow a user
 func (a Account) Follow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
-		return user, errors.New("No user/password")
+		return user, errors.New("Invalid Credentials")
 	}
 
 	if followstr == "" {
-		return user, errors.New("No query.")
+		return user, errors.New("no query")
 	}
 
 	v := url.Values{}
@@ -166,7 +173,7 @@ func (a Account) Follow(followstr string) (user User, err error) {
 // UnFollow sends a request to unfollow a user
 func (a Account) UnFollow(followstr string) (user User, err error) {
 	if a.Username == "" || a.Password == "" {
-		return user, errors.New("No user/password")
+		return user, errors.New("Invalid Credentials")
 	}
 	if followstr == "" {
 		return user, errors.New("No query")
@@ -202,7 +209,7 @@ func (a Account) GetUserTimeline(userlookup string) ([]Quip, error) {
 // PostNew publishes content on a.Node, returns the new quip or an error.
 func (a Account) PostNew(content string) (q Quip, err error) {
 	if a.Username == "" || a.Password == "" {
-		return q, errors.New("No user/password")
+		return q, errors.New("Invalid Credentials")
 	}
 
 	if content == "" {
@@ -227,7 +234,7 @@ func (a Account) PostNew(content string) (q Quip, err error) {
 // Some nodes don't return anything.
 func (a Account) ListAllGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
-		return nil, errors.New("No user/password")
+		return nil, errors.New("Invalid Credentials")
 	}
 
 	path := "/api/statusnet/groups/list_all.json"
@@ -245,7 +252,7 @@ func (a Account) ListAllGroups() ([]Group, error) {
 // ListMyGroups lists each group a a.Username is a member of
 func (a Account) ListMyGroups() ([]Group, error) {
 	if a.Username == "" || a.Password == "" {
-		return nil, errors.New("No user/password")
+		return nil, errors.New("Invalid Credentials")
 	}
 
 	path := "/api/statusnet/groups/list.json"
@@ -264,11 +271,11 @@ func (a Account) ListMyGroups() ([]Group, error) {
 // JoinGroup sends a request to join group grp.
 func (a Account) JoinGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
-		return g, errors.New("No user/password")
+		return g, errors.New("Invalid Credentials")
 	}
 
 	if grp == "" {
-		return g, errors.New("Blank group detected. Not going furthur.")
+		return g, errors.New("no group")
 	}
 	v := url.Values{}
 
@@ -292,11 +299,11 @@ func (a Account) JoinGroup(grp string) (g Group, err error) {
 // PartGroup sends a request to part group grp.
 func (a Account) PartGroup(grp string) (g Group, err error) {
 	if a.Username == "" || a.Password == "" {
-		return g, errors.New("No user/password")
+		return g, errors.New("Invalid Credentials")
 	}
 
 	if grp == "" {
-		return g, errors.New("Blank group detected. Not going furthur.")
+		return g, errors.New("no group")
 	}
 
 	v := url.Values{}
@@ -314,4 +321,76 @@ func (a Account) PartGroup(grp string) (g Group, err error) {
 	_ = json.Unmarshal(body, &g)
 
 	return g, err
+}
+
+func (a Account) Upload(fpath string, content ...string) (link string, err error) {
+
+	// Optional Caption
+	var caption string
+	if content != nil {
+		caption = strings.Join(content, "\n")
+	} else {
+		caption = " "
+	}
+
+	// Multipart Form
+	var b = new(bytes.Buffer)
+	w := multipart.NewWriter(b)
+	f, err := os.Open(fpath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	fw, err := w.CreateFormFile("media", filepath.Base(fpath))
+	if err != nil {
+		return "", err
+	}
+	fb, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+	n, err := fw.Write(fb)
+	if err != nil {
+		panic(err)
+	}
+	if fw, err = w.CreateFormField("status"); err != nil {
+		return "", err
+	}
+	if _, err = fw.Write([]byte(caption)); err != nil {
+		return
+	}
+	w.Close()
+
+	// Request
+	uploadURL := a.Scheme + a.Node + "/api/statuses/update.json"
+	req, err := http.NewRequest("POST", uploadURL, b)
+
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(a.Username, a.Password)
+	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	fmt.Printf("%v bytes uploading\n", n)
+	res, err := apigun.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+
+	// Response
+	if res.StatusCode != http.StatusOK {
+		err = fmt.Errorf("bad status: %s", res.Status)
+		return "", err
+	}
+
+	var bb []byte
+	bb, err = ioutil.ReadAll(res.Body)
+	bstr := string(bb)
+	if strings.Contains("Page not found", bstr) {
+		return "404 Page not found", err
+	}
+
+	return string(bb), err
+
 }

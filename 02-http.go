@@ -57,7 +57,7 @@ func (a Account) firePOST(path string, v url.Values) ([]byte, error) {
 	if path == "" {
 		return nil, errors.New("No path")
 	}
-	if v.Encode() == "" && !strings.Contains(path, "update") { // update needs a blank post request..
+	if v.Encode() == "" && !strings.Contains(path, "update") { // update can use a blank post request..
 		return nil, errors.New("No values to post")
 	}
 	apipath := a.Scheme + a.Node + path
