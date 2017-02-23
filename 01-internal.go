@@ -1,6 +1,7 @@
 package quitter
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -78,6 +79,7 @@ func Init() {
 		if err != nil {
 			log.Fatal("Error parsing SOCKS proxy URL:", socks, ".", err)
 		}
+		fmt.Fprintf(os.Stderr, "Using SOCKS proxy: %q\n", u.String())
 		proxyDialer, err = proxy.FromURL(u, proxy.Direct)
 		if err != nil {
 			log.Fatal("Error setting SOCKS proxy.", err)

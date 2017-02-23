@@ -28,6 +28,7 @@ func (a Account) fireGET(path string) ([]byte, error) {
 
 	resp, err = apigun.Do(req)
 
+
 	if err != nil {
 		return nil, err
 	}

@@ -323,6 +323,7 @@ func (a Account) PartGroup(grp string) (g Group, err error) {
 	return g, err
 }
 
+// Upload an image and optional caption
 func (a Account) Upload(fpath string, content ...string) (link string, err error) {
 
 	// Optional Caption
