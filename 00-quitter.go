@@ -324,7 +324,7 @@ func (a Account) PartGroup(grp string) (g Group, err error) {
 }
 
 // Upload an image and optional caption
-func (a Account) Upload(fpath string, content ...string) (link string, err error) {
+func (a Account) Upload(fpath string, content ...string) (quip Quip, err error) {
 
 	// Optional Caption
 	var caption string
@@ -339,23 +339,23 @@ func (a Account) Upload(fpath string, content ...string) (link string, err error
 	w := multipart.NewWriter(b)
 	f, err := os.Open(fpath)
 	if err != nil {
-		return "", err
+		return Quip{}, err
 	}
 	defer f.Close()
 	fw, err := w.CreateFormFile("media", filepath.Base(fpath))
 	if err != nil {
-		return "", err
+		return Quip{}, err
 	}
 	fb, err := ioutil.ReadAll(f)
 	if err != nil {
-		return "", err
+		return Quip{}, err
 	}
 	n, err := fw.Write(fb)
 	if err != nil {
-		panic(err)
+		return Quip{}, err
 	}
 	if fw, err = w.CreateFormField("status"); err != nil {
-		return "", err
+		return Quip{}, err
 	}
 	if _, err = fw.Write([]byte(caption)); err != nil {
 		return
@@ -367,7 +367,7 @@ func (a Account) Upload(fpath string, content ...string) (link string, err error
 	req, err := http.NewRequest("POST", uploadURL, b)
 
 	if err != nil {
-		return "", err
+		return Quip{}, err
 	}
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("User-Agent", goquitter)
@@ -375,23 +375,24 @@ func (a Account) Upload(fpath string, content ...string) (link string, err error
 	fmt.Printf("%v bytes uploading\n", n)
 	res, err := apigun.Do(req)
 	if err != nil {
-		return "", err
+		return Quip{}, err
 	}
 
 
 	// Response
 	if res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("bad status: %s", res.Status)
-		return "", err
+		return Quip{}, err
 	}
 
 	var bb []byte
 	bb, err = ioutil.ReadAll(res.Body)
 	bstr := string(bb)
 	if strings.Contains("Page not found", bstr) {
-		return "404 Page not found", err
+		return Quip{Text: "404 Page not found"}, err
 	}
+	var tweet Quip
+	err = json.Unmarshal(bb, &tweet)
 
-	return string(bb), err
-
+	return tweet, err
 }
