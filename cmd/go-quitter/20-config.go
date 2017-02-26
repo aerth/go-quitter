@@ -93,11 +93,11 @@ func needConfig() {
 			q.Node = os.Getenv("GNUSOCIALNODE")
 		}
 		if q.Username == username {
-			fmt.Println("Welcome back, " + q.Username + "@" + q.Node)
+			fmt.Fprintln(os.Stderr, "Welcome back, " + q.Username + "@" + q.Node)
 		} else {
-			fmt.Println("Welcome, " + q.Username + "@" + q.Node)
+			fmt.Fprintln(os.Stderr, "Welcome, " + q.Username + "@" + q.Node)
 		}
 	} else {
-		fmt.Println("No config file detected.")
+		fmt.Fprintln(os.Stderr, "No config file detected.")
 	}
 }

@@ -1,3 +1,5 @@
+// +build cui
+
 package main
 
 import (
@@ -14,8 +16,10 @@ import (
 
 var row = 1
 var style = tcell.StyleDefault
+func init(){
 
-func initgui() {
+
+initgui =func() {
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -187,6 +191,7 @@ func initgui() {
 	<-quit
 
 	s.Fini()
+}
 }
 func putln(s tcell.Screen, str string, style ...tcell.Style) {
 	_, y := s.Size()

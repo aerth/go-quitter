@@ -308,11 +308,7 @@ func main() {
 		}
 		fmt.Println()
 		time.Sleep(time.Second)
-		out, err := q.Upload(path, content)
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-		fmt.Println(out)
+		PrintQuip(q.Upload(path, content))
 	default:
 		// this happens if we invoke with somehing like "go-quitter test"
 		fmt.Println("Command not found, try ", os.Args[0]+" help")
@@ -413,6 +409,8 @@ func PrintUsers(users []quitter.User, err error) {
 		}
 	}
 }
+
+//PrintUser prints a single @user
 func PrintUser(user quitter.User, err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -451,6 +449,8 @@ func PrintGroups(groups []quitter.Group, err error) {
 		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
 	}
 }
+
+var initgui = func() { fmt.Println("go-quitter not built with cui support.") }
 
 func init() {
 
