@@ -3,7 +3,7 @@
 
 NAME=go-quitter
 VERSION=0.0.9
-RELEASE:=v${VERSION}.$(shell git rev-parse --verify --short HEAD)
+RELEASE?=v${VERSION}.$(shell git rev-parse --verify --short HEAD)
 PREFIX=/usr/local/bin
 all:
 	@mkdir -p bin
