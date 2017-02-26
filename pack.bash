@@ -10,7 +10,7 @@ package(){
         fi
         cd bin
         echo "Creating HASH file"
-        for i in $(ls | grep -v "VERSION"); do sha384sum $i >> $WORKDIR/HASH; done
+        for i in $(ls | grep -v "VERSION"); do sha256sum $i >> $WORKDIR/HASH; done
         cd $WORKDIR
         echo "Packaging all in ./bin"
         for i in $(ls bin|grep -v "VERSION"); do zip pkg/$i.zip bin/$i README.md LICENSE.md HASH; done
