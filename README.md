@@ -56,9 +56,10 @@ For example: ```export GNUSOCIALNODE="gnusocial.de"``` in your ~/.shrc or ~/.pro
 If you have Go toolchain installed you can build it yourself with:
 
 ```shell
-GOPATH=/tmp/go go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
+GOPATH=/tmp/go go get -v -u -d github.com/aerth/go-quitter/cmd/go-quitter
 cd $GOPATH/src/github.com/aerth/go-quitter/cmd/go-quitter
-make && sudo make install
+make && su -c 'make install'
+
 ```
 
 ## Go Get-able
