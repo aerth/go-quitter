@@ -26,7 +26,7 @@ func main() {
 		q.Username = "username"
 		q.Password = "nopassword"
 		q.Node = "gnusocial.de"
-		quips, err := q.GetHome(false)
+		quips, err := q.GetHome()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -44,7 +44,7 @@ func main() {
 	if len(os.Args) == 2 && os.Args[1] == "public" {
 		q2 := qw.NewAccount()
 		q2.Node = "gnusocial.de"
-		quips, err := q2.GetPublic(true)
+		quips, err := q2.GetPublic()
 		if err != nil {
 			fmt.Println(err)
 		}
