@@ -16,7 +16,7 @@ all:
 	@echo "		\"bin/${NAME}-${RELEASE}\""
 	@echo
 	@mkdir -p bin
-	@go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE} -ldflags '${LDFLAGS}' ${GOCMD}
+	@go build -v -x ${XTRA} -o bin/${NAME} -ldflags '${LDFLAGS}' ${GOCMD}
 
 deps:
 	go get -d ./...
@@ -24,8 +24,9 @@ deps:
 test:
 	go test -v
 
-install:
-	sudo mv bin/${NAME}-${RELEASE} ${PREFIX}/${NAME}
+install: bin/go-quitter
+#	sudo mv bin/${NAME}-${RELEASE} ${PREFIX}/${NAME}
+	sudo mv bin/${NAME} ${PREFIX}/${NAME}
 
 update: upgrade deps all install
 
