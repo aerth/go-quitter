@@ -8,10 +8,18 @@ import (
 	"github.com/aerth/seconf"
 )
 
-func makeConfig() {
-	if seconf.Detect(gnusocialpath) == false {
+func init(){
+	if gnusocialpath == "" {
+		gnusocialpath = "go-quitter"
+	}
+}
 
+func makeConfig() {
+
+	if seconf.Detect(gnusocialpath) == false {
 		fmt.Println("Creating config file. You will be asked for your user, node, and password.")
+		fmt.Println("You must have a GNU Social account already. To sign up, find a node!")
+		fmt.Println("More info here: https://gnu.io/social/try/servers.html")
 		fmt.Println("Your password will not echo.")
 		seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 	} else {
@@ -98,6 +106,6 @@ func needConfig() {
 			fmt.Fprintln(os.Stderr, "Welcome, " + q.Username + "@" + q.Node)
 		}
 	} else {
-		fmt.Fprintln(os.Stderr, "No config file detected.")
+		fmt.Fprintln(os.Stderr, "No config file detected at", gnusocialpath)
 	}
 }

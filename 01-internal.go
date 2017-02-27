@@ -1,6 +1,7 @@
 package quitter
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,95 +12,76 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-// internal functions and vars not exported
-
 var apipath string
-
-//var apipath = "https://localhost/api/statuses/home_timeline.json"
-var proxyDialer proxy.Dialer
-var socks = os.Getenv("SOCKS")
+var ProxyDialer proxy.Dialer
+var ProxyString string
 var err error
-
-var (
-	goquitter = "go-quitter v0.0.9"
-)
-
-// // Set User Agent
 var apigun = &http.Client{
 	CheckRedirect: redirectPolicyFunc,
-	Transport:     tr,
+	Transport:     Transport,
 }
 
-var unsafe = os.Getenv("GNUSOCIALUNSAFE")
-var tr = &http.Transport{}
+var Transport = &http.Transport{}
 
 func init() {
-	Init()
+
 }
 
-// Init can be called after something like
-// os.Setenv("SOCKS", "socks5://localhost:9050"),
-// otherwise we don't recognize the env var because we have
-// already initialized (before injecting os.Setenv).
-func Init() {
-	/*
+var enableSOCKS bool
+var enableInvalidTLS bool
 
-		 This Init() is just for those who want either:
-		 	To use a proxy
-			To ignore ssl verification
-
-			And:
-			Want to set os.Getenv("SOCKS") in a program
-			they are writing, instead of typing it on the command line.
-	*/
-	socks = os.Getenv("SOCKS")
-
-	if socks == "" {
-		socks = os.Getenv("PROXY")
-	}
-
-	if socks == "" && unsafe == "" {
+func EnableSOCKS(socksurl string) {
+	if socksurl == "" {
 		return
 	}
 
-	/*
-		   Socks proxy
-		   First check it is valid. Needs to be valid.
-			 		SOCKS=socks5://127.0.0.1:9050 program_name
-
-
-	*/
-	if os.Getenv("TOR") != "" || strings.ToUpper(socks) == "TOR" {
-		socks = "socks5://127.0.0.1:9050"
-	} else if strings.ToUpper(socks) == "TRUE" {
-		socks = "socks5://127.0.0.1:1080"
-	}
-	if socks != "" {
-		u, err := url.Parse(socks)
-		if err != nil {
-			log.Fatal("Error parsing SOCKS proxy URL:", socks, ".", err)
-		}
-		fmt.Fprintf(os.Stderr, "Using SOCKS proxy: %q\n", u.String())
-		proxyDialer, err = proxy.FromURL(u, proxy.Direct)
-		if err != nil {
-			log.Fatal("Error setting SOCKS proxy.", err)
-		}
-		tr.Dial = proxyDialer.Dial
-
+	// tor users can use SOCKS=tor
+	if strings.ToUpper(socksurl) == "TOR" {
+		socksurl = "socks5://127.0.0.1:9050"
+		// i use SOCKS=true
+	} else if strings.ToUpper(socksurl) == "TRUE" {
+		socksurl = "socks5://127.0.0.1:1080"
 	}
 
-	/*
-	  Unsafe SSL
-	  In the rare event you want to ignore SSL certificate checks
-	*/
-	if unsafe != "" {
-		tr.TLSClientConfig.InsecureSkipVerify = true
+	u, err := url.Parse(socksurl)
+	if err != nil {
+		log.Fatal("Error parsing SOCKS proxy URL:", socksurl, ".", err)
 	}
 
+	ProxyDialer, err = proxy.FromURL(u, proxy.Direct)
+	if err != nil {
+		log.Fatal("Error setting SOCKS proxy.", err)
+	}
+
+	Transport.Dial = ProxyDialer.Dial
+	apigun.Transport = Transport
+	ProxyString = u.String()
+	fmt.Fprintf(os.Stderr, "Using SOCKS proxy: %q\n", ProxyString)
 }
+
+/*
+EnableInvalidTLS In the rare event you want to ignore SSL certificate checks
+To ignore ssl verification
+*/
+func EnableInvalidTLS() {
+	if Transport == nil {
+		Transport = new(http.Transport)
+	}
+	if Transport.TLSClientConfig == nil {
+
+		Transport.TLSClientConfig = new(tls.Config)
+	}
+
+	Transport.TLSClientConfig.InsecureSkipVerify = true
+	fmt.Fprint(os.Stderr, "Skipping TLS Verification (unsafe)\n")
+	return
+}
+
+// UserAgent to send
+var UserAgent = "go-quitter/0.9"
 
 func redirectPolicyFunc(req *http.Request, reqs []*http.Request) error {
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("User-Agent", UserAgent)
 	return nil
 }

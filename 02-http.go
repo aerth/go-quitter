@@ -19,7 +19,7 @@ func (a Account) fireGET(path string) ([]byte, error) {
 	apipath := a.Scheme + a.Node + path
 	req, err := http.NewRequest("GET", apipath, nil)
 	req.SetBasicAuth(a.Username, a.Password)
-	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("User-Agent", UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (a Account) firePOST(path string, v url.Values) ([]byte, error) {
 	req.Header.Set("HTTP_REFERER", a.Scheme+a.Node+"/")
 	// req.Header.Add("Content-Type", "[application/json; charset=utf-8") // is this a typo ?
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("User-Agent", UserAgent)
 	var resp *http.Response
 	resp, err = apigun.Do(req)
 	if err != nil {

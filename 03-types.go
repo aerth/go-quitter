@@ -25,7 +25,7 @@ func NewAccount() *Account {
 	return &Account{
 		Username: "gopher",
 		Password: "password",
-		Node:     "localhost",
+		Node:     "example.org",
 		Scheme:   "https://",
 	}
 }

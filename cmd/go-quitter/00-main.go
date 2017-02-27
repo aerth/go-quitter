@@ -23,16 +23,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aerth/go-quitter"
+	"github.com/aerth/go-quitter" // libgoquitter
 )
 
 var (
-	goquitter     = "go-quitter v0.0.9"
+	release       = "v0.0.9 (go get)"
+	buildinfo     string
+	goquitter     = "go-quitter " + release
 	username      = os.Getenv("GNUSOCIALUSER")
 	password      = os.Getenv("GNUSOCIALPASS")
 	gnusocialnode = os.Getenv("GNUSOCIALNODE")
+	gnusocialpath = os.Getenv("GNUSOCIALPATH")
 	apipath       = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
-	gnusocialpath = "go-quitter"
+	builtWithCUI  = false
+	initgui       func()
 	configuser    string
 	configpass    string
 	confignode    string
@@ -41,64 +45,149 @@ var (
 	hashbar       string
 )
 
-var versionbar = strings.Repeat("#", 10) + "\t" + goquitter + "\t" + strings.Repeat("#", 30)
+func init() {
+	if gnusocialpath == "" {
+		gnusocialpath = "go-quitter"
+	}
+}
 
-var usage = "\n" + "\t" + `  Copyright 2016 aerth@sdf.org
+var versionbar = goquitter + " built " + buildinfo
 
-go-quitter config		Creates config file	*do this first*
-go-quitter read			Reads 20 new posts
-go-quitter read fast		Reads 20 new posts (no delay)
-go-quitter home			Your home timeline.
-go-quitter user username	Looks up "username" timeline
-go-quitter post ____ 		Posts to your node.
-go-quitter post 		Post mode.
-go-quitter mentions		Mentions your @name
-go-quitter search ___		Searches for ____
-go-quitter search		Search mode.
-go-quitter follow		Follow a user
-go-quitter unfollow		Unfollow a user
-go-quitter groups		List all groups on current node
-go-quitter mygroups		List only groups you are member of
-go-quitter join ___		Join a !group
-go-quitter leave ___		Part a !group (can also use part)
+var usage = `
+config		Creates config file	*do this first*
+read			Reads 20 new posts
+read fast		Reads 20 new posts (no delay)
+home			Your home timeline.
+user username	Looks up "username" timeline
+post ____ 		Posts to your node.
+post 		Post mode.
+mentions		Mentions your @name
+search ___		Searches for ____
+search		Search mode.
+follow		Follow a user
+unfollow		Unfollow a user
+groups		List all groups on current node
+mygroups		List only groups you are member of
+join ___		Join a !group
+leave ___		Part a !group (can also use part)
+
 
 Using environmental variables will override the config:
 
-GNUSOCIALNODE
-GNUSOCIALPASS
-GNUSOCIALUSER
 GNUSOCIALPATH - path to config file (default ~/.go-quitter)
+GNUSOCIALNODE, GNUSOCIALPASS, GNUSOCIALUSER - account info
 
-Set your environmental variable to change nodes, use a different config,
-	or change user or password for a one-time session.
+Want to use a SOCKS proxy?
+Set the SOCKS environmental variable. Here are a few examples:
 
-Want to use a SOCKS proxy? Set the SOCKS environmental variable. Here is an example:
+	SOCKS=true go-quitter -socks # short for 127.0.0.1:1080
+	SOCKS=tor go-quitter -socks # short for 127.0.0.1:9050
+	SOCKS=socks5://127.0.0.1:22000 go-quitter -socks
 
-	SOCKS=socks5://127.0.0.1:1080 ./go-quitter
+[FLAGS] can be placed before a command. Here are the available flags:
+
+	-socks Don't connect without proxy
+	-http Don't use https
+	-unsafe Don't validate TLS cert
 `
 
 var q *quitter.Account
-var allCommands = []string{"help", "config",
+
+var allCommands = []string{"version", "help", "config",
 	"read", "user", "search", "home", "follow", "unfollow",
 	"post", "mentions", "groups", "mygroups", "join", "leave",
-	"replies", "gui-test", "upload"}
+	"replies", "upload"}
+var needLogin = []string{"home", "follow", "unfollow",
+	"post", "mentions", "mygroups", "groups", "search", "join", "leave", "mention",
+	"replies", "direct", "inbox", "sent", "upload", "cui"}
 
-func main() {
+func print(s string) {
+	fmt.Fprint(os.Stderr, s)
+}
 
-	q = quitter.NewAccount()
-	q.Proxy = os.Getenv("SOCKS")
-	if containsString(os.Args, "-debug") {
+func printf(f string, i ...interface{}) {
+	fmt.Fprintf(os.Stderr, f, i...)
+}
+
+// flagy can transcend space and time
+func flagy(a []string) []string {
+
+	//	-unsafe flag does not validate TLS certs
+	if containsString(a, "-unsafe") {
+		// -unsafe: remove -unsafe arg
+		a = func(old []string) (new []string) {
+			for i := range old {
+				if old[i] == "-unsafe" {
+					continue
+				}
+				new = append(new, old[i])
+			}
+			return new
+		}(a)
+		// -unsafe: warn user on stderr
 		q.Scheme = "http://"
+		printf("*Using %q scheme*\n", q.Scheme)
 	}
 
-	if os.Args[1] == "config" {
+	// -http flag uses http instead of https
+	if containsString(a, "-http") {
+		// -http: remove -http arg
+		a = func(old []string) (new []string) {
+			for i := range old {
+				if old[i] == "-http" {
+					continue
+				}
+				new = append(new, old[i])
+			}
+			return new
+		}(a)
+		// -unsafe: warn user on stderr
+		quitter.EnableInvalidTLS()
+		print("*Not validating TLS certificates*\n")
+	}
+	//	-socks flag MAKE SURE we are using a socks proxy.
+	// it must be configured using SOCKS environmental variable or new config
+	if containsString(a, "-socks") {
+		// -socks: remove -socks arg
+		a = func(old []string) (new []string) {
+			for i := range old {
+				if old[i] == "-socks" {
+					continue
+				}
+				new = append(new, old[i])
+			}
+			return new
+		}(a)
+		// -socks: warn user on stderr
+		if quitter.ProxyString == "" {
+			fmt.Println("No proxy")
+			os.Exit(1)
+		}
+	}
+	return a
+}
+
+func main() {
+	args := os.Args
+	q = quitter.NewAccount()
+
+	args = flagy(args)
+
+	if len(args) < 2 || !containsString(allCommands, args[1]) {
+		fmt.Println(versionbar)
+		fmt.Println("Commands:", allCommands)
+		os.Exit(1)
+	}
+
+	if args[1] == "config" {
 		makeConfig()
 		os.Exit(0)
 	}
 
 	// command: go-quitter help
 	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
-	if containsString(helpArg, os.Args[1]) {
+	if containsString(helpArg, args[1]) {
+		fmt.Println(goquitter, buildinfo)
 		fmt.Println(usage)
 		fmt.Println(hashbar)
 		os.Exit(0)
@@ -106,16 +195,14 @@ func main() {
 
 	// command: go-quitter version (or -v)
 	versionArg := []string{"version", "-v"}
-	if containsString(versionArg, os.Args[1]) {
-		fmt.Println(goquitter)
+	if containsString(versionArg, args[1]) {
+		fmt.Println(goquitter, buildinfo)
 		os.Exit(0)
 	}
 
 	// command requires login credentials
-	needLogin := []string{"gui-test", "home", "follow", "unfollow",
-		"post", "mentions", "mygroups", "groups", "search", "join", "leave", "mention",
-		"replies", "direct", "inbox", "sent", "upload"}
-	if containsString(needLogin, os.Args[1]) {
+
+	if containsString(needLogin, args[1]) {
 		needConfig()
 	} else { // command doesn't need login
 		if configExists() {
@@ -134,12 +221,9 @@ func main() {
 		q.Node = os.Getenv("GNUSOCIALNODE")
 	}
 
-	switch os.Args[1] {
+	switch args[1] {
 	// command: go-quitter read
-	case "test":
-		//		runtests()
-	case "gui-test":
-
+	case "cui":
 		initgui()
 		os.Exit(0)
 
@@ -150,8 +234,8 @@ func main() {
 		// command: go-quitter search _____
 	case "search":
 		searchstr := ""
-		if len(os.Args) > 1 {
-			searchstr = strings.Join(os.Args[2:], " ")
+		if len(args) > 1 {
+			searchstr = strings.Join(args[2:], " ")
 		}
 		if searchstr == "" {
 			searchstr = getTypin()
@@ -161,8 +245,8 @@ func main() {
 
 		// command: go-quitter user aerth
 	case "user":
-		if len(os.Args) > 2 && os.Args[2] != "" {
-			userlookup := os.Args[2]
+		if len(args) > 2 && args[2] != "" {
+			userlookup := args[2]
 			PrintQuips(q.GetUserTimeline(userlookup))
 
 			os.Exit(0)
@@ -178,10 +262,10 @@ func main() {
 		// command: go-quitter follow
 	case "follow":
 		followstr := ""
-		if len(os.Args) == 1 {
-			followstr = os.Args[2]
-		} else if len(os.Args) > 1 {
-			followstr = strings.Join(os.Args[2:], " ")
+		if len(args) == 1 {
+			followstr = args[2]
+		} else if len(args) > 1 {
+			followstr = strings.Join(args[2:], " ")
 		}
 		if followstr == "" {
 			fmt.Println("Who to follow?\nExample: someone (without the @)")
@@ -193,10 +277,10 @@ func main() {
 	// command: go-quitter unfollow
 	case "unfollow":
 		followstr := ""
-		if len(os.Args) == 1 {
-			followstr = os.Args[2]
-		} else if len(os.Args) > 1 {
-			followstr = strings.Join(os.Args[2:], " ")
+		if len(args) == 1 {
+			followstr = args[2]
+		} else if len(args) > 1 {
+			followstr = strings.Join(args[2:], " ")
 		}
 		if followstr == "" {
 			fmt.Println("Who to unfollow?\nExample: someone (without the @)")
@@ -223,8 +307,8 @@ func main() {
 		// command: go-quitter join
 	case "join":
 		groupstr := ""
-		if len(os.Args) > 1 {
-			groupstr = strings.Join(os.Args[2:], " ")
+		if len(args) > 1 {
+			groupstr = strings.Join(args[2:], " ")
 		}
 		if groupstr == "" {
 			fmt.Println("Which group to join?\nExample: groupname (without the !)")
@@ -236,8 +320,8 @@ func main() {
 		// command: go-quitter part
 	case "part":
 		groupstr := ""
-		if len(os.Args) > 1 {
-			groupstr = strings.Join(os.Args[2:], " ")
+		if len(args) > 1 {
+			groupstr = strings.Join(args[2:], " ")
 		}
 		if groupstr == "" {
 			fmt.Println("Which group to leave?\nExample: groupname (without the !)")
@@ -256,8 +340,8 @@ func main() {
 		// command: go-quitter leave
 	case "leave":
 		content := ""
-		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ")
+		if len(args) > 1 {
+			content = strings.Join(args[2:], " ")
 		}
 		PrintGroup(q.PartGroup(content))
 		os.Exit(0)
@@ -265,8 +349,8 @@ func main() {
 		// command: go-quitter post
 	case "post":
 		var content string
-		if len(os.Args) > 1 {
-			content = strings.Join(os.Args[2:], " ") // go-quitter post wow this is a post\!
+		if len(args) > 1 {
+			content = strings.Join(args[2:], " ") // go-quitter post wow this is a post\!
 		}
 		if content == "" {
 			content = getTypin()
@@ -286,17 +370,18 @@ func main() {
 		PrintQuip(q.PostNew(content))
 
 		os.Exit(0)
-		// command: go-quitter post
+
+	// command: go-quitter upload
 	case "upload":
 		var path, content string // go-quitter upload cat.gif lol
-		if len(os.Args) > 1 {
-			path = os.Args[2] // cat.gif
+		if len(args) > 1 {
+			path = args[2] // cat.gif
 		}
 		if path == "" {
 			path = getTypin()
 		}
-		if len(os.Args) > 2 {
-			content = strings.Join(os.Args[3:], " ") // lol
+		if len(args) > 2 {
+			content = strings.Join(args[3:], " ") // lol
 		}
 		if content == "" {
 			content = getTypin()
@@ -310,35 +395,20 @@ func main() {
 		PrintQuip(q.Upload(path, content))
 	default:
 		// this happens if we invoke with somehing like "go-quitter test"
-		fmt.Println("Command not found, try ", os.Args[0]+" help")
+		fmt.Println("Command not found, try ", args[0]+" help")
 		os.Exit(1)
 	}
 }
 
-var initgui = func() { fmt.Println("go-quitter not built with cui support.") }
-
 func init() {
-
 	if len(os.Args) < 2 {
-
-		fmt.Println("\n\n" + versionbar)
-		fmt.Println("Current list of commands:")
-		fmt.Println(allCommands)
-		fmt.Printf("\nRun '%s -help' for more information.\n\n", os.Args[0])
-
-		os.Exit(0)
-	}
-	if os.Getenv("GNUSOCIALPATH") != "" {
-		gnusocialpath = os.Getenv("GNUSOCIALPATH")
-	}
-	if gnusocialnode == "" {
-		gnusocialnode = "gnusocial.de"
-	}
-	if !containsString(allCommands, os.Args[1]) {
-		fmt.Println(usage)
-		fmt.Println("Current list of commands:")
-		fmt.Println(allCommands)
-		fmt.Println(hashbar)
+		fmt.Fprintln(os.Stderr, versionbar)
+		fmt.Fprintln(os.Stderr, "Current list of commands:")
+		fmt.Fprintln(os.Stderr, allCommands)
+		fmt.Fprintf(os.Stderr, "\nRun '%s -help' for more information.\n\n", os.Args[0])
 		os.Exit(1)
+	}
+	if os.Getenv("SOCKS") != "" {
+		quitter.EnableSOCKS(os.Getenv("SOCKS"))
 	}
 }

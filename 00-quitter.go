@@ -370,9 +370,9 @@ func (a Account) Upload(fpath string, content ...string) (quip Quip, err error) 
 		return Quip{}, err
 	}
 	req.SetBasicAuth(a.Username, a.Password)
-	req.Header.Set("User-Agent", goquitter)
+	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	fmt.Printf("%v bytes uploading\n", n)
+	fmt.Fprintf(os.Stderr, "%v bytes uploading\n", n)
 	res, err := apigun.Do(req)
 	if err != nil {
 		return Quip{}, err

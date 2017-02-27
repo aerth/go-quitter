@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/aerth/go-quitter" // libgoquitter
 )
 
 // Receive non-hidden input from user.
@@ -21,7 +23,6 @@ func getTypin() string {
 	}
 	return ""
 }
-
 
 // Ask user to confirm the action.
 func askForConfirmation() bool {
@@ -61,8 +62,6 @@ func posString(slice []string, element string) int {
 	return -1
 }
 
-
-
 // returnHomeDir gives us the true home directory for letting the user know where the config file is. Windows, Unix, OS X
 func returnHomeDir() (homedir string) {
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
@@ -74,7 +73,6 @@ func returnHomeDir() (homedir string) {
 	}
 	return homedir
 }
-
 
 func PrintQuips(quips []quitter.Quip, err error) {
 	if err != nil {

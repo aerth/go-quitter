@@ -2,6 +2,13 @@
 
 package main
 
+/*
+
+30-cui.go
+adds console user interface
+
+*/
+
 import (
 	"fmt"
 	"os"
@@ -17,8 +24,9 @@ import (
 var row = 1
 var style = tcell.StyleDefault
 func init(){
-
-
+fmt.Fprintln(os.Stderr, "CUI Initialized.")
+builtWithCUI = true
+allCommands = append(allCommands, "cui")
 initgui =func() {
 	s, e := tcell.NewScreen()
 	if e != nil {
@@ -54,35 +62,10 @@ initgui =func() {
 	s.Clear()
 	quit := make(chan struct{})
 	style = bold
-	putln(s, "Press ESC to Exit")
-	//putln(s, "Character set: "+s.CharacterSet())
+	putln(s, "Press ESC to Exit, Ctrl+R for read public timeline")
 	style = plain
-	drawUserBox(s)
 
-	// for i := 1; i < len(q.Username); i++ {
-	// 	putln(s, string([]rune{
-	// 		tcell.RuneLTee,
-	// 		tcell.RuneHLine,
-	// 		tcell.RunePlus,
-	// 		tcell.RuneHLine,
-	// 		tcell.RuneRTee,
-	// 	}))
-	//
-	// }
-	// putln(s, string([]rune{
-	// 	tcell.RuneVLine,
-	// 	tcell.RuneDiamond,
-	// 	tcell.RuneVLine,
-	// 	tcell.RuneUArrow,
-	// 	tcell.RuneVLine,
-	// })+"  (diamond, up arrow)")
-	// putln(s, string([]rune{
-	// 	tcell.RuneLLCorner,
-	// 	tcell.RuneHLine,
-	// 	tcell.RuneBTee,
-	// 	tcell.RuneHLine,
-	// 	tcell.RuneLRCorner,
-	// }))
+	drawUserBox(s)
 
 	s.Show()
 	go func() {
@@ -192,6 +175,7 @@ initgui =func() {
 
 	s.Fini()
 }
+
 }
 func putln(s tcell.Screen, str string, style ...tcell.Style) {
 	_, y := s.Size()
@@ -246,7 +230,7 @@ func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 	}
 	if len(deferred) != 0 {
 		s.SetContent(x+i, y, deferred[0], deferred[1:], style)
-		i += dwidth
+		//i += dwidth
 	}
 }
 func greatest(ints ...int) int {
