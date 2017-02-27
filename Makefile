@@ -39,7 +39,7 @@ install: bin/go-quitter
 	mv bin/${NAME} ${PREFIX}/${NAME}
 	chmod 755 ${PREFIX}/${NAME}
 	@echo installed as ${PREFIX}/${NAME}
-	@rmdir bin
+	@rmdir bin 2> /dev/null | true
 
 update: upgrade deps build
 	su -c 'make install'
