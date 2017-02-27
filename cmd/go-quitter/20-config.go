@@ -63,7 +63,6 @@ func configExists() bool {
 	return seconf.Detect(gnusocialpath)
 }
 func needConfig() {
-
 	if seconf.Detect(gnusocialpath) == true {
 		configdecoded, err := seconf.Read(gnusocialpath)
 		if err != nil {
@@ -108,5 +107,6 @@ func needConfig() {
 		}
 	} else {
 		fmt.Fprintln(os.Stderr, "No config file detected at", gnusocialpath)
+		os.Exit(1)
 	}
 }

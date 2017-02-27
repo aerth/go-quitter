@@ -12,7 +12,6 @@ adds console user interface
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	quitter "github.com/aerth/go-quitter"
@@ -24,10 +23,10 @@ import (
 var row = 1
 var style = tcell.StyleDefault
 func init(){
-fmt.Fprintln(os.Stderr, "CUI Initialized.")
 builtWithCUI = true
 allCommands = append(allCommands, "cui")
 initgui =func() {
+	fmt.Fprintln(os.Stderr, "Initializing CUI menu")
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -77,13 +76,19 @@ initgui =func() {
 				case tcell.KeyEscape, tcell.KeyEnter:
 					close(quit)
 					return
+				case tcell.KeyHelp, tcell.KeyCtrlG:
+					for _, line := range strings.Split("Help mode!\n"+usage, "\n"){
+						putln(s, line, style)
+					}
+					s.Show()
 				case tcell.KeyCtrlD:
 					drawFakeTweets(s)
-					s.Sync()
+					s.Show()
 				case tcell.KeyCtrlL:
-					s.Sync()
+					s.Show()
 				case tcell.KeyUp:
-
+					s.Clear()
+					s.Show()
 					if bufYindex < len(buf)-1 {
 						bufYindex++
 					}
@@ -91,20 +96,30 @@ initgui =func() {
 						col++
 					}
 					redrawBuf(s)
-					s.Sync()
+					s.Show()
 				case tcell.KeyDown:
-					if bufYindex > 0 && bufYindex != 1 {
+					s.Clear()
+					s.Show()
+					if bufYindex > 0 {
 						bufYindex--
 					}
 					if col > 0 {
 						col--
 					}
 					redrawBuf(s)
-					s.Sync()
+					s.Show()
 
 				case tcell.KeyCtrlT:
 					s.Clear()
-					quips := []quitter.Quip{dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip()}
+					go func(){
+					quips, err := q.GetPublic()
+					if err != nil {
+						lines := cutline(maxwidth-2, err.Error())
+						for _, line := range lines {
+							putln(s, line)
+						}
+						return
+					}
 					//var bz []string
 					for _, quip := range quips {
 						b1 := "@" + quip.User.Screenname
@@ -127,7 +142,8 @@ initgui =func() {
 
 						switch ev.Key() {
 						case tcell.KeyUp:
-
+							s.Clear()
+							s.Show()
 							if bufYindex < len(buf)-1 {
 								bufYindex++
 							}
@@ -135,22 +151,23 @@ initgui =func() {
 								col++
 							}
 							redrawBuf(s)
-							s.Sync()
+							s.Show()
 						case tcell.KeyDown:
-							if bufYindex > 0 && bufYindex != 1 {
+							if bufYindex > 0 {
 								bufYindex--
 							}
 							if col > 0 {
 								col--
 							}
 							redrawBuf(s)
-							s.Sync()
+							s.Show()
 						}
 
 						row++
 
 					}
-					s.Sync()
+					s.Show()
+					}()
 
 				case tcell.KeyCtrlC:
 
@@ -159,10 +176,10 @@ initgui =func() {
 					style = bold
 					putln(s, "Press ESC to Exit")
 					//putln(s, "Character set: "+s.CharacterSet())
-					style = plain
-					drawUserBox(s)
-					quips := []quitter.Quip{dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip()}
-					drawTweetBox(s, quips)
+					// style = plain
+					// drawUserBox(s)
+					// quips := []quitter.Quip{dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip(), dummyQuip()}
+					// drawTweetBox(s, quips)
 					s.Sync()
 				}
 			case *tcell.EventResize:
@@ -281,7 +298,7 @@ func cutline(size int, s string) []string {
 // Bust Tweet into Lines
 func bustTweet(s tcell.Screen, q quitter.Quip) []string {
 	maxwidth, _ := s.Size()
-	lines := cutline(maxwidth-10, q.Text)
+	lines := cutline(maxwidth-20, q.Text)
 	return lines
 }
 func drawTweetBox(s tcell.Screen, quips []quitter.Quip) {
@@ -293,7 +310,7 @@ func drawTweetBox(s tcell.Screen, quips []quitter.Quip) {
 	}
 	putln(s,
 		string([]rune{tcell.RuneULCorner})+
-			strings.Repeat(string([]rune{tcell.RuneHLine}), width-2)+
+			strings.Repeat(string([]rune{tcell.RuneHLine}), width-4)+
 			string([]rune{tcell.RuneURCorner}),
 	)
 
@@ -410,6 +427,9 @@ func redrawBuf(s tcell.Screen) {
 		bufYindex = len(buf) - 1
 	}
 	for _, line := range buf[bufYindex:] {
-		putln(s, "Col: "+strconv.Itoa(col)+" Row:"+strconv.Itoa(row)+line)
+		putln(s, line)
+		putln(s, "\n")
+
+		//putln(s, "Col: "+strconv.Itoa(col)+" Row:"+strconv.Itoa(row)+line)
 	}
 }
