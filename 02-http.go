@@ -64,6 +64,9 @@ func (a Account) firePOST(path string, v url.Values) ([]byte, error) {
 	apipath := a.Scheme + a.Node + path
 	b := bytes.NewBufferString(v.Encode())
 	req, err := http.NewRequest("POST", apipath, b)
+	if err != nil {
+		return nil, err
+	}
 	req.SetBasicAuth(a.Username, a.Password)
 	req.Header.Set("HTTP_REFERER", a.Scheme+a.Node+"/")
 	// req.Header.Add("Content-Type", "[application/json; charset=utf-8") // is this a typo ?

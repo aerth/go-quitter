@@ -46,7 +46,7 @@ func ExampleAccount_PostNew() {
 	q.Username = "username"
 	q.Password = "password"
 	q.Node = "localhost"
-	content := ` dang this is a " < new > ! quip about to be published>>><><><?><?><?><<?><?><?><?><?><?><?><?><"`
+	content := ` dang this is a " < new > ! quip about to be published>>><><><"`
 	quip, err := q.PostNew(content)
 	if err != nil {
 		fmt.Println(err)

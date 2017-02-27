@@ -53,38 +53,37 @@ func init() {
 
 var versionbar = goquitter + " built " + buildinfo
 
-var usage = `
-config		Creates config file	*do this first*
-read			Reads 20 new posts
-read fast		Reads 20 new posts (no delay)
-home			Your home timeline.
-user username	Looks up "username" timeline
-post ____ 		Posts to your node.
-post 		Post mode.
-mentions		Mentions your @name
-search ___		Searches for ____
-search		Search mode.
-follow		Follow a user
-unfollow		Unfollow a user
-groups		List all groups on current node
-mygroups		List only groups you are member of
-join ___		Join a !group
-leave ___		Part a !group (can also use part)
+var usage = "Usage: " + os.Args[0] + ` [command]
+config         Creates config file	*do this first*
+read           Reads 20 new posts
+home           Your home timeline.
+user ____      Looks up "username" timeline
+post ____      Posts to your node.
+post           Post mode.
+mentions       Mentions your @name
+search ___     Searches for ____
+search         Search mode.
+follow         Follow a user
+unfollow       Unfollow a user
+groups         List all groups on current node
+mygroups       List only groups you are member of
+join ___       Join a !group
+leave ___      Part a !group (can also use part)`
 
-
-Using environmental variables will override the config:
+var usage2 = `
+* Using environmental variables will override the config:
 
 GNUSOCIALPATH - path to config file (default ~/.go-quitter)
 GNUSOCIALNODE, GNUSOCIALPASS, GNUSOCIALUSER - account info
 
-Want to use a SOCKS proxy?
+* Want to use a SOCKS proxy?
 Set the SOCKS environmental variable. Here are a few examples:
 
 	SOCKS=true go-quitter -socks # short for 127.0.0.1:1080
 	SOCKS=tor go-quitter -socks # short for 127.0.0.1:9050
 	SOCKS=socks5://127.0.0.1:22000 go-quitter -socks
 
-[FLAGS] can be placed before a command. Here are the available flags:
+* -flags can be placed before a [command]. Here are the available flags:
 
 	-socks Don't connect without proxy
 	-http Don't use https
@@ -170,12 +169,26 @@ func flagy(a []string) []string {
 func main() {
 	args := os.Args
 	q = quitter.NewAccount()
-
+	if os.Getenv("SOCKS") != "" {
+		quitter.EnableSOCKS(os.Getenv("SOCKS"))
+	}
 	args = flagy(args)
 
+	// invalid command
 	if len(args) < 2 || !containsString(allCommands, args[1]) {
 		fmt.Println(versionbar)
-		fmt.Println("Commands:", allCommands)
+		commandstring := func() string {
+			var s string
+			for i, v := range allCommands {
+				if i%4 == 0 {
+					s += "\n\t"
+				}
+				s += v + " "
+			}
+			return s
+		}()
+		fmt.Println("Commands:", commandstring)
+		fmt.Println("Use 'go-quitter help' or 'go-quitter help more' for usage info")
 		os.Exit(1)
 	}
 
@@ -185,18 +198,24 @@ func main() {
 	}
 
 	// command: go-quitter help
-	helpArg := []string{"help", "halp", "usage", "-help", "-h"}
+	helpArg := []string{"help", "halp", "usage", "-help", "-h", "--help"}
 	if containsString(helpArg, args[1]) {
 		fmt.Println(goquitter, buildinfo)
 		fmt.Println(usage)
-		fmt.Println(hashbar)
+
+		if len(args) > 2 && args[2] == "more" {
+			fmt.Println(usage2)
+		} else {
+			fmt.Println("Type 'go-quitter help more' for more usage info!")
+		}
+		fmt.Println("Check for updates: https://github.com/aerth/go-quitter")
 		os.Exit(0)
 	}
 
 	// command: go-quitter version (or -v)
 	versionArg := []string{"version", "-v"}
 	if containsString(versionArg, args[1]) {
-		fmt.Println(goquitter, buildinfo)
+		fmt.Println(versionbar)
 		os.Exit(0)
 	}
 
@@ -393,22 +412,10 @@ func main() {
 		fmt.Println()
 		time.Sleep(time.Second)
 		PrintQuip(q.Upload(path, content))
-	default:
-		// this happens if we invoke with somehing like "go-quitter test"
-		fmt.Println("Command not found, try ", args[0]+" help")
-		os.Exit(1)
+	default: //
 	}
 }
 
 func init() {
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, versionbar)
-		fmt.Fprintln(os.Stderr, "Current list of commands:")
-		fmt.Fprintln(os.Stderr, allCommands)
-		fmt.Fprintf(os.Stderr, "\nRun '%s -help' for more information.\n\n", os.Args[0])
-		os.Exit(1)
-	}
-	if os.Getenv("SOCKS") != "" {
-		quitter.EnableSOCKS(os.Getenv("SOCKS"))
-	}
+
 }

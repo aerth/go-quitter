@@ -17,14 +17,15 @@ func init(){
 func makeConfig() {
 
 	if seconf.Detect(gnusocialpath) == false {
-		fmt.Println("Creating config file. You will be asked for your user, node, and password.")
+		fmt.Println(versionbar)
+		fmt.Printf("New config: %q\nYou will be asked for your user, node, and password.\n", returnHomeDir()+"/."+gnusocialpath)
 		fmt.Println("You must have a GNU Social account already. To sign up, find a node!")
 		fmt.Println("More info here: https://gnu.io/social/try/servers.html")
 		fmt.Println("Your password will not echo.")
 		seconf.Create(gnusocialpath, "GNU Social", "GNU Social username", "Which GNU Social node? Example: gnusocial.de", "password: will not echo")
 	} else {
 
-		fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample: GNUSOCIALPATH=gnusocial.de go-quitter config")
+		fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\nYou can also set the GNUSOCIALPATH env to use multiple config files. \nExample to use ~/.gs-2 config:\n\t'GNUSOCIALPATH=gs-2 go-quitter config'")
 		fmt.Println("\nConfig exists:", returnHomeDir()+"/."+gnusocialpath)
 		os.Exit(1)
 	}
