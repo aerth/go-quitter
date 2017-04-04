@@ -52,19 +52,19 @@ deps:
 
 cross:
 	mkdir -p bin
-	GOOS=windows GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-WIN32.exe -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=windows GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-WIN64.exe -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=darwin GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-OSX-x86 -ldflags='${LDFLAGS}' ${GOCMD}
-GOOS=darwin GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-OSX-amd64 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=linux GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-amd64 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=linux GOARCH=arm go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-arm -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=linux GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-x86 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=freebsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-freebsd-amd64 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=freebsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-freebsd-x86 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=openbsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-openbsd-amd64 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=openbsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-openbsd-x86 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=netbsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-netbsd-amd64 -ldflags='${LDFLAGS}' ${GOCMD}
-	GOOS=netbsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-netbsd-x86 -ldflags='${LDFLAGS}' ${GOCMD}
+	GOOS=windows GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-WIN32.exe -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=windows GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-WIN64.exe -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=darwin GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-OSX-x86 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=darwin GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-OSX-amd64 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=linux GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-amd64 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=linux GOARCH=arm go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-arm -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=linux GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-linux-x86 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=freebsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-freebsd-amd64 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=freebsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-freebsd-x86 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=openbsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-openbsd-amd64 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=openbsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-openbsd-x86 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=netbsd GOARCH=amd64 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-netbsd-amd64 -ldflags="${LDFLAGS}" ${GOCMD}
+	GOOS=netbsd GOARCH=386 go build -v -x ${XTRA} -o bin/${NAME}-${RELEASE}-netbsd-x86 -ldflags="${LDFLAGS}" ${GOCMD}
 
 cui:
 	XTRA='-tags cui' make

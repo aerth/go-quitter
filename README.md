@@ -51,17 +51,17 @@ Check for updates: https://github.com/aerth/go-quitter
 
 ```
 
-## Install (outdated) binary for your OS
+## Install binary for your OS
 ### [Latest Binary Releases](https://github.com/aerth/go-quitter/releases/latest)
 
-## Install from Go source (sometimes newer)
+## Install from Go source (most likely newer)
 
-If you have Go toolchain installed you can build it yourself with:
+If you have Go toolchain installed you can build and install it yourself with:
 
 ```shell
 GOPATH=/tmp/go go get -v -u -d github.com/aerth/go-quitter/cmd/go-quitter
 cd $GOPATH/src/github.com/aerth/go-quitter/cmd/go-quitter
-make && su -c 'make install'
+CGO_ENABLED=0 make && su -c 'make install'
 
 ```
 
@@ -70,7 +70,8 @@ make && su -c 'make install'
 Or use go get:
 
 ```
-go get -v -u github.com/aerth/go-quitter/cmd/go-quitter
+
+GOBIN=$HOME/bin/ CGO_ENABLED=0 go get -v -u -x -ldflags='-s -w' github.com/aerth/go-quitter/cmd/go-quitter
 
 ```
 
