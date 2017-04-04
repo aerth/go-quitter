@@ -4,42 +4,45 @@ Command line **GNU Social** client and Go library
 
 [![GoDoc](https://godoc.org/github.com/aerth/go-quitter?status.svg)](https://godoc.org/github.com/aerth/go-quitter)
 
-```go
+```shell go-quitter help more```
 
-$ go-quitter help
+```
+Usage: go-quitter [command]
+config         Creates config file	*do this first*
+read           Reads 20 new posts
+home           Your home timeline.
+user ____      Looks up "username" timeline
+post ____      Posts to your node.
+post           Post mode.
+mentions       Mentions your @name
+search ___     Searches for ____
+search         Search mode.
+follow         Follow a user
+unfollow       Unfollow a user
+groups         List all groups on current node
+mygroups       List only groups you are member of
+join ___       Join a !group
+leave ___      Part a !group (can also use part)
 
-##########	go-quitter v0.0.9	##############################
+* Using environmental variables will override the config:
 
-	  Copyright 2016 aerth@sdf.org
+GNUSOCIALPATH - path to config file (default ~/.go-quitter)
+GNUSOCIALNODE, GNUSOCIALPASS, GNUSOCIALUSER - account info
 
-go-quitter config		Creates config file	**do this first**
-go-quitter read			Reads 20 new posts
-go-quitter read fast		Reads 20 new posts (no delay)
-go-quitter home			Your home timeline.
-go-quitter user username	Looks up "username" timeline
-go-quitter post ____ 		Posts to your node.
-go-quitter post 		Post mode.
-go-quitter mentions		Mentions your @name
-go-quitter search ___		Searches for ____
-go-quitter search		Search mode.
-go-quitter follow		Follow a user
-go-quitter unfollow		Unfollow a user
-go-quitter groups		List all groups on current node
-go-quitter mygroups		List only groups you are member of
-go-quitter join ___		Join a !group
-go-quitter leave ___		Part a !group (can also use part)
+* Want to use a SOCKS proxy?
+Set the SOCKS environmental variable. Here are a few examples:
 
-Using environmental variables will override the config:
+	SOCKS=true go-quitter -socks # short for 127.0.0.1:1080
+	SOCKS=tor go-quitter -socks # short for 127.0.0.1:9050
+	SOCKS=socks5://127.0.0.1:22000 go-quitter -socks
 
-GNUSOCIALNODE - GNU Social Node to connect to
-GNUSOCIALPASS - Password to use
-GNUSOCIALUSER - Username to use
-GNUSOCIALPATH - Path to config file
+* -flags can be placed before a [command]. Here are the available flags:
 
-Set your environmental variable to change nodes, use a different config,
-	or change user or password for a one-time session.
+	-socks Don't connect without proxy
+	-http Don't use https
+	-unsafe Don't validate TLS cert
 
-For example: ```export GNUSOCIALNODE="gnusocial.de"``` in your ~/.shrc or ~/.profile or ~/.bashrc
+Check for updates: https://github.com/aerth/go-quitter
 
 
 
@@ -111,12 +114,7 @@ GNUSOCIALNODE=sealion.club go-quitter read fast >> treet.log
 
 ### Todo
 
-- [ ] Learn Go
-- [ ] Include user interface with up/down scrolling
-- [ ] Write tests
-- [ ] cat filename.txt | go-quitter // I may introduce this just because it would make uploading photos easy.
-
-
+  * CUI
 
 ### Contributing
 
