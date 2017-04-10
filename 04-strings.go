@@ -17,10 +17,10 @@ func (u User) String() string {
 	return fmt.Sprintf("@" + u.Screenname)
 }
 func (a Account) String() string {
-	str := "User: "+a.Username+"\n"
-  str += "Node: "+a.Node+"\n"
-if a.Proxy != "" {
-  str += "Proxy: "+a.Proxy+"\n"
-}
-  return str
+	str := "User: " + a.Username + "\n"
+	str += "Node: " + a.Node + "\n"
+	if a.Proxy != "" {
+		str += "Proxy: " + a.Proxy + "\n"
+	}
+	return str
 }

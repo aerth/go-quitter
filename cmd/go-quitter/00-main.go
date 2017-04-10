@@ -232,9 +232,9 @@ func main() {
 	if containsString(needLogin, args[1]) {
 		needConfig(acct)
 	} else { // command doesn't need login
-		if configExists() {
-			dontNeedConfig(acct)
-		}
+		//if configExists() {
+		dontNeedConfig(acct)
+		//	}
 	}
 
 	// user environmental credentials if they exist
@@ -247,7 +247,6 @@ func main() {
 	if os.Getenv("GNUSOCIALNODE") != "" {
 		acct.Node = os.Getenv("GNUSOCIALNODE")
 	}
-
 	switch args[1] {
 	// command: go-quitter read
 	case "cui":

@@ -128,7 +128,6 @@ func PrintUser(user quitter.User, err error) {
 		return
 	}
 	fmt.Println(user)
-
 }
 func PrintGroup(group quitter.Group, err error) {
 	if err != nil {
