@@ -33,13 +33,10 @@ import (
 
 // GetPublic shows 20 new messages.
 func (a Account) GetPublic() ([]Quip, error) {
-	resp, err := apigun.Get(a.Scheme + a.Node + "/api/statuses/public_timeline.json")
+	body, err := a.fireGET("/api/statuses/public_timeline.json")
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	body, _ := ioutil.ReadAll(resp.Body)
 	var quips []Quip
 
 	var apiresponse Badrequest
@@ -377,7 +374,6 @@ func (a Account) Upload(fpath string, content ...string) (quip Quip, err error) 
 	if err != nil {
 		return Quip{}, err
 	}
-
 
 	// Response
 	if res.StatusCode != http.StatusOK {

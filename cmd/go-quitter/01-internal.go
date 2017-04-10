@@ -87,12 +87,8 @@ func PrintQuips(quips []quitter.Quip, err error) {
 	for i, j := 0, len(quips)-1; i < j; i, j = i+1, j-1 {
 		quips[i], quips[j] = quips[j], quips[i]
 	}
-	for i := range quips {
-		if quips[i].User.Screenname == quips[i].User.Name {
-			fmt.Printf("[@" + quips[i].User.Screenname + "] " + quips[i].Text + "\n\n")
-		} else {
-			fmt.Printf("@" + quips[i].User.Screenname + " [" + quips[i].User.Name + "] " + quips[i].Text + "\n\n")
-		}
+	for _, quip := range quips {
+		fmt.Println(quip)
 	}
 }
 func PrintQuip(quip quitter.Quip, err error) {
@@ -104,12 +100,7 @@ func PrintQuip(quip quitter.Quip, err error) {
 		fmt.Println("No quip.")
 		return
 	}
-	if quip.User.Screenname == quip.User.Name {
-		fmt.Printf("[@" + quip.User.Screenname + "] " + quip.Text + "\n\n")
-	} else {
-		fmt.Printf("@" + quip.User.Screenname + " [" + quip.User.Name + "] " + quip.Text + "\n\n")
-	}
-
+	fmt.Println(quip)
 }
 
 func PrintUsers(users []quitter.User, err error) {
@@ -121,12 +112,8 @@ func PrintUsers(users []quitter.User, err error) {
 		fmt.Println("No users.")
 		return
 	}
-	for i := range users {
-		if users[i].Screenname == users[i].Name {
-			fmt.Printf("[@" + users[i].Screenname + "]\n\n")
-		} else {
-			fmt.Printf("@" + users[i].Screenname + " [" + users[i].Name + "]\n\n")
-		}
+	for _, user := range users {
+		fmt.Println(user)
 	}
 }
 
@@ -140,7 +127,7 @@ func PrintUser(user quitter.User, err error) {
 		fmt.Println("No user.")
 		return
 	}
-	fmt.Printf("[@" + user.Screenname + "]\n\n")
+	fmt.Println(user)
 
 }
 func PrintGroup(group quitter.Group, err error) {
@@ -152,7 +139,7 @@ func PrintGroup(group quitter.Group, err error) {
 		fmt.Println("No group.")
 		return
 	}
-	fmt.Printf("!" + group.Nickname + " [" + group.Fullname + "] \n" + group.Description + "\n\n")
+	fmt.Println(group)
 
 }
 
@@ -165,7 +152,7 @@ func PrintGroups(groups []quitter.Group, err error) {
 		fmt.Println("No groups.")
 		return
 	}
-	for i := range groups {
-		fmt.Printf("!" + groups[i].Nickname + " [" + groups[i].Fullname + "] \n" + groups[i].Description + "\n\n")
+	for _, group := range groups {
+		fmt.Println(group)
 	}
 }

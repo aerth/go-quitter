@@ -11,16 +11,6 @@ type Account struct {
 
 // NewAccount sets the authentication method and choose node.
 // It does NOT register a new account on a node.
-// Use like this:
-/*
-
- q := qw.NewAccount()
- q.Username = "john"
- q.Password = "pass123"
- q.Node = "gnusocial.de"
- resp, err := q.GetHome()
-
-*/
 func NewAccount() *Account {
 	return &Account{
 		Username: "gopher",
@@ -37,14 +27,6 @@ type User struct {
 }
 
 // Quip is a GNU Social Quip, gets returned by GS API.
-/*
-
-	if q.User.Screenname == "joe" {
-		fmt.Println(q.ID, q.User, q.Text)
-	}
-
-
-*/
 type Quip struct {
 	ID                   int64    `json:"id"`
 	IDStr                string   `json:"id_str"`
