@@ -5,10 +5,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/aerth/go-quitter"
 	"github.com/aerth/seconf"
 )
 
-func init(){
+func init() {
 	if gnusocialpath == "" {
 		gnusocialpath = "go-quitter"
 	}
@@ -31,7 +32,7 @@ func makeConfig() {
 	}
 }
 
-func dontNeedConfig() {
+func dontNeedConfig(acct *quitter.Account) {
 	//fmt.Println("Config file detected, but this command doesn't need to login.\nWould you like to select the GNU Social node using the config?\nType YES or NO (y/n)")
 	//if AskForConfirmation() == true {
 	// only use gnusocial node from config
@@ -56,13 +57,13 @@ func dontNeedConfig() {
 	gnusocialnode = strings.Replace(gnusocialnode, "https://", "", -1)
 	//			gnusocialnode = strings.TrimLeft(gnusocialnode, "https://")
 	//			gnusocialnode = strings.TrimLeft(gnusocialnode, "http://")
-	q.Node = gnusocialnode
+	acct.Node = gnusocialnode
 
 }
 func configExists() bool {
 	return seconf.Detect(gnusocialpath)
 }
-func needConfig() {
+func needConfig(q *quitter.Account) {
 	if seconf.Detect(gnusocialpath) == true {
 		configdecoded, err := seconf.Read(gnusocialpath)
 		if err != nil {
@@ -101,9 +102,9 @@ func needConfig() {
 			q.Node = os.Getenv("GNUSOCIALNODE")
 		}
 		if q.Username == username {
-			fmt.Fprintln(os.Stderr, "Welcome back, " + q.Username + "@" + q.Node)
+			fmt.Fprintln(os.Stderr, "Welcome back, "+q.Username+"@"+q.Node)
 		} else {
-			fmt.Fprintln(os.Stderr, "Welcome, " + q.Username + "@" + q.Node)
+			fmt.Fprintln(os.Stderr, "Welcome, "+q.Username+"@"+q.Node)
 		}
 	} else {
 		fmt.Fprintln(os.Stderr, "No config file detected at", gnusocialpath)

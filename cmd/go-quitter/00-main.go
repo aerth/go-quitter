@@ -27,7 +27,9 @@ import (
 )
 
 var (
-	release       = "v0.0.9 (go get)"
+	initcui       func(*quitter.Account)
+	initgui       func(*quitter.Account)
+	release       = "v0.0.10 (go get)"
 	buildinfo     string
 	goquitter     = "go-quitter " + release
 	username      = os.Getenv("GNUSOCIALUSER")
@@ -35,8 +37,6 @@ var (
 	gnusocialnode = os.Getenv("GNUSOCIALNODE")
 	gnusocialpath = os.Getenv("GNUSOCIALPATH")
 	apipath       = "https://" + gnusocialnode + "/api/statuses/home_timeline.json"
-	builtWithCUI  = false
-	initgui       func()
 	configuser    string
 	configpass    string
 	confignode    string
@@ -90,8 +90,6 @@ Set the SOCKS environmental variable. Here are a few examples:
 	-unsafe Don't validate TLS cert
 `
 
-var q *quitter.Account
-
 var allCommands = []string{"version", "help", "config",
 	"read", "user", "search", "home", "follow", "unfollow",
 	"post", "mentions", "groups", "mygroups", "join", "leave",
@@ -109,7 +107,7 @@ func printf(f string, i ...interface{}) {
 }
 
 // flagy can transcend space and time
-func flagy(a []string) []string {
+func flagy(q *quitter.Account, a []string) []string {
 
 	//	-unsafe flag does not validate TLS certs
 	if containsString(a, "-unsafe") {
@@ -168,14 +166,24 @@ func flagy(a []string) []string {
 
 func main() {
 	args := os.Args
-	q = quitter.NewAccount()
+	acct := quitter.NewAccount()
 	if os.Getenv("SOCKS") != "" {
 		quitter.EnableSOCKS(os.Getenv("SOCKS"))
 	}
-	args = flagy(args)
+	args = flagy(acct, args)
 
 	// invalid command
 	if len(args) < 2 || !containsString(allCommands, args[1]) {
+		if initcui != nil {
+			needConfig(acct)
+			initcui(acct)
+			return
+		}
+		if initgui != nil {
+			needConfig(acct)
+			initgui(acct)
+			return
+		}
 		fmt.Println(versionbar)
 		commandstring := func() string {
 			var s string
@@ -222,32 +230,32 @@ func main() {
 	// command requires login credentials
 
 	if containsString(needLogin, args[1]) {
-		needConfig()
+		needConfig(acct)
 	} else { // command doesn't need login
 		if configExists() {
-			dontNeedConfig()
+			dontNeedConfig(acct)
 		}
 	}
 
 	// user environmental credentials if they exist
 	if os.Getenv("GNUSOCIALUSER") != "" {
-		q.Username = os.Getenv("GNUSOCIALUSER")
+		acct.Username = os.Getenv("GNUSOCIALUSER")
 	}
 	if os.Getenv("GNUSOCIALPASS") != "" {
-		q.Password = os.Getenv("GNUSOCIALPASS")
+		acct.Password = os.Getenv("GNUSOCIALPASS")
 	}
 	if os.Getenv("GNUSOCIALNODE") != "" {
-		q.Node = os.Getenv("GNUSOCIALNODE")
+		acct.Node = os.Getenv("GNUSOCIALNODE")
 	}
 
 	switch args[1] {
 	// command: go-quitter read
 	case "cui":
-		initgui()
+		initcui(acct)
 		os.Exit(0)
 
 	case "read":
-		PrintQuips(q.GetPublic())
+		PrintQuips(acct.GetPublic())
 		os.Exit(0)
 
 		// command: go-quitter search _____
@@ -259,14 +267,14 @@ func main() {
 		if searchstr == "" {
 			searchstr = getTypin()
 		}
-		PrintQuips(q.Search(searchstr))
+		PrintQuips(acct.Search(searchstr))
 		os.Exit(0)
 
 		// command: go-quitter user aerth
 	case "user":
 		if len(args) > 2 && args[2] != "" {
 			userlookup := args[2]
-			PrintQuips(q.GetUserTimeline(userlookup))
+			PrintQuips(acct.GetUserTimeline(userlookup))
 
 			os.Exit(0)
 		}
@@ -275,7 +283,7 @@ func main() {
 
 		// command: go-quitter mentions
 	case "mentions", "replies", "mention":
-		PrintQuips(q.GetMentions())
+		PrintQuips(acct.GetMentions())
 		os.Exit(0)
 
 		// command: go-quitter follow
@@ -290,7 +298,7 @@ func main() {
 			fmt.Println("Who to follow?\nExample: someone (without the @)")
 			followstr = getTypin()
 		}
-		PrintUser(q.Follow(followstr))
+		PrintUser(acct.Follow(followstr))
 		os.Exit(0)
 
 	// command: go-quitter unfollow
@@ -305,22 +313,22 @@ func main() {
 			fmt.Println("Who to unfollow?\nExample: someone (without the @)")
 			followstr = getTypin()
 		}
-		PrintUser(q.UnFollow(followstr))
+		PrintUser(acct.UnFollow(followstr))
 		os.Exit(0)
 
 	// command: go-quitter home
 	case "home":
-		PrintQuips(q.GetHome())
+		PrintQuips(acct.GetHome())
 		os.Exit(0)
 
 	// command: go-quitter groups
 	case "groups":
-		PrintGroups(q.ListAllGroups())
+		PrintGroups(acct.ListAllGroups())
 		os.Exit(0)
 
 		// command: go-quitter mygroups
 	case "mygroups":
-		PrintGroups(q.ListMyGroups())
+		PrintGroups(acct.ListMyGroups())
 		os.Exit(0)
 
 		// command: go-quitter join
@@ -333,7 +341,7 @@ func main() {
 			fmt.Println("Which group to join?\nExample: groupname (without the !)")
 			groupstr = getTypin()
 		}
-		PrintGroup(q.JoinGroup(groupstr))
+		PrintGroup(acct.JoinGroup(groupstr))
 		os.Exit(0)
 
 		// command: go-quitter part
@@ -353,7 +361,7 @@ func main() {
 			os.Exit(0)
 		}
 
-		PrintGroup(q.PartGroup(groupstr))
+		PrintGroup(acct.PartGroup(groupstr))
 		os.Exit(0)
 
 		// command: go-quitter leave
@@ -362,7 +370,7 @@ func main() {
 		if len(args) > 1 {
 			content = strings.Join(args[2:], " ")
 		}
-		PrintGroup(q.PartGroup(content))
+		PrintGroup(acct.PartGroup(content))
 		os.Exit(0)
 
 		// command: go-quitter post
@@ -376,7 +384,7 @@ func main() {
 		}
 		// go-quitter post -y hello world
 		if !strings.HasPrefix(content, "-y ") {
-			fmt.Println("Preview:\n\n[" + q.Username + "] " + content)
+			fmt.Println("Preview:\n\n[" + acct.Username + "] " + content)
 			fmt.Println("\nType YES to publish!")
 			if askForConfirmation() == false {
 				fmt.Println("Your status was not updated.")
@@ -386,7 +394,7 @@ func main() {
 			content = strings.TrimPrefix(content, "-y ")
 		}
 
-		PrintQuip(q.PostNew(content))
+		PrintQuip(acct.PostNew(content))
 
 		os.Exit(0)
 
@@ -411,11 +419,7 @@ func main() {
 		}
 		fmt.Println()
 		time.Sleep(time.Second)
-		PrintQuip(q.Upload(path, content))
+		PrintQuip(acct.Upload(path, content))
 	default: //
 	}
-}
-
-func init() {
-
 }
